@@ -1,4 +1,4 @@
-package com.smt.object;
+package com.smt.core;
 
 /****************************************************************************
  * <b>Title</b>: HashCodeUtil.java

@@ -1,8 +1,10 @@
-package com.smt.object;
+package com.smt.core;
 
 // Junit 5
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
+
+import com.smt.core.HashCodeUtil;
 
 // JDK 11.x
 import java.util.Arrays;
@@ -23,7 +25,7 @@ import java.util.List;
 class HashCodeUtilTest {
 
 	/**
-	 * Test method for {@link com.smt.object.HashCodeUtil#hash(boolean)}.
+	 * Test method for {@link com.smt.core.HashCodeUtil#hash(boolean)}.
 	 */
 	@Test
 	void testHashBoolean() {
@@ -32,7 +34,7 @@ class HashCodeUtilTest {
 	}
 
 	/**
-	 * Test method for {@link com.smt.object.HashCodeUtil#hash(char)}.
+	 * Test method for {@link com.smt.core.HashCodeUtil#hash(char)}.
 	 */
 	@Test
 	void testHashChar() {
@@ -41,7 +43,7 @@ class HashCodeUtilTest {
 	}
 
 	/**
-	 * Test method for {@link com.smt.object.HashCodeUtil#hash(int)}.
+	 * Test method for {@link com.smt.core.HashCodeUtil#hash(int)}.
 	 */
 	@Test
 	void testHashInt() {
@@ -51,7 +53,7 @@ class HashCodeUtilTest {
 	}
 
 	/**
-	 * Test method for {@link com.smt.object.HashCodeUtil#hash(float)}.
+	 * Test method for {@link com.smt.core.HashCodeUtil#hash(float)}.
 	 */
 	@Test
 	void testHashFloat() {
@@ -60,7 +62,7 @@ class HashCodeUtilTest {
 	}
 
 	/**
-	 * Test method for {@link com.smt.object.HashCodeUtil#hash(double)}.
+	 * Test method for {@link com.smt.core.HashCodeUtil#hash(double)}.
 	 */
 	@Test
 	void testHashDouble() {
@@ -69,7 +71,7 @@ class HashCodeUtilTest {
 	}
 
 	/**
-	 * Test method for {@link com.smt.object.HashCodeUtil#hash(int, java.lang.Object)}.
+	 * Test method for {@link com.smt.core.HashCodeUtil#hash(int, java.lang.Object)}.
 	 */
 	@Test
 	void testHashIntObject() {

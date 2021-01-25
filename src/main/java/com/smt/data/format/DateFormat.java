@@ -13,113 +13,80 @@ import java.time.ZonedDateTime;
 import org.apache.commons.lang3.time.FastDateFormat;
 
 /*********************************************************************************************************
- * <b>Title</b>: Convert<p/> Utilities to convert a String Date into a date
- * (java.sql or java.util)
- *  Copyright: Copyright (c) 2002<p/> Company: SiliconMountain Technologies
+ * <b>Title</b>: Convert<p/> Utilities for Date parsing, formatting and conversions
+ * <b>Copyright:</b> Copyright (c) 2021
+ * <b>Company:</b> Silicon Mountain Technologies
  * 
- * @author James Camire
+ * @author Bala Gayatri Bugatha
  * @version 1.0
- * @since 9.30.02
- * @updates: 
- * 		
- * 		JM - 07-14-16 - changed order of Strings in loadDatePatterns so we attempt 
- * 			formats of greater precision before lesser ones.  e.g.: mm/dd/yyyy before mm/dd/yy
- * 		
- *      Bala Gayatri Bugatha - 01-22-2021
- *      Added methods to change TimeZone from Local to UTC and UTC to Local
- *      Added method to change given string/date of a specific time zone to UTC ZonedDateTime
- *      Added method to change ZonedDateTime object to Date object.
- * 		Updated all string/date parsing and formatting methods 
- *                       to use FastDateFormat replacing SimpleDateFormat.
- *      Changed the getEndOfDate method to keep the same date and change times to end of day 23:59:59
- *      Added method getStartOfNextDate to get next day with time set to 00:00:00            
+ * @since 01.25.2021 
+ * @updates:         
  **********************************************************************************************************/
 public class DateFormat {
 	
-	// Define multiple patterns for string formatting
-		//date formats
-		public static final String DATE_DASH_PATTERN = "yyyy-MM-dd";
-		public static final String DATE_DASH_SIMPLE_YEAR_PATTERN = "MM-dd-yyyy";
-		public static final String DATE_SLASH_PATTERN = "MM/dd/yyyy";
-		public static final String DATE_SLASH_ABBREV_PATTERN = "MMM/dd/yyyy";
-		public static final String DATE_SLASH_SHORT_PATTERN = "MM/dd/yy";
-		public static final String DATE_LONG = "EEEE MMMM dd, yyyy";
-		public static final String DATE_FULL_MONTH = "MMMMMMMMM dd, yyyy";
-		public static final String DATE_SHORT_MONTH = "MMM dd, yyyy";
-		public static final String DATE_NOSPACE_PATTERN = "yyyyMMdd";
-		public static final String DATE_SHORT_NOSPACE_PATTERN = "yyMMdd";
-		public static final String DATE_SIMPLE_PATTERN = "MMddyy";
-		public static final String DATE_SIMPLE_YEAR_PATTERN = "MMddyyyy";
-		public static final String DATE_SHORT_PATTERN = "MMyy";
-		public static final String DATE_SLASH_MONTH_PATTERN = "MM/yyyy";
-		public static final String DATE_SLASH_MONTH_SHORT_PATTERN = "MM/yy";
-		public static final String DATE_LONG_DAY_OF_WEEK_PATTERN = "EEE MMM dd HH:mm:ss zzz yyyy";
+	public enum Patterns{
+				// Defining and declaring enum type Date and Time Patterns
+		        		        
+				//Date Time formats that are RSS Related.
+				RFC_2822_NO_SEC ("EEE dd MMM yyyy HH:mm zzz"),
+				RFC_2822("EEE dd MMM yyyy HH:mm:ss zzz"),
+				
+				//Date Time formats that are ATOM Feed Related
+				ISO_8601_NO_SEC("yyyy-MM-dd'T'HH:mmZ"),
+				ISO_8601("yyyy-MM-dd'T'HH:mm:ssZ"),	
+				
+				//date & time formats
+				DATE_TIME_SLASH_PATTERN("MM/dd/yyyy HH:mm:ss"),
+				DATE_TIME_DASH_PATTERN("yyyy-MM-dd HH:mm:ss"),
+				DATETIME_SLASH_PATTERN("MM/dd/yyyy HH:mm"),
+				DATETIME_SLASH_SHORT_PATTERN("MM/dd/yy HH:mm"),
+				DATETIME_DASH_PATTERN("yyyy-MM-dd HH:mm"),
+				ISO_PATTERN("yyyy-MM-dd'T'HH:mm:ss.SSS zzz"),
+				ISO_PATTERN_SHORT("yyyy-MM-dd'T'HH:mm:ss.SSS"),
+				
+				//date formats
+				DATE_DASH_PATTERN("yyyy-MM-dd"),
+				DATE_DASH_SIMPLE_YEAR_PATTERN("MM-dd-yyyy"),
+				DATE_SLASH_PATTERN("MM/dd/yyyy"),
+				DATE_SLASH_ABBREV_PATTERN("MMM/dd/yyyy"),
+				DATE_SLASH_SHORT_PATTERN("MM/dd/yy"),
+				DATE_LONG("EEEE MMMM dd, yyyy"),
+				DATE_FULL_MONTH("MMMMMMMMM dd, yyyy"),
+				DATE_SHORT_MONTH("MMM dd, yyyy"),
+				DATE_NOSPACE_PATTERN("yyyyMMdd"),
+				DATE_SHORT_NOSPACE_PATTERN("yyMMdd"),
+				DATE_SIMPLE_PATTERN("MMddyy"),
+				DATE_SIMPLE_YEAR_PATTERN("MMddyyyy"),
+				DATE_SHORT_PATTERN("MMyy"),
+				DATE_SLASH_MONTH_PATTERN("MM/yyyy"),
+				DATE_SLASH_MONTH_SHORT_PATTERN("MM/yy"),
+				DATE_LONG_DAY_OF_WEEK_PATTERN("EEE MMM dd HH:mm:ss zzz yyyy"),
+				
+				DATE_TIME_NOSPACE_PATTERN("yyyyMMdd_HHmmss"),
+				DATE_TIME_DASH_PATTERN_12HR("yyyy-MM-dd hh:mm a"),
+				DATE_TIME_SLASH_PATTERN_12HR("MM/dd/yyyy hh:mm a"),
+				DATE_TIME_SLASH_PATTERN_FULL_12HR("MM/dd/yyyy hh:mm:ss a"),
+				DATE_TIME_NOSPACE_PATTERN_12HR("yyyyMMdd_hhmma"),
 
-		//date & time formats
-		public static final String DATE_TIME_SLASH_PATTERN = "MM/dd/yyyy HH:mm:ss";
-		public static final String DATE_TIME_DASH_PATTERN = "yyyy-MM-dd HH:mm:ss";
-		public static final String DATETIME_SLASH_PATTERN = "MM/dd/yyyy HH:mm";
-		public static final String DATETIME_SLASH_SHORT_PATTERN = "MM/dd/yy HH:mm";
-		public static final String DATETIME_DASH_PATTERN = "yyyy-MM-dd HH:mm";
-		public static final String ISO_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS zzz";
-		public static final String ISO_PATTERN_SHORT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+				//time formats
+				TIME_SHORT_PATTERN("h:mm a"),
+				TIME_LONG_PATTERN("hh:mm:ss a"),
+				TIME_SHORT_NOSPACE("hhmm"),
+				TIME_SHORT_24HR_NOSPACE("HHmm"),
+				TIME_LONG_24HR_NOSPACE("HHmmss");
+	    
+		private final String pattern;
 		
-		//Date Time formats that are RSS Related.
-		public static final String RFC_2822_NO_SEC = "EEE dd MMM yyyy HH:mm zzz";
-		public static final String RFC_2822 = "EEE dd MMM yyyy HH:mm:ss zzz";
-
-		//Date Time formats that are ATOM Feed Related
-		public static final String ISO_8601_NO_SEC = "yyyy-MM-dd'T'HH:mmZ";
-		public static final String ISO_8601 = "yyyy-MM-dd'T'HH:mm:ssZ";
-
-		public static final String DATE_TIME_NOSPACE_PATTERN = "yyyyMMdd_HHmmss";
-		public static final String DATE_TIME_DASH_PATTERN_12HR = "yyyy-MM-dd hh:mm a";
-		public static final String DATE_TIME_SLASH_PATTERN_12HR = "MM/dd/yyyy hh:mm a";
-		public static final String DATE_TIME_SLASH_PATTERN_FULL_12HR = "MM/dd/yyyy hh:mm:ss a";
-		public static final String DATE_TIME_NOSPACE_PATTERN_12HR = "yyyyMMdd_hhmma";
-
-		//time formats
-		public static final String TIME_SHORT_PATTERN = "h:mm a";
-		public static final String TIME_LONG_PATTERN = "hh:mm:ss a";
-		public static final String TIME_SHORT_NOSPACE = "hhmm";
-		public static final String TIME_SHORT_24HR_NOSPACE = "HHmm";
-		public static final String TIME_LONG_24HR_NOSPACE = "HHmmss";
-
-		/**
-		 * Creates an array of the different date/time formats
-		 * @return
-		 */
-		public static String[] loadDatePatterns() {
-			return new String[] {
-					DATE_TIME_DASH_PATTERN_12HR,
-					DATE_TIME_SLASH_PATTERN_FULL_12HR,
-					DATE_TIME_SLASH_PATTERN_12HR,
-					DATE_TIME_NOSPACE_PATTERN_12HR,
-					DATE_TIME_SLASH_PATTERN,
-					DATETIME_SLASH_PATTERN,
-					DATETIME_SLASH_SHORT_PATTERN,
-					DATE_TIME_DASH_PATTERN,
-					DATETIME_DASH_PATTERN,
-					DATE_TIME_NOSPACE_PATTERN,
-					DATE_DASH_PATTERN,
-					DATE_DASH_SIMPLE_YEAR_PATTERN,
-					DATE_SLASH_PATTERN,
-					DATE_SLASH_SHORT_PATTERN,
-					DATE_LONG,
-					DATE_NOSPACE_PATTERN,
-					DATE_SIMPLE_YEAR_PATTERN,
-					DATE_SIMPLE_PATTERN,
-					DATE_SHORT_NOSPACE_PATTERN,
-					DATE_SLASH_MONTH_PATTERN,
-					DATE_SLASH_MONTH_SHORT_PATTERN,
-					DATE_SHORT_PATTERN,
-					DATE_FULL_MONTH,
-					ISO_8601_NO_SEC,
-					ISO_8601,
-					RFC_2822_NO_SEC,
-					RFC_2822
-			};
+		//initialization of patterns
+		private Patterns(String pattern) {
+			this.pattern=pattern;
 		}
+		
+		//Returning pattern when called to get a specific pattern
+		public String getPattern() {
+	        return this.pattern;
+	    }
+	}
 	
 	/**
 	 * Converts given ZonedDateTime format date to Date format date
@@ -164,10 +131,11 @@ public class DateFormat {
 		theDate = theDate.replaceAll(",", "");
 		theDate = theDate.trim();
 		Date d = null;
-		String[] patterns = loadDatePatterns();
+		
 
-		for (String pattern : patterns) {
-			d = formatDate(pattern, theDate);
+		for (Patterns p : Patterns.values()) {
+			System.out.println(p.getPattern());
+			d = formatDate(p.getPattern(), theDate);
 			if (d != null)
 				break;
 		}
@@ -273,7 +241,7 @@ public class DateFormat {
 	 * @return
 	 */
 	public static java.sql.Date formatSQLDate(String dateText) {
-		java.util.Date uDate = formatDate(DATE_SLASH_PATTERN, dateText);
+		java.util.Date uDate = formatDate(Patterns.DATE_SLASH_PATTERN.getPattern(), dateText);
 		return formatSQLDate(uDate);
 	}
 	/**

@@ -92,7 +92,7 @@ public class JWTTokenManager {
 	 * @param issuer Name of the issuing authority
 	 * @return Decoded JWT Token with all valida information unpacked
 	 */
-	public static DecodedJWT getToken(String token, String issuer) throws JWTDecodeException {
+	public static DecodedJWT getToken(String token, String issuer) {
 		if (! isTokenValid(token, issuer)) throw new JWTDecodeException("Invalid Token");
 		else return JWT.decode(token); 
 	}

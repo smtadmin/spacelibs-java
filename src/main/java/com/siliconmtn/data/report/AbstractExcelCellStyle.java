@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.ss.usermodel.BorderStyle;
 
 // Space Libs 1.x
@@ -123,10 +124,12 @@ public abstract class AbstractExcelCellStyle implements ExcelStyleInterface {
 	protected void setFont(CellStyle style, Map<String, Object> innerStyleMap, Workbook wb) {
 
 		Font font = wb.createFont();
-
+		font.setFontName(HSSFFont.FONT_ARIAL);
+		
 		if(innerStyleMap.get(BOLD_WEIGHT) != null){
 			font.setBold(BooleanUtil.toBoolean(innerStyleMap.get(BOLD_WEIGHT)));
 		}
+		
 		if (innerStyleMap.get(FONT_COLOR)!= null){
 			font.setColor(Short.parseShort(innerStyleMap.get(FONT_COLOR) + ""));
 		}

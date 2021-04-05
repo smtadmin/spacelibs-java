@@ -8,7 +8,6 @@ import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
 
@@ -39,8 +38,6 @@ class BeanDataMapperTest {
 	// Members
 	private TestDataBeanVO dbvo;
 	private Map<String, String[]> map;
-	
-	@Mock
 	private HttpServletRequest req;
 	
 	@BeforeEach

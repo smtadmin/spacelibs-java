@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,9 @@ public class ParserFactory {
 	@Autowired
 	protected AutowireCapableBeanFactory autowireCapableBeanFactory;
 	
+	@Autowired
+    private ApplicationContext applicationContext;
+	
 	/**
 	 * Checks the parserMapper property in the application's config file for the parser associated with
 	 * the passed classname.methodname key.
@@ -51,22 +55,20 @@ public class ParserFactory {
 	 * @return ParserIntfc that will be used to parse the request body into ValidationDTOs
 	 * @throws EndpointRequestException When unable to create an instance of the controller name
 	 */
-	public ParserIntfc parserDispatcher(String controllerName, Map<AttributeKey, Object> attributes)
-			throws EndpointRequestException {
-		String parserClassName = builderMapper.get(controllerName);
-		if (StringUtil.isEmpty(parserClassName))
-			return null;
+	public ParserIntfc parserDispatcher(String beanName, Map<AttributeKey, Object> attributes)
+            throws EndpointRequestException {
+        String parserClassName = builderMapper.get(beanName);
+        if (StringUtil.isEmpty(parserClassName))
+            return null;
 
-		try {
-			Class<?> c = Class.forName(parserClassName);
-			ParserIntfc parser = (ParserIntfc) c.getDeclaredConstructor().newInstance();
-			parser.setAttributes(attributes);
-			autowireCapableBeanFactory.autowireBean(parser);
-			return parser;
-		} catch (Exception e) {
-			throw new EndpointRequestException("Failed to create data parser", e.getCause(),
-					HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+        try {
+            ParserIntfc parser = (ParserIntfc) applicationContext.getBean(parserClassName);
+            parser.setAttributes(attributes);
+            autowireCapableBeanFactory.autowireBean(parser);
+            return parser;
+        } catch (Exception e) {
+            throw new EndpointRequestException("Failed to create data parser", e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

@@ -81,6 +81,16 @@ class XSSRequestWrapperTest {
 		assertEquals("hello world", XSSRequestWrapper.stripXSS("<b>hello world</b>"));
 		assertEquals("", XSSRequestWrapper.stripXSS("<script>function hello() {} </script>"));
 	}
+	
+	
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.security.XSSRequestWrapper#stripXSS(java.lang.String)}.
+	 */
+	@Test
+	void testStripJson() throws Exception {
+		String val = "{'com.smt.ezform.person.permission.EzformPermissionController.updateEzformPerson':'ezformUserParser','com.smt.ezform.response.ResponseController.submitResponse':'questionResponseParser'}";
+		assertEquals(val, XSSRequestWrapper.stripXSS(val));
+	}
 
 
 	/**

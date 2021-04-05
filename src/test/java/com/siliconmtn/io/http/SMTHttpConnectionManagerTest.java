@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 // Libs
@@ -54,18 +53,8 @@ class SMTHttpConnectionManagerTest {
 	Map<String, String> cookies;
 	String sUrl = "https://www.siliconmtn.com";
 	String url = "http://www.siliconmtn.com";
-	
-	@Mock
 	SMTHttpConnectionManager connection;
-	
-	@Mock
 	HttpURLConnection mockUrlConn;
-	
-	@Mock
-	URL mockUrl;
-	
-	@Mock
-	URL sMockUrl;
 
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
@@ -135,7 +124,7 @@ class SMTHttpConnectionManagerTest {
 	    assertThrows(IOException.class, () -> connection.getRequestData(nullURL, null, HttpConnectionType.GET));
 	    
 		// Tests with a URL Class
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		mockUrlConn = mock(HttpURLConnection.class);
 		InputStream mis = IOUtils.toInputStream("Hello World", "UTF-8");
 		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
@@ -150,7 +139,7 @@ class SMTHttpConnectionManagerTest {
 	 */
 	@Test
 	void testGetRequestDataString () throws Exception {
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
 		Mockito.doReturn(mockUrl).when(connection).createURL(url);
 
@@ -168,7 +157,7 @@ class SMTHttpConnectionManagerTest {
 	@Test
 	void testGetRequestDataStringNulls () throws Exception {
 		connection.setConnectionTimeout(1000);
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
 		Mockito.doReturn(mockUrl).when(connection).createURL(url);
 
@@ -189,7 +178,7 @@ class SMTHttpConnectionManagerTest {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
 		Mockito.doReturn(mockUrl).when(connection).createURL(url);
 
@@ -211,7 +200,7 @@ class SMTHttpConnectionManagerTest {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 
 		mockUrlConn = mock(HttpURLConnection.class);
 		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
@@ -230,7 +219,7 @@ class SMTHttpConnectionManagerTest {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 
 		mockUrlConn = mock(HttpURLConnection.class);
 		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
@@ -248,8 +237,8 @@ class SMTHttpConnectionManagerTest {
 	void testGetRequestDataStringPutNoHeader () throws Exception {
 		connection.setConnectionTimeout(1000);
 		connection.setUseCookieHandler(true);
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		Mockito.doReturn(mockUrl).when(connection).createURL(url);
 
 		mockUrlConn = mock(HttpURLConnection.class);
@@ -396,7 +385,7 @@ class SMTHttpConnectionManagerTest {
 		// Tests with a URL Class
 		connection.setFollowRedirects(true);
 		connection.setRedirectLimit(1);
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		mockUrlConn = mock(HttpURLConnection.class);
 		when(mockUrlConn.getHeaderField("Location")).thenReturn("http://www.google.com");
 		
@@ -424,7 +413,7 @@ class SMTHttpConnectionManagerTest {
 		// Tests with a URL Class
 		connection.setFollowRedirects(true);
 		connection.setRedirectLimit(0);
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		mockUrlConn = mock(HttpURLConnection.class);
 		when(mockUrlConn.getHeaderField("Location")).thenReturn(null);
 		
@@ -447,7 +436,7 @@ class SMTHttpConnectionManagerTest {
 		// Tests with a URL Class
 		connection.setFollowRedirects(false);
 		connection.setRedirectLimit(0);
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		mockUrlConn = mock(HttpURLConnection.class);
 		when(mockUrlConn.getHeaderField("Location")).thenReturn(null);
 		
@@ -465,7 +454,7 @@ class SMTHttpConnectionManagerTest {
 	@Test
 	void testGetConnectionStreamSSL() throws Exception {
 		// Test with no SSL Factory
-		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("https://www.siliconmtn.com"));
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("https://www.siliconmtn.com"));
 		when(mockUrl.getProtocol()).thenReturn("https");
 		mockUrlConn = mock(HttpsURLConnection.class);
 		when(mockUrl.openConnection()).thenReturn(mockUrlConn);

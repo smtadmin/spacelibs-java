@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 
 // Faster XML 2.1.x
 import com.fasterxml.jackson.annotation.JsonFormat;
-
+import com.siliconmtn.data.text.StringUtil;
 // PlanIt apps
 import com.siliconmtn.io.api.validation.ValidationErrorDTO;
 
@@ -116,6 +116,14 @@ public class EndpointResponse {
         this.debugMessage = ex.getLocalizedMessage();
     }
     
+    /*
+     * (non-javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+    	return StringUtil.getJsonString(this);
+    }
     /**
      * Adds a single failed validation to the collection
      * @param failedValidation Adds a failed validation to the exception

@@ -39,7 +39,7 @@ public class XSSFilter implements Filter {
 	 */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-        throws IOException, ServletException {
+    throws IOException, ServletException {
 
         XSSRequestWrapper wrappedRequest = new XSSRequestWrapper((HttpServletRequest) request);
 

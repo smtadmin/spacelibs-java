@@ -4,7 +4,6 @@ package com.siliconmtn.io.api.validation.factory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -57,11 +57,16 @@ class ParserFactoryTest {
 		Map<AttributeKey, Object> attributes = new EnumMap<>(AttributeKey.class);
 		attributes.put(AttributeKey.PATH_VAR, "test");
 		
+		TestParser t = new TestParser();
+		
 		Map<String, String> builderMapper = mock(HashMap.class);
+		ApplicationContext ctx = mock(ApplicationContext.class);
 		when(builderMapper.get("test")).thenReturn("");
 		when(builderMapper.get("com.fake.class.fakeMethod")).thenReturn("nothing");
-		when(builderMapper.get("com.fake.class.otherFake")).thenReturn("com.siliconmtn.io.api.validation.TestParser");
+		when(builderMapper.get("com.fake.class.otherFake")).thenReturn("testParser");
+		when(ctx.getBean("testParser")).thenReturn(t);
 		ReflectionTestUtils.setField(fact, "builderMapper", builderMapper);
+		ReflectionTestUtils.setField(fact, "applicationContext", ctx);
 
 		assertNull(fact.parserDispatcher(null, attributes));
 		assertNull(fact.parserDispatcher("test", attributes));
@@ -69,11 +74,8 @@ class ParserFactoryTest {
 		ParserIntfc parser = fact.parserDispatcher("com.fake.class.otherFake", attributes);
 
 		List<ValidationDTO> fields = parser.requestParser("Test");
-
-		assertEquals(1, fields.size());
-		assertEquals("Test", fields.get(0).getValue());
-		assertEquals("id", fields.get(0).getElementId());
-		assertTrue(fields.get(0).isRequired());
+		
+		assertEquals(0, fields.size());
 		assertThrows(EndpointRequestException.class, () -> fact.parserDispatcher("com.fake.class.fakeMethod",attributes));
 		
 	}

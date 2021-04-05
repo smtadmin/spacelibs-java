@@ -12,7 +12,7 @@ import com.siliconmtn.io.api.validation.ValidationErrorDTO;
 
 /****************************************************************************
  * <b>Title</b>: ValidationException.java
- * <b>Project</b>: planit-api
+ * <b>Project</b>: spacelibs-java
  * <b>Description: </b> Exception to be passed when a validation has failed
  * on data that is passed into the end-point.
  * <b>Copyright:</b> Copyright (c) 2021
@@ -23,7 +23,7 @@ import com.siliconmtn.io.api.validation.ValidationErrorDTO;
  * @since Mar 4, 2021
  * @updates:
  ****************************************************************************/
-public class EndpointRequestException extends RuntimeException {
+public class EndpointRequestException extends Exception {
 
 	/**
 	 * Serial Version UID

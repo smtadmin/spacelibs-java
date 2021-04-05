@@ -5,6 +5,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.UUID;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /****************************************************************************
  * <b>Title</b>: StringUtil.java
  * <b>Project</b>: SpaceLibs-Java
@@ -219,6 +222,21 @@ public class StringUtil {
 	 */
 	public static String getToString(Object o) {
 		return getToString(o, ":");
+	}
+	
+	/**
+	 * Uses Jackson JSON parser to convert the supplied pojo into a JSON object
+	 * @param o POJO to convert to JSON
+	 * @return Json Object.  Delimited string if JSON conversion fails
+	 */
+	public static String getJsonString(Object o) {
+
+		try {
+			ObjectMapper om = new ObjectMapper();
+			return om.writeValueAsString(o);
+		} catch (JsonProcessingException e) {
+			return "";
+		}
 	}
 	
 	/**

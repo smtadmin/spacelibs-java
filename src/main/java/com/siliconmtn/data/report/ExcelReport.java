@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 // Apache POI 3.13
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -97,7 +97,7 @@ public class ExcelReport extends AbstractReport {
 	 */
 	public ExcelReport(Map<String, String> headerMap, ExcelStyleInterface style) {
 		super();
-		wb = new XSSFWorkbook();
+		wb = new HSSFWorkbook();
 		this.headerMap = headerMap;
 		headerStyle = style.getHeadingStyle(wb);
 		titleStyle = style.getTitleStyle(wb);

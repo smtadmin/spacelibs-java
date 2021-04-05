@@ -8,6 +8,8 @@ import javax.validation.ConstraintViolationException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.ConversionNotSupportedException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -15,16 +17,25 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-
+import org.springframework.validation.BindException;
 // Spring 5.5.x
 import org.springframework.validation.BindingResult;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
+import com.siliconmtn.io.api.security.SecurityAuthorizationException;
+
+import java.lang.reflect.Method;
 // JDK 11.x
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +78,8 @@ class RestExceptionHandlerTest {
 	 */
 	@Test
     void testHandleMethodArgumentNotValid() throws Exception {
-		MethodParameter p = mock(MethodParameter.class);
+		Method m = String.class.getDeclaredMethod("concat", String.class);
+		MethodParameter p = new MethodParameter(m, 0);
 		BindingResult b = mock(BindingResult.class);
 		
 		RestExceptionHandler  rest = new RestExceptionHandler();
@@ -216,5 +228,120 @@ class RestExceptionHandlerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		assertEquals("The parameter 'emailAddress' of value 'pie' could not be converted to type ''", ((EndpointResponse)resp.getBody()).getMessage());
     }
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleHttpRequestMethodNotSupported(org.springframework.web.HttpRequestMethodNotSupportedException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleHttpRequestMethodNotSupported() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleHttpRequestMethodNotSupported(new HttpRequestMethodNotSupportedException("emailAddress", "String"), null, HttpStatus.BAD_REQUEST, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Method is Not Supported", ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleHttpMediaTypeNotAcceptable(org.springframework.web.HttpMediaTypeNotAcceptableException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleHttpMediaTypeNotAcceptable() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleHttpMediaTypeNotAcceptable(new HttpMediaTypeNotAcceptableException("emailAddress"), null, HttpStatus.BAD_REQUEST, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Media Type is Not Acceptable", ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleMissingPathVariable(org.springframework.web.bind.MissingPathVariableException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleMissingPathVariable() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		Method m = String.class.getDeclaredMethod("concat", String.class);
+		MethodParameter mp = new MethodParameter(m, 0);
+		
+		ResponseEntity<Object> resp = rest.handleMissingPathVariable(new MissingPathVariableException("Some Val", mp), null, HttpStatus.BAD_REQUEST, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("A Path variable is missing on this request", ((EndpointResponse)resp.getBody()).getMessage());
+		
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleServletRequestBindingException(org.springframework.web.bind.ServletRequestBindingException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleServletRequestBindingException() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleServletRequestBindingException(new ServletRequestBindingException("emailAddress"), null, HttpStatus.BAD_REQUEST, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Service Binding Exception", ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleConversionNotSupported(org.springframework.beans.ConversionNotSupportedException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleConversionNotSupported() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleConversionNotSupported(new ConversionNotSupportedException("test", this.getClass(), null), null, HttpStatus.BAD_REQUEST, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Unable to Convert data element", ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleTypeMismatch(org.springframework.beans.TypeMismatchException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleTypeMismatch() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleTypeMismatch(new TypeMismatchException("test", this.getClass(), null), null, HttpStatus.BAD_REQUEST, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Data Type Mismatch", ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleMissingServletRequestPart(org.springframework.web.multipart.support.MissingServletRequestPartException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleMissingServletRequestPart() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleMissingServletRequestPart(new MissingServletRequestPartException("emailAddress"), null, HttpStatus.BAD_REQUEST, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("multipart/form-data error", ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleBindException(org.springframework.validation.BindException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleBindException() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleBindException(new BindException("this", "that"), null, HttpStatus.BAD_REQUEST, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Unable to Support a Binding Result", ((EndpointResponse)resp.getBody()).getMessage());
+		
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleAsyncRequestTimeoutException(org.springframework.web.context.request.async.AsyncRequestTimeoutException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleAsyncRequestTimeoutException() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleAsyncRequestTimeoutException(new AsyncRequestTimeoutException(), null, HttpStatus.BAD_REQUEST, null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Request Timed Out", ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleSecurityAuthorizationException(com.siliconmtn.io.api.security.SecurityAuthorizationException)}.
+	 */
+	@Test
+	void testHandleSecurityAuthorizationException() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleSecurityAuthorizationException(new SecurityAuthorizationException("test"));
+		assertEquals(HttpStatus.FORBIDDEN, resp.getStatusCode());
+		assertEquals("test", ((EndpointResponse)resp.getBody()).getMessage());
+	}
 
 }

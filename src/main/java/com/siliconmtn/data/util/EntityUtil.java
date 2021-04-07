@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+// SpaceLibs 1.x
 import com.siliconmtn.data.lang.ClassUtil;
 
 import lombok.extern.log4j.Log4j2;

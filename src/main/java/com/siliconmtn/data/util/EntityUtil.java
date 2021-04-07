@@ -10,10 +10,13 @@ import java.util.List;
 
 // JPA
 import javax.persistence.EntityManager;
+import javax.persistence.Id;
 
 // Spring 5.3.x
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.siliconmtn.data.lang.ClassUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -76,6 +79,38 @@ public class EntityUtil {
 		}
 		
 		return entityInstance;
+	}
+	
+	public <T extends Object> T entityToDto(Object entity, Class<T> dto) {
+		T dtoInstance = null;
+
+		try {
+			dtoInstance = dto.getDeclaredConstructor().newInstance();
+
+			for (Field dtoField : dto.getDeclaredFields()) {
+				Object value = getValueFromInstance(dtoField.getName(), entity);
+				Field entityField = entity.getClass().getDeclaredField(dtoField.getName());
+				
+				if (entityField.getType() != dtoField.getType() && value != null) {
+					List<Field> fieldsWithId = ClassUtil.getFieldsByAnnotation(value.getClass(), Id.class);
+					if (fieldsWithId.isEmpty()) {
+						value = null;
+					} else {
+						String fieldName = fieldsWithId.get(0).getName();
+						value = getValueFromInstance(fieldName, value);
+					}
+
+				}
+
+				setValueIntoInstance(dtoField.getName(), dtoInstance, value);
+			}
+
+		} catch (Exception ex) {
+			log.error("unable to convert to dto", ex);
+			return null;
+		}
+
+		return dtoInstance;
 	}
 	
 	/**

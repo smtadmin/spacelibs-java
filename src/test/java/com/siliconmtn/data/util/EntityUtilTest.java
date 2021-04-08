@@ -4,17 +4,6 @@ package com.siliconmtn.data.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
-// Lombok 1.18.x
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 // JDK 11.x
 import java.io.Serializable;
@@ -23,9 +12,18 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-//Java JPA
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.Id;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import net.minidev.asm.ex.NoSuchFieldException;
 
 /****************************************************************************
  * <b>Title</b>: EntityUtilTest.java
@@ -44,7 +42,9 @@ class EntityUtilTest {
 	private static CategoryDTO dto;
 	private static CategoryDTO nestedDTO;
 	private static Category category;
+	private static Category2 category2;
 	private static Category nestedCategory;
+	private static Category2 nestedCategory2;
 	
 	@MockBean
 	private static EntityManager entityManager;
@@ -71,6 +71,13 @@ class EntityUtilTest {
 		category.setDepth((short) 0);
 		category.setName("Name");
 		
+		category2 = new Category2();
+		category2.setCode("CODE");
+		category2.setGroupCode("CODE");
+		category2.setParentCode(null);
+		category2.setDepth((short) 0);
+		category2.setName("Name");
+		
 		nestedDTO = new CategoryDTO();
 		nestedDTO.setCode("CODE2");
 		nestedDTO.setGroupCode("CODE");
@@ -84,6 +91,13 @@ class EntityUtilTest {
 		nestedCategory.setParentCode(category);
 		nestedCategory.setDepth((short) 1);
 		nestedCategory.setName("Name2");
+		
+		nestedCategory2 = new Category2();
+		nestedCategory2.setCode("CODE2");
+		nestedCategory2.setGroupCode("CODE");
+		nestedCategory2.setParentCode(category2);
+		nestedCategory2.setDepth((short) 1);
+		nestedCategory2.setName("Name2");
 
 		entityManager = Mockito.mock(EntityManager.class);
 		entityUtil = new EntityUtil(entityManager);
@@ -139,12 +153,60 @@ class EntityUtilTest {
 		List<Category> categories = entityUtil.dtoListToEntity(dtos, Category.class);
 		assertEquals(2, categories.size());
 	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.data.util.EntityUtil#entityToDto(java.lang.Object, java.lang.Class)}.
+	 */
+	@Test
+	void testEntityToDto() throws Exception {
+		CategoryDTO result = entityUtil.entityToDto(category, CategoryDTO.class);
+		assertEquals(category.getCode(), result.getCode());		
+		assertEquals(category.getGroupCode(), result.getGroupCode());	
+		assertEquals(category.getParentCode(), result.getParentCode());	
+		assertEquals(category.getDepth(), result.getDepth());	
+		assertEquals(category.getName(), result.getName());	
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.util.EntityUtil#entityToDto(java.lang.Object, java.lang.Class)}.
+	 */
+	@Test
+	void testEntityToDtoMissingAnnotation() throws Exception {
+		CategoryDTO result = entityUtil.entityToDto(nestedCategory2, CategoryDTO.class);
+		assertEquals(nestedCategory2.getCode(), result.getCode());		
+		assertEquals(nestedCategory2.getGroupCode(), result.getGroupCode());	
+		assertEquals(null, result.getParentCode());	
+		assertEquals(nestedCategory2.getDepth(), result.getDepth());	
+		assertEquals(nestedCategory2.getName(), result.getName());
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.util.EntityUtil#entityToDto(java.lang.Object, java.lang.Class)}.
+	 */
+	@Test
+	void testEntityToDtoWithNestedType() throws Exception {
+		CategoryDTO result = entityUtil.entityToDto(nestedCategory, CategoryDTO.class);
+		assertEquals(nestedCategory.getCode(), result.getCode());		
+		assertEquals(nestedCategory.getGroupCode(), result.getGroupCode());	
+		assertEquals(nestedCategory.getParentCode().getCode(), result.getParentCode());	
+		assertEquals(nestedCategory.getDepth(), result.getDepth());	
+		assertEquals(nestedCategory.getName(), result.getName());
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.util.EntityUtil#entityToDto(java.lang.Object, java.lang.Class)}.
+	 */
+	@Test
+	void testEntityToDtoThrow() throws Exception {
+		doThrow(new NoSuchFieldException()).when(nestedCategory).getClass().getDeclaredField(ArgumentMatchers.any());
+		CategoryDTO result = entityUtil.entityToDto(nestedCategory, CategoryDTO.class);
+		assertEquals(null, result);
+	}
+
 }
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
-@ToString
 class CategoryDTO {	
 	private String code;
 	private String groupCode;
@@ -153,17 +215,26 @@ class CategoryDTO {
 	private String name;
 }
 
-@Entity
+@Data
 @NoArgsConstructor
-@Setter
-@Getter
-@ToString
-class Category implements Serializable {
-	
+class Category implements Serializable {	
 	private static final long serialVersionUID = 4457516413601618139L;
+	@Id
 	private String code;
 	private String groupCode;
 	private Category parentCode;
+	private short depth;
+	private String name;
+	private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
+}
+
+@Data
+@NoArgsConstructor
+class Category2 implements Serializable {	
+	private static final long serialVersionUID = 6215676666713039022L;
+	private String code;
+	private String groupCode;
+	private Category2 parentCode;
 	private short depth;
 	private String name;
 	private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);

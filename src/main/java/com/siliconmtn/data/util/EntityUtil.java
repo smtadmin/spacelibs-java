@@ -82,6 +82,13 @@ public class EntityUtil {
 		return entityInstance;
 	}
 	
+	/**
+	 * To map any given entity object into its respective dto object
+	 * @param <T> type of dto object being returned
+	 * @param entity the entity that needs to be mapped into dto
+	 * @param dto the dto type to map the entity into
+	 * @return a dto that was mapped by an entity
+	 */
 	public <T extends Object> T entityToDto(Object entity, Class<T> dto) {
 		T dtoInstance = null;
 

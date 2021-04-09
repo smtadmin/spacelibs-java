@@ -4,6 +4,12 @@ package com.siliconmtn.data.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 // JDK 11.x
 import java.io.Serializable;
@@ -15,15 +21,10 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
+// spacelibs-java 1.1.x
 import com.siliconmtn.data.lang.ClassUtil;
 
+// Lombok 1.18.x
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

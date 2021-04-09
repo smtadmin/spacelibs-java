@@ -105,6 +105,13 @@ class EntityUtilTest {
 		entityManager = Mockito.mock(EntityManager.class);
 		entityUtil = new EntityUtil(entityManager);
 	}
+	/**
+	 * Test method for {@link com.smt.ezform.core.EntityUtil#dtoToEntity(Object, Class<T>, EntityManager)}
+	 */
+	@Test
+	void testDtoToEntityNull() throws Exception {
+		assertEquals(null, entityUtil.dtoToEntity(null, Category.class));
+	}
 	
 	/**
 	 * Test method for {@link com.smt.ezform.core.EntityUtil#dtoToEntity(Object, Class<T>, EntityManager)}
@@ -155,6 +162,14 @@ class EntityUtilTest {
 		
 		List<Category> categories = entityUtil.dtoListToEntity(dtos, Category.class);
 		assertEquals(2, categories.size());
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.util.EntityUtil#entityToDto(java.lang.Object, java.lang.Class)}.
+	 */
+	@Test
+	void testEntityToDtoNull() throws Exception {
+		assertEquals(null, entityUtil.entityToDto(null, CategoryDTO.class));
 	}
 
 	/**

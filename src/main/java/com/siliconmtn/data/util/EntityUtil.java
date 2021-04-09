@@ -58,6 +58,7 @@ public class EntityUtil {
 	 * @return an entity that was mapped by a dto
 	 */
 	public <T extends Object> T dtoToEntity(Object dto, Class<T> entity) {
+		if (dto == null) return null;
 		T entityInstance = null;
 
 		try {
@@ -90,6 +91,7 @@ public class EntityUtil {
 	 * @return a dto that was mapped by an entity
 	 */
 	public <T extends Object> T entityToDto(Object entity, Class<T> dto) {
+		if (entity == null) return null;
 		T dtoInstance = null;
 
 		try {

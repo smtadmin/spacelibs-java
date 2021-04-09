@@ -18,12 +18,14 @@ import javax.persistence.Id;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import com.siliconmtn.data.lang.ClassUtil;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.asm.ex.NoSuchFieldException;
 
 /****************************************************************************
  * <b>Title</b>: EntityUtilTest.java
@@ -42,14 +44,14 @@ class EntityUtilTest {
 	private static CategoryDTO dto;
 	private static CategoryDTO nestedDTO;
 	private static Category category;
-	private static Category2 category2;
+	private static CategoryWithoutId categoryWithoutId;
 	private static Category nestedCategory;
-	private static Category2 nestedCategory2;
+	private static CategoryWithoutId nestedCategoryWithoutId;
 	
 	@MockBean
 	private static EntityManager entityManager;
 	private static EntityUtil entityUtil;
-	
+		
 	/**
 	 * Steps to execute before each and every test
 	 * Defining category dto and entity object with data
@@ -71,12 +73,12 @@ class EntityUtilTest {
 		category.setDepth((short) 0);
 		category.setName("Name");
 		
-		category2 = new Category2();
-		category2.setCode("CODE");
-		category2.setGroupCode("CODE");
-		category2.setParentCode(null);
-		category2.setDepth((short) 0);
-		category2.setName("Name");
+		categoryWithoutId = new CategoryWithoutId();
+		categoryWithoutId.setCode("CODE");
+		categoryWithoutId.setGroupCode("CODE");
+		categoryWithoutId.setParentCode(null);
+		categoryWithoutId.setDepth((short) 0);
+		categoryWithoutId.setName("Name");
 		
 		nestedDTO = new CategoryDTO();
 		nestedDTO.setCode("CODE2");
@@ -92,12 +94,12 @@ class EntityUtilTest {
 		nestedCategory.setDepth((short) 1);
 		nestedCategory.setName("Name2");
 		
-		nestedCategory2 = new Category2();
-		nestedCategory2.setCode("CODE2");
-		nestedCategory2.setGroupCode("CODE");
-		nestedCategory2.setParentCode(category2);
-		nestedCategory2.setDepth((short) 1);
-		nestedCategory2.setName("Name2");
+		nestedCategoryWithoutId = new CategoryWithoutId();
+		nestedCategoryWithoutId.setCode("CODE2");
+		nestedCategoryWithoutId.setGroupCode("CODE");
+		nestedCategoryWithoutId.setParentCode(categoryWithoutId);
+		nestedCategoryWithoutId.setDepth((short) 1);
+		nestedCategoryWithoutId.setName("Name2");
 
 		entityManager = Mockito.mock(EntityManager.class);
 		entityUtil = new EntityUtil(entityManager);
@@ -172,12 +174,12 @@ class EntityUtilTest {
 	 */
 	@Test
 	void testEntityToDtoMissingAnnotation() throws Exception {
-		CategoryDTO result = entityUtil.entityToDto(nestedCategory2, CategoryDTO.class);
-		assertEquals(nestedCategory2.getCode(), result.getCode());		
-		assertEquals(nestedCategory2.getGroupCode(), result.getGroupCode());	
+		CategoryDTO result = entityUtil.entityToDto(nestedCategoryWithoutId, CategoryDTO.class);
+		assertEquals(nestedCategoryWithoutId.getCode(), result.getCode());		
+		assertEquals(nestedCategoryWithoutId.getGroupCode(), result.getGroupCode());	
 		assertEquals(null, result.getParentCode());	
-		assertEquals(nestedCategory2.getDepth(), result.getDepth());	
-		assertEquals(nestedCategory2.getName(), result.getName());
+		assertEquals(nestedCategoryWithoutId.getDepth(), result.getDepth());	
+		assertEquals(nestedCategoryWithoutId.getName(), result.getName());
 	}
 	
 	/**
@@ -198,9 +200,12 @@ class EntityUtilTest {
 	 */
 	@Test
 	void testEntityToDtoThrow() throws Exception {
-		doThrow(new NoSuchFieldException()).when(nestedCategory).getClass().getDeclaredField(ArgumentMatchers.any());
-		CategoryDTO result = entityUtil.entityToDto(nestedCategory, CategoryDTO.class);
-		assertEquals(null, result);
+		try (MockedStatic<ClassUtil> classUtilMock = Mockito.mockStatic(ClassUtil.class)) {
+			classUtilMock.when(() -> ClassUtil.getFieldsByAnnotation(ArgumentMatchers.any(), ArgumentMatchers.any()))
+					.thenThrow(new RuntimeException());
+			CategoryDTO result = entityUtil.entityToDto(nestedCategory, CategoryDTO.class);
+			assertEquals(null, result);
+		}
 	}
 
 }
@@ -230,11 +235,11 @@ class Category implements Serializable {
 
 @Data
 @NoArgsConstructor
-class Category2 implements Serializable {	
+class CategoryWithoutId implements Serializable {	
 	private static final long serialVersionUID = 6215676666713039022L;
 	private String code;
 	private String groupCode;
-	private Category2 parentCode;
+	private CategoryWithoutId parentCode;
 	private short depth;
 	private String name;
 	private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);

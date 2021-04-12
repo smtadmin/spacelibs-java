@@ -141,6 +141,23 @@ public class EntityUtil {
 	}
 	
 	/**
+	 * Coverts a List of DTO objects into a list of their corresponding dto
+	 * @param <T> Type of DTO object being returned
+	 * @param entities List of Entity objects
+	 * @param dto DTO to convert the entities
+	 * @return Collection of DTOs
+	 */
+	public <T extends Object> List<T> entityListToDto(List<?> entities, Class<T> dto) {
+		List<T> dtos = new ArrayList<>();
+
+		for (Object entity : entities) {
+			dtos.add(entityToDto(entity, dto));
+		}
+
+		return dtos;
+	}
+	
+	/**
 	 * Helper function that wraps Property descriptor in order to call the read method on a given class with a given field 
 	 * @param fieldName the field to call a getter on
 	 * @param classInstance the class the getter is inside of

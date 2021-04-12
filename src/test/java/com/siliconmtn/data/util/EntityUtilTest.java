@@ -223,6 +223,19 @@ class EntityUtilTest {
 			assertEquals(null, result);
 		}
 	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.util.EntityUtil#entityListToDto(java.util.List, java.lang.Class)}.
+	 */
+	@Test
+	void testEntityListToDto() throws Exception {
+		List<Category> entities = new ArrayList<>();
+		entities.add(category);
+		entities.add(nestedCategory);
+		
+		List<CategoryDTO> categories = entityUtil.entityListToDto(entities, CategoryDTO.class);
+		assertEquals(2, categories.size());
+	}
 
 }
 

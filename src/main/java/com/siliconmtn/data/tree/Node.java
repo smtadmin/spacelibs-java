@@ -9,14 +9,14 @@ import com.siliconmtn.core.HashCodeUtil;
 import com.siliconmtn.data.text.StringUtil;
 
 /****************************************************************************
- * <b>Title</b>: Node.java<p/>
+ * <b>Title</b>: Node.java
  * <b>Description: Manages the node object for a tree structure</b>  
- * <p/>
- * <b>Copyright:</b> Copyright (c) 2005<p/>
- * <b>Company:</b> Silicon Mountain Technologies<p/>
+ * 
+ * <b>Copyright:</b> Copyright (c) 2005
+ * <b>Company:</b> Silicon Mountain Technologies
  * @author James Camire
  * @version 1.0
- * @since Aug 31, 2011<p/>
+ * @since Aug 31, 2011
  * <b>Changes: </b>
  * JC 11-08-12 fixed hashCode, equals, and clone methods to be properly implemented
  ****************************************************************************/
@@ -38,7 +38,7 @@ public class Node implements Serializable, Comparable<Node> {
 	private String fullPath;
     
 	/**
-	 * Default COnstructir
+	 * Default Constructor
 	 */
 	public Node() {
 		children = new ArrayList<>();
@@ -46,7 +46,7 @@ public class Node implements Serializable, Comparable<Node> {
 	
 	/**
 	 * Copy constructor to clone a node
-	 * @param n
+	 * @param n Node to assign
 	 */
 	public Node(Node n) {
 		this.nodeId = n.nodeId;
@@ -58,14 +58,14 @@ public class Node implements Serializable, Comparable<Node> {
 		this.leaf = n.leaf;
 		this.root = n.root;
 
-		this.setChildren(new ArrayList<Node>());
+		this.setChildren(new ArrayList<>());
 		this.setUserObject(n.getUserObject());
 	}
 	
 	/**
 	 * sets the root node or node head
-	 * @param nodeId
-	 * @param parentId
+	 * @param nodeId Id of the node
+	 * @param parentId id of the parent node
 	 */
 	public Node(String nodeId, String parentId) {
 		this();
@@ -76,9 +76,9 @@ public class Node implements Serializable, Comparable<Node> {
 	
 	/**
 	 * sets the root node or node head as well as the extended data
-	 * @param nodeId
-	 * @param parentId
-	 * @param userObject
+	 * @param nodeId Id of the node
+	 * @param parentId id of the parent node
+	 * @param userObject Object data of this node
 	 */
 	public Node(String nodeId, String parentId, Object userObject) {
 		this();
@@ -89,9 +89,9 @@ public class Node implements Serializable, Comparable<Node> {
 	
 	/**
 	 * sets the root node or node head
-	 * @param nodeId
-	 * @param parentId
-	 * @param parentName
+	 * @param nodeId Id of the node
+	 * @param parentId id of the parent node
+	 * @param parentName Name of the parent node
 	 */
 	public Node(String nodeId, String parentId, String parentName) {
 		this(nodeId, parentId);
@@ -100,7 +100,7 @@ public class Node implements Serializable, Comparable<Node> {
 	
 	/**
 	 * Adds a child node to this element
-	 * @param child
+	 * @param child Child node to be added to the root element
 	 */
 	public void addChild(Node child) {
 		child.setDepthLevel(depthLevel + 1);
@@ -114,8 +114,8 @@ public class Node implements Serializable, Comparable<Node> {
 
 	/**
 	 * Returns if this is a child node
-	 * @param child
-	 * @return
+	 * @param child Node to find
+	 * @return Boolean if the node is a child node
 	 */
 	public boolean isChild(Node child) {
 		return children.contains(child);
@@ -123,7 +123,7 @@ public class Node implements Serializable, Comparable<Node> {
 
 	/**
 	 * Gets the node id
-	 * @return
+	 * @return Id of this node
 	 */
 	public String getNodeId() {
 		return nodeId;
@@ -131,7 +131,7 @@ public class Node implements Serializable, Comparable<Node> {
 
 	/**
 	 * Sets the node id
-	 * @param nodeId
+	 * @param nodeId Id of this node
 	 */
 	public void setNodeId(String nodeId) {
 		this.nodeId = nodeId;
@@ -139,7 +139,7 @@ public class Node implements Serializable, Comparable<Node> {
 
 	/**
 	 * Gets the parent id
-	 * @return
+	 * @return ID of the prent node.
 	 */
 	public String getParentId() {
 		return parentId;
@@ -155,7 +155,7 @@ public class Node implements Serializable, Comparable<Node> {
 
 	/**
 	 * Gets the node name
-	 * @return
+	 * @return Name of this node
 	 */
 	public String getNodeName() {
 		return nodeName;
@@ -172,7 +172,7 @@ public class Node implements Serializable, Comparable<Node> {
 	/**
 	 * gets the user object.  This allows the node to store any type
 	 * of data elements as part of the tree/node
-	 * @return
+	 * @return User object assigned to this node
 	 */
 	public Object getUserObject() {
 		return userObject;
@@ -197,7 +197,7 @@ public class Node implements Serializable, Comparable<Node> {
 	
 	/**
 	 * Gets the node depth level from root
-	 * @return
+	 * @return Depth level of the node.
 	 */
 	public int getDepthLevel() {
 		return depthLevel;
@@ -205,7 +205,7 @@ public class Node implements Serializable, Comparable<Node> {
 
 	/**
 	 * Describe whether this node is a leaf (true) or branch (false)
-	 * @return
+	 * @return True if this node has no children.  False otherwise
 	 */
 	public boolean isLeaf() {
 		return leaf;
@@ -213,7 +213,7 @@ public class Node implements Serializable, Comparable<Node> {
 
 	/**
 	 * Sets the leaf type
-	 * @param leaf
+	 * @param leaf Stes this node as a leaf node
 	 */
 	public void setLeaf(boolean leaf) {
 		this.leaf = leaf;
@@ -221,7 +221,7 @@ public class Node implements Serializable, Comparable<Node> {
 
 	/**
 	 * describes whether or not the node is root
-	 * @return
+	 * @return whether the node is a root node (no parent node)
 	 */
 	public boolean isRoot() {
 		return root;
@@ -280,7 +280,7 @@ public class Node implements Serializable, Comparable<Node> {
     
     /**
      * Returns the number of child nodes
-     * @return
+     * @return Number of children of this node
      */
 	public int getNumberChildren() {
 		if (children.isEmpty()) return 0;
@@ -303,7 +303,7 @@ public class Node implements Serializable, Comparable<Node> {
 	}
 
 	/**
-	 * @return the fullPath
+	 * @return the fullPath of this node
 	 */
 	public String getFullPath() {
 		return fullPath;
@@ -332,15 +332,15 @@ public class Node implements Serializable, Comparable<Node> {
 
 	/**
 	 * Returns the number of child nodes for this node
-	 * @return
+	 * @return Number of children for the node
 	 */
 	public int getTotalChildren() {
 		return totalChildren;
 	}
 
 	/**
-	 * Sets the total number of children fo rthis node
-	 * @param totalChildren
+	 * Sets the total number of children for this node
+	 * @param totalChildren Sets the number of children
 	 */
 	public void setTotalChildren(int totalChildren) {
 		this.totalChildren = totalChildren;
@@ -348,7 +348,7 @@ public class Node implements Serializable, Comparable<Node> {
 	
 	/**
 	 * Returns the order number (ordering) for this node
-	 * @return
+	 * @return Gets the order number for the node
 	 */
 	public int getOrderNo() {
 		return orderNo;

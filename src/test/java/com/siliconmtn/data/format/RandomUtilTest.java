@@ -18,34 +18,33 @@ import org.junit.jupiter.api.Test;
  * @updates:
  ****************************************************************************/
 
-public class RandomUtilTest {
+class RandomUtilTest {
 
 	/**
 	 * Test method for {@link com.smt.data.format.generateRandomNumber(int, int)}
 	 */
 	@Test
-	public void generateRandomNumberTest() {
+	void generateRandomNumberTest() {
 		int number = RandomUtil.generateRandomNumber(2, 8);
 		assertEquals(number, Integer.max(1, number));
 		assertEquals(number, Integer.min(9, number));
 	}
 
 	/**
-	 * Test method for {@link com.smt.data.format.generateRandom(int) }
+	 * Test method for {@link com.smt.data.format.generateExtendedRandom(int) }
 	 */
 	@Test
-	public void generateRandomTest() {
-		assertEquals(true,RandomUtil.generateRandom(4).matches("[0-9a-z]{4}"));
+	void generateExtendedRandomTest() {
+		assertEquals(true,RandomUtil.alphaNumericExtended(4).matches("[0-9a-zA-Z!*$#]{4}"));
 	}
+	
 	/**
 	 * Test method for {@link com.smt.data.format.generateExtendedRandom(int) }
 	 */
 	@Test
-	public void generateExtendedRandomTest() {
-		assertEquals(true,RandomUtil.generateExtendedRandom(4).matches("[0-9a-zA-Z!*$#]{4}"));
+	void alphaNumericTest() {
+		assertEquals(true,RandomUtil.alphaNumeric(6).matches("[0-9A-Z]{6}"));
 	}
-	
-	
 }
 
 

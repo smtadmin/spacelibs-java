@@ -143,7 +143,7 @@ class SunTimeVOTest {
 	}
 
 	@Test
-	public void testSunTimeVOHttpServletRequest() throws Exception {
+	void testSunTimeVOHttpServletRequest() throws Exception {
 		Map<String, String[]> map = new HashMap<>();
 		map.put("sunsetTime", new String[] {"10:24"});
 		HttpServletRequest req = Mockito.mock(HttpServletRequest.class);

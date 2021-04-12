@@ -47,7 +47,7 @@ class GenericVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetKey() throws Exception {
+	void testGetKey() throws Exception {
 		gvo.setKey("NEW_KEY");
 		assertEquals("NEW_KEY", gvo.getKey());
 	}
@@ -57,7 +57,7 @@ class GenericVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetValue() throws Exception {
+	void testGetValue() throws Exception {
 		gvo.setValue("NEW_VALUE");
 		assertEquals("NEW_VALUE", gvo.getValue());
 	}
@@ -67,7 +67,7 @@ class GenericVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testToString() throws Exception {
+	void testToString() throws Exception {
 		assertTrue(gvo.toString().contains("KEY"));
 		assertTrue(gvo.toString().contains("VALUE"));
 	}
@@ -77,7 +77,7 @@ class GenericVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testCompareTo() throws Exception {
+	void testCompareTo() throws Exception {
 		GenericVO vo = new GenericVO();
 		assertEquals(0, gvo.compareTo(vo));
 		assertEquals(0, gvo.compareTo(null));
@@ -97,16 +97,16 @@ class GenericVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testEquals() throws Exception {
+	void testEquals() throws Exception {
 		GenericVO vo = new GenericVO();
-		assertFalse(gvo.equals(vo));
-		assertFalse(gvo.equals(null));
+		assertNotEquals(vo, gvo);
+		assertNotEquals(null, gvo);
 		
 		vo.setKey("KEY");
-		assertTrue(gvo.equals(vo));
+		assertEquals(vo, gvo);
 		
 		gvo.setKey(new ArrayList<Integer>());
-		assertFalse(gvo.equals(vo));
+		assertNotEquals(gvo, vo);
 	}
 
 	/**
@@ -114,7 +114,7 @@ class GenericVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testHashCode() throws Exception {
+	void testHashCode() throws Exception {
 		assertEquals(233, gvo.hashCode());
 		gvo.setKey("MY_NEW_KEY");
 		assertNotEquals(233, gvo.hashCode());

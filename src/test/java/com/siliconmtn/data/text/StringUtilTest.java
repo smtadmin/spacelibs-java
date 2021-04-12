@@ -49,9 +49,8 @@ class StringUtilTest {
 		assertEquals(7, indexes[1]);
 		
 		indexes = StringUtil.everyIndexOf("the time for all of the good things", "the");
-		assertEquals(2, indexes.length);
+		assertEquals(1, indexes.length);
 		assertEquals(0, indexes[0]);
-		assertEquals(20, indexes[1]);
 		
 		indexes = StringUtil.everyIndexOf("the time for all of the good things", "");
 		assertEquals(0, indexes.length);
@@ -109,7 +108,7 @@ class StringUtilTest {
 	 * Test method for {@link com.siliconmtn.data.text.StringUtil#getToString(java.lang.Array, char)}.
 	 */
 	@Test
-	public void testGetToStringObjectArrayChar() throws Exception {
+	void testGetToStringObjectArrayChar() throws Exception {
 		assertEquals("[1,2,3,4]", StringUtil.getToString(new Integer[] {1,2,3,4}, ","));
 		assertEquals("[one|two|three]", StringUtil.getToString(new String[] {"one", "two", "three"}, "|"));
 		assertEquals("[one^^three]", StringUtil.getToString(new String[] {"one", null, "three"}, "^"));
@@ -120,7 +119,7 @@ class StringUtilTest {
 	 * Test method for {@link com.siliconmtn.data.text.StringUtil#getToString(java.lang.Object, java.lang.String)}.
 	 */
 	@Test
-	public void testGetToStringObjectString() throws Exception {
+	void testGetToStringObjectString() throws Exception {
 		Node n = new Node("one", "two", "three");
 		assertTrue(StringUtil.getToString(n, "|").contains("one"));
 		assertTrue(StringUtil.getToString(n, "|").contains("two"));
@@ -133,6 +132,13 @@ class StringUtilTest {
 		assertTrue(StringUtil.getToString(mockNode, "|").contains("|"));
 	}
 	
+	/**
+	 * Test method for {@link com.siliconmtn.data.text.StringUtil#getToString(java.lang.Object)}.
+	 */
+	@Test
+	void testGetToStringObject() throws Exception {
+		assertEquals("", StringUtil.getToString(null));
+	}
 	
 	@Test
 	void checkExceptionGetUUID() {
@@ -144,5 +150,91 @@ class StringUtilTest {
 	@Test
 	void checkThrowsExceptionGetUUID() {
 		assertEquals(null, StringUtil.getUUID(baduuid));
+	}
+
+	@Test
+	void testPadLeft() throws Exception {
+		assertEquals("00000", StringUtil.padLeft("", '0', 5));
+		assertEquals("00000", StringUtil.padLeft(null, '0', 5));
+		assertEquals("ABCDE", StringUtil.padLeft("ABCDEF", '0', 5));
+		assertEquals("0000A", StringUtil.padLeft("A", '0', 5));
+		assertEquals("0ABCD", StringUtil.padLeft("ABCD", '0', 5));
+	}
+
+	@Test
+	void testPadRight() throws Exception {
+		assertEquals("00000", StringUtil.padRight("", '0', 5));
+		assertEquals("00000", StringUtil.padRight(null, '0', 5));
+		assertEquals("ABCDE", StringUtil.padRight("ABCDEF", '0', 5));
+		assertEquals("A0000", StringUtil.padRight("A", '0', 5));
+		assertEquals("ABCD0", StringUtil.padRight("ABCD", '0', 5));
+	}
+
+	/**
+	 * Tests the count mataches method
+	 * @throws Exception
+	 */
+	@Test
+	void testCountMatchesCharSequenceChar() throws Exception {
+		 assertEquals(0,StringUtil.countMatches(null, '*'));
+		 assertEquals(0,StringUtil.countMatches("", '*'));
+		 assertEquals(0,StringUtil.countMatches("abba", '0'));
+		 assertEquals(2,StringUtil.countMatches("abba", 'a'));
+		 assertEquals(2,StringUtil.countMatches("abba", 'b'));
+		 assertEquals(0,StringUtil.countMatches("abba", 'x'));
+	}
+
+	/**
+	 * Tests the string version of the count matches method
+	 * @throws Exception
+	 */
+	@Test
+	void testCountMatchesStringString() throws Exception {
+		assertEquals(0,StringUtil.countMatches(null, null));
+		assertEquals(0,StringUtil.countMatches("", ""));
+		assertEquals(0,StringUtil.countMatches("abba", null));
+		assertEquals(0,StringUtil.countMatches("abba", ""));
+		assertEquals(2,StringUtil.countMatches("abba", "a"));
+		assertEquals(1,StringUtil.countMatches("abba", "ab"));
+		assertEquals(0,StringUtil.countMatches("abba", "xxx"));
+		assertEquals(1,StringUtil.countMatches("ababa", "aba"));
+	}
+
+	/**
+	 * Tests the s empty function to ensure it correctly evaluates the string state
+	 * @throws Exception
+	 */
+	@Test
+	void testIsEmpty() throws Exception {
+		assertTrue(StringUtil.isEmpty(null));
+		assertTrue(StringUtil.isEmpty(""));
+		assertTrue(StringUtil.isEmpty("   "));
+		assertFalse(StringUtil.isEmpty("Hello"));
+	}
+
+	/**
+	 * Test that the defaultString returns the defaultVal if it is empty
+	 * @throws Exception
+	 */
+	@Test
+	void testDefaultStringString() throws Exception {
+		assertEquals("", StringUtil.defaultString(null, null));
+		assertEquals("", StringUtil.defaultString("", ""));
+		assertEquals("hello", StringUtil.defaultString("", "hello"));
+		assertEquals("hello", StringUtil.defaultString("   ", "hello"));
+		assertEquals("hello", StringUtil.defaultString(null, "hello"));
+		assertEquals("world", StringUtil.defaultString("world", "hello"));
+	}
+	
+	/**
+	 * Tests that the default string returns a "" when null or empty
+	 * @throws Exception
+	 */
+	@Test
+	void testDefaultString() throws Exception {
+		assertEquals("", StringUtil.defaultString(null));
+		assertEquals("", StringUtil.defaultString(""));
+		assertEquals("", StringUtil.defaultString("   "));
+		assertEquals("hello", StringUtil.defaultString("hello"));
 	}
 }

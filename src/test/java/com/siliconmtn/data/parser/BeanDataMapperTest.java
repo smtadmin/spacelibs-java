@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 // JDK 11.x
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
@@ -90,8 +91,8 @@ class BeanDataMapperTest {
 		when(obj.convert(ArgumentMatchers.anyString(), ArgumentMatchers.any()))
 		.thenThrow(new ConversionException(""));
 		Mockito.spy(obj);
-		BeanDataMapper.createList(String.class, new Object[] {"one", "two"});
-		
+		List<Object> data = BeanDataMapper.createList(String.class, new Object[] {"one", "two"});
+		assertEquals(2, data.size());
 	}
 
 	/**

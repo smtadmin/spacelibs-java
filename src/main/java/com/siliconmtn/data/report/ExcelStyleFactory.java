@@ -7,15 +7,15 @@ import java.lang.reflect.Constructor;
 import lombok.extern.log4j.Log4j2;
 
 /****************************************************************************
- * <b>Title</b>: ExcelStyleFactory.java <p/>
- * <b>Project</b>: SpaceLibs-Java <p/>
+ * <b>Title</b>: ExcelStyleFactory.java 
+ * <b>Project</b>: SpaceLibs-Java 
  * <b>Description: </b> uses a string to identify the correct style and returns its class
- * <p/>
- * <b>Copyright:</b> Copyright (c) 2016<p/>
- * <b>Company:</b> Silicon Mountain Technologies<p/>
+ * 
+ * <b>Copyright:</b> Copyright (c) 2016
+ * <b>Company:</b> Silicon Mountain Technologies
  * @author James Camire
  * @version 1.0
- * @since Feb 14, 2021<p/>
+ * @since Feb 14, 2021
  * @updates:
  ****************************************************************************/
 @Log4j2
@@ -42,8 +42,8 @@ public class ExcelStyleFactory {
 	
 	/**
 	 * Gets the style of the enum type passed into the factory
-	 * @param style
-	 * @return
+	 * @param style Loads the style class
+	 * @return Style class fo rthis report
 	 */
 	public static ExcelStyleInterface getExcelStyle(Styles style) {
 		try {

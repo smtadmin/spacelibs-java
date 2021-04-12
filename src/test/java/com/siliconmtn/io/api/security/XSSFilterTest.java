@@ -15,8 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 // Junit 5
 import org.junit.jupiter.api.Test;
 
-import lombok.extern.log4j.Log4j2;
-
 /****************************************************************************
  * <b>Title</b>: XSSFilterTest.java
  * <b>Project</b>: spacelibs-java
@@ -30,7 +28,7 @@ import lombok.extern.log4j.Log4j2;
  * @since Mar 9, 2021
  * @updates:
  ****************************************************************************/
-@Log4j2
+
 class XSSFilterTest {
 
 	/**
@@ -54,9 +52,9 @@ class XSSFilterTest {
         
         when(request.getReader()).thenReturn(reader);
         when(wrappedRequest.getReader()).thenReturn(reader);
-        try {
+        
         assertDoesNotThrow(()-> xss.doFilter(request, response, chain));
-        }catch(Error e) {log.info(e);}
+        
 	}
 
 	/**

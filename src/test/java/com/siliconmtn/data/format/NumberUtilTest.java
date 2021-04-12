@@ -23,7 +23,7 @@ class NumberUtilTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testToIntString() throws Exception {
+	void testToIntString() throws Exception {
 		assertEquals(0, NumberUtil.toInt(null));
 		assertEquals(0, NumberUtil.toInt(""));
 		assertEquals(0, NumberUtil.toInt("abc"));
@@ -41,7 +41,7 @@ class NumberUtilTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testProcessInt() throws Exception {
+	void testProcessInt() throws Exception {
 		assertEquals(-123, NumberUtil.toInt("-123.45", 0, false));
 		assertEquals(123, NumberUtil.toInt("+123.45", 0, false));
 		assertEquals(123, NumberUtil.toInt("+123^&#.45", 0, true));
@@ -53,7 +53,7 @@ class NumberUtilTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testToLongString() throws Exception {
+	void testToLongString() throws Exception {
 		assertEquals(0, NumberUtil.toLong(null));
 		assertEquals(0, NumberUtil.toLong(""));
 		assertEquals(0, NumberUtil.toLong("abc"));
@@ -68,7 +68,7 @@ class NumberUtilTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testToFloatString() throws Exception {
+	void testToFloatString() throws Exception {
 		assertEquals(0, NumberUtil.toFloat(null));
 		assertEquals(0, NumberUtil.toFloat(""));
 		assertEquals(6f, NumberUtil.toFloat("6f"));
@@ -87,7 +87,7 @@ class NumberUtilTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testToDoubleStringDoubleBoolean() throws Exception {
+	void testToDoubleStringDoubleBoolean() throws Exception {
 		assertEquals(0, NumberUtil.toDouble(null));
 		assertEquals(0, NumberUtil.toDouble(""));
 		assertEquals(6.0, NumberUtil.toDouble("6"));
@@ -101,10 +101,12 @@ class NumberUtilTest {
 	}
 
 	@Test
-	public void testGetNumber() throws Exception {
+	void testGetNumber() throws Exception {
 		assertEquals(Long.valueOf(5), NumberUtil.getNumber("5"));
 		assertEquals(Double.valueOf(5.5f), NumberUtil.getNumber("5.5f"));
 		assertEquals(Double.valueOf(23456.1234567), NumberUtil.getNumber("23456.1234567"));
+		assertEquals(Double.valueOf(23456.1234567), NumberUtil.getNumber("23456.1234567"));
+		assertEquals(Double.valueOf(Double.POSITIVE_INFINITY), NumberUtil.getNumber("8289234523432343234322039840983409823409823049809823461234556687678923452343234323432203984098340982340982304980982346123455668767892345234323432343220398409834098234098230498098234612345566876789234523432343234322039840983409823409823049809823461234556687678923452343234323432203984098340982340982304980982346.1234567"));
 		assertNull(NumberUtil.getNumber("Test"));
 	}
 

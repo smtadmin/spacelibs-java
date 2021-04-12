@@ -106,8 +106,12 @@ class SMTHttpConnectionManagerTest {
 	 */
 	@Test
 	void testSMTHttpConnectionManagerBoolean() {
-		new SMTHttpConnectionManager(true);
-		new SMTHttpConnectionManager(false);
+		
+		SMTHttpConnectionManager newConn = new SMTHttpConnectionManager(true);
+		assertTrue(newConn.isUseCookieHandler());
+		
+		newConn = new SMTHttpConnectionManager(false);
+		assertFalse(newConn.isUseCookieHandler());
 	}
 
 	/**
@@ -275,6 +279,7 @@ class SMTHttpConnectionManagerTest {
 	@Test
 	void testSetSslSocketFactory() {
 		connection.setSslSocketFactory(null);
+		assertNull(connection.getSslSocketFactory());
 	}
 
 	/**
@@ -282,7 +287,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetConnectionTimeout() throws Exception {
+	void testGetConnectionTimeout() throws Exception {
 		connection.setConnectionTimeout(5);
 		assertEquals(5, connection.getConnectionTimeout());
 	}
@@ -292,7 +297,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testIsFollowRedirects() throws Exception {
+	void testIsFollowRedirects() throws Exception {
 		connection.setFollowRedirects(true);
 		assertTrue(connection.isFollowRedirects());
 	}
@@ -302,7 +307,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetRequestHeaders() throws Exception {
+	void testGetRequestHeaders() throws Exception {
 		Map<String, String> nullHeaders = null;
 		connection.setRequestHeaders(nullHeaders);
 		assertEquals(0, connection.getRequestHeaders().size());
@@ -316,7 +321,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetResponseCode() throws Exception {
+	void testGetResponseCode() throws Exception {
 		assertEquals(0, connection.getResponseCode());
 	}
 
@@ -325,7 +330,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetCookies() throws Exception {
+	void testGetCookies() throws Exception {
 		connection.setCookies(cookies);
 		assertEquals(3, connection.getCookies().size());
 		
@@ -347,7 +352,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetHeaderMap() throws Exception {
+	void testGetHeaderMap() throws Exception {
 		connection.setHeaderMap(cookies);
 		assertEquals(3, connection.getHeaderMap().size());
 		
@@ -365,7 +370,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetRedirectLimit() throws Exception {
+	void testGetRedirectLimit() throws Exception {
 		connection.setRedirectLimit(5);
 		assertEquals(5, connection.getRedirectLimit());
 	}
@@ -375,7 +380,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testIsUseCookieHandler() throws Exception {
+	void testIsUseCookieHandler() throws Exception {
 		connection.setUseCookieHandler(true);
 		assertTrue(connection.isUseCookieHandler());
 	}
@@ -387,7 +392,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetConnectionStream() throws Exception {
+	void testGetConnectionStream() throws Exception {
 		// Tests with a URL Class
 		connection.setFollowRedirects(true);
 		connection.setRedirectLimit(1);
@@ -415,7 +420,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetConnectionStreamRedirNull() throws Exception {
+	void testGetConnectionStreamRedirNull() throws Exception {
 		// Tests with a URL Class
 		connection.setFollowRedirects(true);
 		connection.setRedirectLimit(0);
@@ -438,7 +443,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetConnectionStream404() throws Exception {
+	void testGetConnectionStream404() throws Exception {
 		// Tests with a URL Class
 		connection.setFollowRedirects(false);
 		connection.setRedirectLimit(0);
@@ -458,7 +463,7 @@ class SMTHttpConnectionManagerTest {
 	}
 
 	@Test
-	public void testGetConnectionStreamSSL() throws Exception {
+	void testGetConnectionStreamSSL() throws Exception {
 		// Test with no SSL Factory
 		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("https://www.siliconmtn.com"));
 		when(mockUrl.getProtocol()).thenReturn("https");
@@ -485,7 +490,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testCreateURL() throws Exception {
+	void testCreateURL() throws Exception {
 		assertThrows(IOException.class, () -> connection.createURL(null));
 	    assertEquals(-1, connection.createURL(sUrl).getPort());
 	    assertEquals("www.siliconmtn.com", connection.createURL(sUrl).getHost());
@@ -500,7 +505,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testStoreCookies() throws Exception {
+	void testStoreCookies() throws Exception {
 		URL myUrl = new URL(sUrl);
 		mockUrlConn = (HttpURLConnection)myUrl.openConnection();
 		mockUrlConn = Mockito.spy(mockUrlConn);
@@ -525,7 +530,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testAssignCookiesHttpURLConnection() throws Exception {
+	void testAssignCookiesHttpURLConnection() throws Exception {
 		URL myUrl = new URL(url);
 		mockUrlConn = (HttpURLConnection)myUrl.openConnection();
 		connection.assignCookies(mockUrlConn);
@@ -535,9 +540,9 @@ class SMTHttpConnectionManagerTest {
 		connection.assignCookies(null);
 		
 		connection.assignCookies(mockUrlConn);
-		assertNotNull(mockUrlConn.getRequestProperty("Cookie").contains("JSESSION_ID"));
-		assertNotNull(mockUrlConn.getRequestProperty("Cookie").contains("AWSALB"));
-		assertNotNull(mockUrlConn.getRequestProperty("Cookie").contains("AWSALBCORS"));
+		assertTrue(mockUrlConn.getRequestProperty("Cookie").contains("JSESSION_ID"));
+		assertTrue(mockUrlConn.getRequestProperty("Cookie").contains("AWSALB"));
+		assertTrue(mockUrlConn.getRequestProperty("Cookie").contains("AWSALBCORS"));
 	}
 
 	/**
@@ -546,7 +551,7 @@ class SMTHttpConnectionManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testSetRequestHeadersHttpURLConnection() throws Exception {
+	void testSetRequestHeadersHttpURLConnection() throws Exception {
 		connection.setRequestHeaders(headers);
 		URL myUrl = new URL(sUrl);
 		mockUrlConn = (HttpURLConnection)myUrl.openConnection();

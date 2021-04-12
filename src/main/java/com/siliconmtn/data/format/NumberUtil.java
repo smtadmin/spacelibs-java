@@ -56,6 +56,8 @@ public class NumberUtil {
 	 * 
 	 * @param val String to be converted
 	 * @param defaultVal Default value for non String or non value in string
+	 * @param removeNonAlphaNum boolean to indicate whether non alphas should be 
+	 * stripped beforee conversion
 	 * @return Integer, default val if failed
 	 */
 	public static int toInt(String val, int defaultVal, boolean removeNonAlphaNum) {
@@ -81,6 +83,7 @@ public class NumberUtil {
 	 * Converts a String into an Long
 	 * 
 	 * @param val String to be converted
+	 * @param defaultValue Default value to assign if val is empty
 	 * @return Long of value 0 if conversion fails
 	 */
 	public static long toLong(String val, long defaultValue) {
@@ -90,10 +93,11 @@ public class NumberUtil {
 	/**
 	 * Converts a String into a long, acts as the controller for the process
 	 * 
-	 * @param val
-	 * @param defaultValue
-	 * @param removeNonAlphaNum
-	 * @return
+	 * @param val Value to convert
+	 * @param defaultValue Assigned value if val is empty
+	 * @param removeNonAlphaNum boolean to indicate whether non alphas should be 
+	 * stripped before conversion
+	 * @return Lnog value represneting the passed value and metadata
 	 */
 	public static long toLong(String val, long defaultValue, boolean removeNonAlphaNum) {
 		// Convert a String into an long
@@ -117,7 +121,7 @@ public class NumberUtil {
 	 * @param negative is the number negative
 	 * @param removeNonAlphaNum removes all non-numbers in the val
 	 * @param defaultValue if empty/null/error converting, return this value
-	 * @return long value
+	 * @return long Converted value
 	 */
 	private static long processLongInt(String val,boolean negative, boolean removeNonAlphaNum, long defaultValue) {
 
@@ -129,7 +133,7 @@ public class NumberUtil {
 				convertedString = Long.parseLong(signedValue(StringUtil.removeNonAlphaNumeric(val), negative));
 			}else {
 				//else just try and parse the string as is
-				convertedString = Long.parseLong(val.toString());
+				convertedString = Long.parseLong(val);
 			}
 
 		} catch (Exception nfe) {
@@ -150,9 +154,9 @@ public class NumberUtil {
 	
 	/**
 	 * Converts a String into an Float
-	 * @param val
+	 * @param val Value to convert
 	 * @param defaultValue Default value if val is null/empty
-	 * @return
+	 * @return Float representation of the provided value
 	 */
 	public static float toFloat(String val, float defaultValue) {
 		return toFloat(val,defaultValue, true);
@@ -160,10 +164,11 @@ public class NumberUtil {
 	
 	/**
 	 * converts a string into a Float, acts as the controller for the process
-	 * @param val
-	 * @param defaultValue
-	 * @param removeNonAlphaNum
-	 * @return
+	 * @param val String to convert to a float
+	 * @param defaultValue Value to assign if val is empty or can't be converted
+	 * @param removeNonAlphaNum boolean to indicate whether non alphas should be 
+	 * stripped before conversion
+	 * @return Float value representing the passed data
 	 */
 	public static float toFloat(String val, float defaultValue, boolean removeNonAlphaNum) {
 		// Convert a String into an float.
@@ -176,11 +181,12 @@ public class NumberUtil {
 	
 	/**
 	 * processes the conversion from String to Float
-	 * @param value
-	 * @param negative
-	 * @param indexOfDecimalPoint
-	 * @param removeNonAlphaNum
-	 * @param defaultValue
+	 * @param value String to convert to a float
+	 * @param negative Boolean to know before removing non-alphas
+	 * @param indexOfDecimalPoint Need to have this assigned if parsing non alphas
+	 * @param removeNonAlphaNum boolean to indicate whether non alphas should be 
+	 * stripped before conversion
+	 * @param defaultValue Value to assign if value is empty or can't be converted
 	 * @return
 	 */
 	private static float processFloat(String value, boolean negative, boolean removeNonAlphaNum, float defaultValue) {
@@ -205,7 +211,7 @@ public class NumberUtil {
 	 * Converts a String into a double with default double value.
 	 * @param val String to convert
 	 * @param d Default value if val is empty
-	 * @return
+	 * @return Double value from meta data
 	 */
 	public static double toDouble(String val, double d) {
 		return toDouble(val, d, true);
@@ -216,7 +222,7 @@ public class NumberUtil {
 	 * @param val Value to convert
 	 * @param defaultValue if null/empty or error, return default value
 	 * @param removeNonAlphaNum removes all non-alpha characters from the value
-	 * @return
+	 * @return Double value from meta data
 	 */
 	public static double toDouble(String val, double defaultValue, boolean removeNonAlphaNum) {
 		// Convert a String into an Double object.
@@ -233,7 +239,7 @@ public class NumberUtil {
 	 * @param negative is a negative number
 	 * @param removeNonAlphaNum removes all non-alpha characters from the value
 	 * @param defaultValue if null/empty or error, return default value
-	 * @return
+	 * @return Double value from meta data
 	 */
 	private static double processDouble(String value, boolean negative, boolean removeNonAlphaNum, double defaultValue) {
 		try {
@@ -248,7 +254,7 @@ public class NumberUtil {
 	 * @param value String value
 	 * @param negative is a negative number
 	 * @param removeNonAlphaNum removes all non-alphanumeric characters (such as $, ",", etc ...
-	 * @return
+	 * @return String that is number parsable
 	 */
 	private static String formatValue(String value, boolean negative, boolean removeNonAlphaNum) {
 		if (removeNonAlphaNum) {
@@ -276,7 +282,7 @@ public class NumberUtil {
 	 * This method will re-apply he negative flag so it is not complete missed when we remove alpha
 	 * @param val String value to be checked
 	 * @param negativeStringFlag is the number negative?
-	 * @return
+	 * @return value with negative value applied
 	 */
 	private static String signedValue(String val, boolean isNegative) {
 		StringBuilder sb = new StringBuilder((val.length() +1));

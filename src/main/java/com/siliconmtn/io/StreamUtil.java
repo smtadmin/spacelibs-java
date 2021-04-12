@@ -5,13 +5,11 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 
 // JEEE 8.x
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
 
 // SpaceLibs 1.x
 import com.siliconmtn.data.report.AbstractReport;
+import com.siliconmtn.data.text.StringUtil;
 
 /****************************************************************************
  * <b>Title</b>: StreamUtil.java
@@ -40,7 +38,7 @@ public class StreamUtil {
 	 * This is basically a helper method for getting reports off the server in a generic way.
 	 * @param report The report to stream back to the user
 	 * @param response Standard HttpServletResponse object
-	 * @throws ServletException
+	 * @throws IOException Error thrown trying to Stream the report
 	 */
 	public final void streamReport(AbstractReport report, HttpServletResponse response) throws IOException {
 
@@ -51,7 +49,7 @@ public class StreamUtil {
 		response.setContentType(report.getContentType());
 
 		// Set the name of the file if it is set.  Add the header tags for the name and type
-		if (! StringUtils.isEmpty(report.getFileName())) {
+		if (! StringUtil.isEmpty(report.getFileName())) {
 			String attachment = (report.isHeaderAttachment()) ? "attachment; " : "";
 			response.setHeader("Content-Disposition", attachment + "filename=\"" + report.getFileName() + "\"");
 		}

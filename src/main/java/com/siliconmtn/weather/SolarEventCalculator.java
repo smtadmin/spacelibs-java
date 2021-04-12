@@ -23,8 +23,8 @@ import com.siliconmtn.data.lang.SMTMath;
  * http://www.apache.org/licenses/LICENSE-2.0
  ****************************************************************************/
 public class SolarEventCalculator {
-    final private Coordinate location;
-    final private TimeZone timeZone;
+	private final Coordinate location;
+	private final TimeZone timeZone;
 
     /**
      * Constructs a new <code>SolarEventCalculator</code> using the given parameters.
@@ -98,10 +98,10 @@ public class SolarEventCalculator {
 
     /**
      * <code>Zenith</code> enum corresponding to the type of sunset to compute.
-     * @param solarZenith
+     * @param solarZenith  Defines the solar declination used in computing the sunrise/sunset.
      * @param date Date to calculate
      * @param isSunrise is sunrise or sunset
-     * @return
+     * @return The solar event time
      */
     protected BigDecimal computeSolarEventTime(Zenith solarZenith, Calendar date, boolean isSunrise) {
         date.setTimeZone(this.timeZone);
@@ -113,8 +113,7 @@ public class SolarEventCalculator {
 
         BigDecimal sunLocalHour = getSunLocalHour(cosineSunLocalHour, isSunrise);
         BigDecimal localMeanTime = getLocalMeanTime(sunTrueLong, longitudeHour, sunLocalHour);
-        BigDecimal localTime = getLocalTime(localMeanTime, date);
-        return localTime;
+        return getLocalTime(localMeanTime, date);
     }
 
     /**
@@ -132,7 +131,7 @@ public class SolarEventCalculator {
      */
     private BigDecimal getLongitudeHour(Calendar date, Boolean isSunrise) {
         int offset = 18;
-        if (isSunrise) {
+        if (isSunrise.booleanValue()) {
             offset = 6;
         }
         
@@ -158,8 +157,8 @@ public class SolarEventCalculator {
      * @return the suns true longitude, in <code>BigDecimal</code> form.
      */
     private BigDecimal getSunTrueLongitude(BigDecimal meanAnomaly) {
-        BigDecimal sinMeanAnomaly = new BigDecimal(Math.sin(SMTMath.convertDegreesToRadians(meanAnomaly).doubleValue()));
-        BigDecimal sinDoubleMeanAnomaly = new BigDecimal(Math.sin(SMTMath.multiplyBy(SMTMath.convertDegreesToRadians(meanAnomaly), BigDecimal.valueOf(2)).doubleValue()));
+        BigDecimal sinMeanAnomaly = BigDecimal.valueOf(Math.sin(SMTMath.convertDegreesToRadians(meanAnomaly).doubleValue()));
+        BigDecimal sinDoubleMeanAnomaly = BigDecimal.valueOf(Math.sin(SMTMath.multiplyBy(SMTMath.convertDegreesToRadians(meanAnomaly), BigDecimal.valueOf(2)).doubleValue()));
 
         BigDecimal firstPart = meanAnomaly.add(SMTMath.multiplyBy(sinMeanAnomaly, new BigDecimal("1.916")));
         BigDecimal secondPart = SMTMath.multiplyBy(sinDoubleMeanAnomaly, new BigDecimal("0.020")).add(new BigDecimal("282.634"));
@@ -178,10 +177,10 @@ public class SolarEventCalculator {
      * @return suns right ascension in degree-hours, in <code>BigDecimal</code> form.
      */
     protected BigDecimal getRightAscension(BigDecimal sunTrueLong) {
-        BigDecimal tanL = new BigDecimal(Math.tan(SMTMath.convertDegreesToRadians(sunTrueLong).doubleValue()));
+        BigDecimal tanL = BigDecimal.valueOf(Math.tan(SMTMath.convertDegreesToRadians(sunTrueLong).doubleValue()));
         
         BigDecimal innerParens = SMTMath.multiplyBy(SMTMath.convertRadiansToDegrees(tanL), new BigDecimal("0.91764"));
-        BigDecimal rightAscension = new BigDecimal(Math.atan(SMTMath.convertDegreesToRadians(innerParens).doubleValue()));
+        BigDecimal rightAscension = BigDecimal.valueOf(Math.atan(SMTMath.convertDegreesToRadians(innerParens).doubleValue()));
         rightAscension = setScale(SMTMath.convertRadiansToDegrees(rightAscension));
 
         if (rightAscension.doubleValue() < 0) {
@@ -252,7 +251,7 @@ public class SolarEventCalculator {
     private BigDecimal getSunLocalHour(BigDecimal cosineSunLocalHour, Boolean isSunrise) {
         BigDecimal arcCosineOfCosineHourAngle = SMTMath.getArcCosineFor(cosineSunLocalHour);
         BigDecimal localHour = SMTMath.convertRadiansToDegrees(arcCosineOfCosineHourAngle);
-        if (isSunrise) {
+        if (isSunrise.booleanValue()) {
             localHour = BigDecimal.valueOf(360).subtract(localHour);
         }
         return SMTMath.divideBy(localHour, BigDecimal.valueOf(15));
@@ -321,7 +320,7 @@ public class SolarEventCalculator {
         }
 
         BigDecimal localTime = localTimeParam;
-        if (localTime.compareTo(BigDecimal.ZERO) == -1) {
+        if ((localTime.compareTo(BigDecimal.ZERO)) < 0) {
             localTime = localTime.add(BigDecimal.valueOf(24.00));
         }
         String[] timeComponents = localTime.toPlainString().split("\\.");
@@ -339,13 +338,14 @@ public class SolarEventCalculator {
         }
 
         String minuteString = minutes.intValue() < 10 ? "0" + minutes.toPlainString() : minutes.toPlainString();
-        String hourString = (hour < 10) ? "0" + String.valueOf(hour) : String.valueOf(hour);
+        String hourString = (hour < 10) ? ("0" + hour) : String.valueOf(hour);
         return hourString + ":" + minuteString;
     }
 
     /**
      * Returns the local rise/set time in the form HH:MM.
      * @param localTimeParam <code>BigDecimal</code> representation of the local rise/set time.
+     * @param date Date to assign the local time
      * @return <code>Calendar</code> representation of the local time as a calendar, or null for none.
      */
     protected Calendar getLocalTimeAsCalendar(BigDecimal localTimeParam, Calendar date) {
@@ -357,7 +357,7 @@ public class SolarEventCalculator {
         Calendar resultTime = (Calendar) date.clone();
 
         BigDecimal localTime = localTimeParam;
-        if (localTime.compareTo(BigDecimal.ZERO) == -1) {
+        if (localTime.compareTo(BigDecimal.ZERO) < 0) {
             localTime = localTime.add(BigDecimal.valueOf(24.0D));
             resultTime.add(Calendar.HOUR_OF_DAY, -24);
         }
@@ -387,16 +387,23 @@ public class SolarEventCalculator {
 
     /** ******* UTILITY METHODS (Should probably go somewhere else. ***************** */
 
-    //TODO In SMT DateFormat
+    /**
+     * Gets the day of year
+     * @param date date ot use
+     * @return dayof year
+     */
     private BigDecimal getDayOfYear(Calendar date) {
         return new BigDecimal(date.get(Calendar.DAY_OF_YEAR));
     }
 
-  //TODO In SMT DateFormat
+    /**
+     * Retrives the UTC offset for the provided ddate
+     * @param date
+     * @return
+     */
     private BigDecimal getUTCOffSet(Calendar date) {
         BigDecimal offSetInMillis = new BigDecimal(date.get(Calendar.ZONE_OFFSET));
-        BigDecimal offSet = offSetInMillis.divide(new BigDecimal(3600000), new MathContext(2));
-        return offSet;
+        return offSetInMillis.divide(new BigDecimal(3600000), new MathContext(2));
     }
     
     /**

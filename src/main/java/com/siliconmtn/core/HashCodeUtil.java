@@ -5,7 +5,7 @@ package com.siliconmtn.core;
  * <b>Project</b>: SpaceLibs-Java
  * <b>Description: </b> * Collected methods which allow easy implementation of <code>hashCode</code>.
  * Example use case:
- * <p/>
+ * 
  * <pre>
  * public int hashCode() {
  * 	int result = HashCodeUtil.SEED;
@@ -50,8 +50,8 @@ public final class HashCodeUtil {
 	
 	/**
 	 * Gets a hashcode for the given boolean value
-	 * @param aBoolean
-	 * @return
+	 * @param aBoolean hashes a boolean value
+	 * @return hash for a boolean as an int
 	 */
 	public static int hash(boolean aBoolean) {
 		return firstTerm() + (aBoolean ? 1 : 0);
@@ -60,7 +60,7 @@ public final class HashCodeUtil {
 	/**
 	 * Retrieves a hashcode for the given char
 	 * @param aChar - Character to Utilize
-	 * @return
+	 * @return hash for a char as an int
 	 */
 	public static int hash(char aChar) {
 		return firstTerm() + (int) aChar;
@@ -78,8 +78,8 @@ public final class HashCodeUtil {
 	
 	/**
 	 * Creates a hashcode form the provided float value
-	 * @param aFloat
-	 * @return
+	 * @param aFloat Float value to be hashed
+	 * @return hashed value
 	 */
 	public static int hash(float aFloat) {
 		return hash(Float.toHexString(aFloat));
@@ -87,8 +87,8 @@ public final class HashCodeUtil {
 
 	/**
 	 * Creates a hashcode form the provided double value
-	 * @param aDouble
-	 * @return hashcode
+	 * @param aDouble double value to hash
+	 * @return hashcode hashed value
 	 */
 	public static int hash(double aDouble) {
 		return hash(Double.toHexString(aDouble));
@@ -100,8 +100,8 @@ public final class HashCodeUtil {
 	 * <code>aObject</code> is a possibly-null object field, and possibly an array.
 	 * If <code>aObject</code> is an array, then each element may be a primitive or
 	 * a possibly-null object.
-	 * @param aObject
-	 * @return
+	 * @param aObject Object to be hashed.  Hashing depends mupon the object type
+	 * @return Hashed value
 	 */
 	public static int hash(Object aObject) {
 		if (aObject == null) {
@@ -124,8 +124,8 @@ public final class HashCodeUtil {
 	
 	/**
 	 * Loops the chars and totals their ascii values
-	 * @param val
-	 * @return
+	 * @param val Hashes a string
+	 * @return Hash of the string value
 	 */
 	private static int hashString(String val) {
 		char[] item = val.toCharArray();
@@ -139,7 +139,7 @@ public final class HashCodeUtil {
 
 	/**
 	 * Grabs the first term
-	 * @return
+	 * @return The first term value.  Used in the seeding
 	 */
 	private static int firstTerm() {
 		return F_ODD_PRIME_NUMBER * SEED;
@@ -147,8 +147,8 @@ public final class HashCodeUtil {
 
 	/**
 	 * Determines if the provided class is an array
-	 * @param obj
-	 * @return
+	 * @param obj determines if the object is an array
+	 * @return true if an array.  false otherwise
 	 */
 	private static boolean isArray(Object obj) {
 		return obj.getClass().isArray();

@@ -94,7 +94,9 @@ class StreamUtilTest {
 		
 		// Call the util class
 		StreamUtil su = new StreamUtil();
-		su.streamReport(ar, response);
+		assertDoesNotThrow(() -> {
+			su.streamReport(ar, response);
+		});
 	}
 	
 	/**
@@ -111,7 +113,9 @@ class StreamUtilTest {
 		
 		// Call the util class
 		StreamUtil su = new StreamUtil();
-		su.streamReport(ar, response);
+		assertDoesNotThrow(() -> {
+			su.streamReport(ar, response);
+		});
 	}
 
 	/**
@@ -124,6 +128,10 @@ class StreamUtilTest {
 		
 		// Call the util class
 		StreamUtil su = new StreamUtil();
-		su.streamReport(ar, response);
+		
+		assertDoesNotThrow(() -> {
+			su.streamReport(ar, response);
+		});
+		
 	}
 }

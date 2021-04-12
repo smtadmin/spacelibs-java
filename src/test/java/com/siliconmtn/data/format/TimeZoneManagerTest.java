@@ -41,7 +41,7 @@ class TimeZoneManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetTimeZoneList() throws Exception {
+	void testGetTimeZoneList() throws Exception {
 		assertEquals(97, TimeZoneManager.getTimeZoneList().size());
 		
 		for (TimeZoneVO tvo : TimeZoneManager.TIME_ZONES.values()) {
@@ -54,7 +54,7 @@ class TimeZoneManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetTimeZone() throws Exception {
+	void testGetTimeZone() throws Exception {
 		assertNull(TimeZoneManager.getTimeZone(null));
 		assertEquals("America/Chicago", TimeZoneManager.getTimeZone("America/Chicago").getId());
 	}
@@ -64,8 +64,8 @@ class TimeZoneManagerTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetTimeZoneByIsoCode() throws Exception {
-		assertNull(TimeZoneManager.getTimeZoneByIsoCode(null));
+	void testGetTimeZoneByIsoCode() throws Exception {
+		assertEquals(0, TimeZoneManager.getTimeZoneByIsoCode(null).size());
 		assertEquals(3, TimeZoneManager.getTimeZoneByIsoCode("MST").size());
 	}
 

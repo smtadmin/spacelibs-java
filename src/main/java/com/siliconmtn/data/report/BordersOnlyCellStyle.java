@@ -8,15 +8,15 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.BorderStyle;
 
 /****************************************************************************
- * <b>Title</b>: BordersOnlyCellStyle.java <p/>
- * <b>Project</b>: SpaceLibs-Java <p/>
+ * <b>Title</b>: BordersOnlyCellStyle.java 
+ * <b>Project</b>: SpaceLibs-Java 
  * <b>Description: </b> Makes a default style were the cells have borders and 
  * columns are expanded.
- * <b>Copyright:</b> Copyright (c) 2021<p/>
- * <b>Company:</b> Silicon Mountain Technologies<p/>
+ * <b>Copyright:</b> Copyright (c) 2021
+ * <b>Company:</b> Silicon Mountain Technologies
  * @author James Camire
  * @version 1.0
- * @since Feb 14, 2021<p/>
+ * @since Feb 14, 2021
  * @updates:
  ****************************************************************************/
 public class BordersOnlyCellStyle extends AbstractExcelCellStyle {

@@ -25,6 +25,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -80,12 +81,12 @@ class ExcelReportTest {
 	/**
 	 * Test method for {@link com.siliconmtn.data.report.ExcelReport#setData(java.lang.Object)}.
 	 */
-	@Test
-	void testSetData() {
-		rpt.setData(null);
-		rpt.setData("Test");
-		rpt.setData(dataSet);
-	}
+//	@Test
+//	void testSetData() {
+//		rpt.setData(null);
+//		rpt.setData("Test");
+//		rpt.setData(dataSet);
+//	}
 	
 	/**
 	 * Test method for {@link com.siliconmtn.data.report.ExcelReport#setFileName(java.lang.String)}.
@@ -132,7 +133,7 @@ class ExcelReportTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testCreateSheet() throws Exception {
+	void testCreateSheet() throws Exception {
 		List<Map<String, Object>> largeData = new ArrayList<>(1024);
 		for (int i=0; i < 800; i++) {
 			largeData.add(getRowData());
@@ -154,7 +155,7 @@ class ExcelReportTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testCreateSheetNoExpand() throws Exception {
+	void testCreateSheetNoExpand() throws Exception {
 		List<Map<String, Object>> largeData = new ArrayList<>(1024);
 		for (int i=0; i < 50; i++) {
 			largeData.add(getRowData());
@@ -176,7 +177,7 @@ class ExcelReportTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetBytes() throws Exception {
+	void testGetBytes() throws Exception {
 		assertNotNull(rpt.getBytes(null));
 		Workbook wb = new HSSFWorkbook();
 		assertEquals(3584, rpt.getBytes(wb).length);
@@ -233,7 +234,7 @@ class ExcelReportTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testSetMaxRowsPerSheet() throws Exception {
+	void testSetMaxRowsPerSheet() throws Exception {
 		rpt.setMaxRowsPerSheet(0);
 		assertEquals(10, rpt.getMaxRowsPerSheet());
 		
@@ -250,7 +251,7 @@ class ExcelReportTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testAttachment() throws Exception {
+	void testAttachment() throws Exception {
 		rpt.setHeaderAttachment(false);
 		assertFalse(rpt.isHeaderAttachment());
 		
@@ -264,7 +265,7 @@ class ExcelReportTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testGetAttributes() throws Exception {
+	void testGetAttributes() throws Exception {
 		Date dob = DateFormat.formatDate(DatePattern.DATE_DASH, "1991-01-01");
 		rpt.addAttribute("NAME", "James");
 		rpt.addAttribute("AGE", 30);
@@ -303,15 +304,45 @@ class ExcelReportTest {
 		
 		return data;
 	}
-
+	
+	/**
+	 * tests the assignment of the body cell type
+	 * @throws Exception
+	 */
 	@Test
-	public void testSetBodyCellStyle() throws Exception {
+	void testSetBodyCellStyle() throws Exception {
 		Workbook wb = rpt.getWorkbook();
 		Sheet s = wb.createSheet();
 		Row row = s.createRow(0);
 		Cell cell = row.createCell(0);
+		
 		rpt.setBodyCellStyle(cell, CellValueType.DATE);
+		assertEquals(164, cell.getCellStyle().getDataFormat());
+		
 		rpt.setBodyCellStyle(cell, CellValueType.TIMESTAMP);
+		assertEquals(164, cell.getCellStyle().getDataFormat());
+		
 		rpt.setBodyCellStyle(cell, CellValueType.STRING);
+		assertEquals(0, cell.getCellStyle().getDataFormat());
+	}
+
+	/**
+	 * Tests the set data method
+	 * @throws Exception
+	 */
+	@Test
+	void testSetData() throws Exception {
+		rpt.setData(null);
+		assertNotNull(rpt.getRowData());
+		
+		rpt.setData("Hello");
+		assertNotNull(rpt.getRowData());
+		
+		Collection<Map<String, Object>> c = new ArrayList<>();
+		Map<String, Object> items = new HashMap<>();
+		items.put("key", "value");
+		c.add(items);
+		rpt.setData(c);
+		assertEquals(1, rpt.getRowData().size());
 	}
 }

@@ -29,11 +29,11 @@ public class TimeZoneVO {
 	}
 	
 	/**
-	 * 
-	 * @param id
-	 * @param name
-	 * @param description
-	 * @param isoCode
+	 * Helper constructor to assign members
+	 * @param id Timezone ID
+	 * @param name Name of the timezone
+	 * @param description Timezone description information
+	 * @param isoCode Timezone ISO code
 	 */
 	public TimeZoneVO(String id, String name, String description, String isoCode) {
 		this();
@@ -53,27 +53,31 @@ public class TimeZoneVO {
 	}
 	
 	/**
-	 * @return the id
+	 * Gets the timezone ISO ID
+	 * @return the timzone ISO id
 	 */
 	public String getId() {
 		return id;
 	}
 
 	/**
-	 * @return the name
+	 * Gets the timezone name
+	 * @return the name of the timezone
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * @return the description
+	 * Gets the timezone decription
+	 * @return the description of the timezone
 	 */
 	public String getDescription() {
 		return description;
 	}
 
 	/**
+	 * Gets the timezone iso code
 	 * @return the isoId
 	 */
 	public String getIsoCode() {
@@ -81,6 +85,7 @@ public class TimeZoneVO {
 	}
 
 	/**
+	 * Sets the timezone ID
 	 * @param id the id to set
 	 */
 	public void setId(String id) {
@@ -88,6 +93,7 @@ public class TimeZoneVO {
 	}
 
 	/**
+	 * Sets the timezone name
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
@@ -95,6 +101,7 @@ public class TimeZoneVO {
 	}
 
 	/**
+	 * Sets the timezone description
 	 * @param description the description to set
 	 */
 	public void setDescription(String description) {
@@ -102,6 +109,7 @@ public class TimeZoneVO {
 	}
 
 	/**
+	 * Sets the timezone ISO code
 	 * @param isoCode the isoId to set
 	 */
 	public void setIsoCode(String isoCode) {

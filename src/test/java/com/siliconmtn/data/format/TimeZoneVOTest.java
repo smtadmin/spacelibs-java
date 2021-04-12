@@ -42,7 +42,7 @@ class TimeZoneVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testTimeZoneVOStringStringStringString() throws Exception {
+	void testTimeZoneVOStringStringStringString() throws Exception {
 		assertEquals("ID", txvo.getId());
 		assertEquals("NAME", txvo.getName());
 		assertEquals("DESC", txvo.getDescription());
@@ -54,7 +54,7 @@ class TimeZoneVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testSetId() throws Exception {
+	void testSetId() throws Exception {
 		txvo.setId("MY_NEW_ID");
 		assertEquals("MY_NEW_ID", txvo.getId());
 	}
@@ -64,7 +64,7 @@ class TimeZoneVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testSetName() throws Exception {
+	void testSetName() throws Exception {
 		txvo.setName("MY_NEW_NM");
 		assertEquals("MY_NEW_NM", txvo.getName());
 	}
@@ -74,7 +74,7 @@ class TimeZoneVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testSetDescription() throws Exception {
+	void testSetDescription() throws Exception {
 		txvo.setDescription("MY_NEW_DESC");
 		assertEquals("MY_NEW_DESC", txvo.getDescription());
 	}
@@ -84,13 +84,13 @@ class TimeZoneVOTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testSetIsoCode() throws Exception {
+	void testSetIsoCode() throws Exception {
 		txvo.setIsoCode("MNIC");
 		assertEquals("MNIC", txvo.getIsoCode());
 	}
 
 	@Test
-	public void testToString() throws Exception {
+	void testToString() throws Exception {
 		assertTrue(txvo.toString().contains("ID"));
 		assertTrue(txvo.toString().contains("NAME"));
 		assertTrue(txvo.toString().contains("DESC"));

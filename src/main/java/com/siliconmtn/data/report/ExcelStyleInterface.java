@@ -5,40 +5,43 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /****************************************************************************
- * <b>Title</b>: ExcelStyleInterface.java <p/>
- * <b>Project</b>: WebCrescendo <p/>
+ * <b>Title</b>: ExcelStyleInterface.java 
+ * <b>Project</b>: WebCrescendo 
  * <b>Description: </b> Style interface to be inherited by concrete styles
- * <p/>
- * <b>Copyright:</b> Copyright (c) 2016<p/>
- * <b>Company:</b> Silicon Mountain Technologies<p/>
+ * 
+ * <b>Copyright:</b> Copyright (c) 2016
+ * <b>Company:</b> Silicon Mountain Technologies
  * @author Ryan Riker
  * @version 2.0
- * @since Sep 9, 2016<p/>
+ * @since Sep 9, 2016
  * @updates:
  ****************************************************************************/
 public interface ExcelStyleInterface {
 
 	/**
 	 * Returns the styles for the excel header row
-	 * @return
+	 * @param wb Workbook to get the styles from
+	 * @return Cellstyle for the provided workbook
 	 */
 	public CellStyle getHeadingStyle(Workbook wb);
 	
 	/**
 	 * Returns the styles for the excel title
-	 * @return
+	 * @param wb Workbook to get the styles from
+	 * @return Cellstyle for the provided workbook
 	 */
 	public CellStyle getTitleStyle(Workbook wb);
 	
 	/**
 	 * Returns the styles for the body title
-	 * @return
+	 * @param wb Workbook to get the styles from
+	 * @return Cellstyle for the provided workbook
 	 */
 	public CellStyle getBodyStyle(Workbook wb);
 	
 	/**
 	 * Defines whether the columns should be expanded by default
-	 * @return
+	 * @return boolean of whether the columns should be expanded
 	 */
 	public boolean getExpandColumnFlag();
 	
@@ -51,19 +54,20 @@ public interface ExcelStyleInterface {
 	
 	/**
 	 * Defines whether the date should be displayed under the title row 
-	 * @return
+	 * @return Whether the date is displayed
 	 */
 	public boolean displayDate();
 	
 	/**
 	 * Sets the flag to display the date on the report header
-	 * @param displayDate
+	 * @param displayDate Sets the display date
 	 */
 	public void setDisplayDate(boolean displayDate);
 
 	/**
-	 * @param wb
-	 * @return
+	 * Style of the date
+	 * @param wb Workbook to get the styles from
+	 * @return Cellstyle for the provided workbook
 	 */
 	public CellStyle getDateStyle(Workbook wb);
 

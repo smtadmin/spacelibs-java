@@ -5,16 +5,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /****************************************************************************
- * <b>Title</b>: NoStyleCellStyle.java <p/>
- * <b>Project</b>: SpaceLibs-Java <p/>
+ * <b>Title</b>: NoStyleCellStyle.java 
+ * <b>Project</b>: SpaceLibs-Java 
  * <b>Description: </b> produces an empty map, this allows the factory to produce
  * an empty style.  
- * <p/>
- * <b>Copyright:</b> Copyright (c) 2016<p/>
- * <b>Company:</b> Silicon Mountain Technologies<p/>
+ * 
+ * <b>Copyright:</b> Copyright (c) 2016
+ * <b>Company:</b> Silicon Mountain Technologies
  * @author James Camire
  * @version 1.0
- * @since Feb 14, 2021<p/>
+ * @since Feb 14, 2021
  * @updates:
  ****************************************************************************/
 public class NoStyleCellStyle extends AbstractExcelCellStyle {

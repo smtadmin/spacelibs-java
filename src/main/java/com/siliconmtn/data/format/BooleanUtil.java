@@ -55,7 +55,15 @@ public class BooleanUtil {
 	
 	/**
 	 * Converts a String into an Boolean. Looks for the following values case
-	 * insensitive:<br/> True<br/> False<br/> Yes<br/> No<br/> Y<br/> N<br/> On<br/> Off <br/>
+	 * insensitive:
+	 * True
+	 * False
+	 * Yes
+	 * No
+	 * Y
+	 * N
+	 * On
+	 * Off
 	 * 
 	 * @param obj String to be converted
 	 * @return boolean value of false if conversion fails

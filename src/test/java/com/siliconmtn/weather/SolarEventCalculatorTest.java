@@ -146,18 +146,18 @@ class SolarEventCalculatorTest {
 	}
 
 	@Test
-	public void testComputeSolarEventTime() throws Exception {
+	void testComputeSolarEventTime() throws Exception {
 		
 		coord = new Coordinate(-39.742043, 104.991531);
 		calc = new SolarEventCalculator(coord, TimeZone.getTimeZone("Africa/Nairobi"));
 		testDate = new GregorianCalendar(1900, 11, 1);
 		calc.computeSolarEventTime(Zenith.ASTRONOMICAL, testDate, true);
 		calc.computeSolarEventTime(Zenith.ASTRONOMICAL, testDate, false);
-		
+		assertEquals(TimeZone.getTimeZone("Africa/Nairobi"), calc.getTimeZone());
 	}
 
 	@Test
-	public void testGetRightAscension() throws Exception {
+	void testGetRightAscension() throws Exception {
 		assertEquals(BigDecimal.valueOf(-1.5521), calc.getRightAscension(BigDecimal.valueOf(-25.1234)));
 		assertEquals(BigDecimal.valueOf(-683.3873), calc.getRightAscension(BigDecimal.valueOf(-10250.0)));
 		assertEquals(BigDecimal.valueOf(0.0611), calc.getRightAscension(BigDecimal.valueOf(.999100009999)));
@@ -166,7 +166,7 @@ class SolarEventCalculatorTest {
 	}
 
 	@Test
-	public void testAdjustForDST() throws Exception {
+	void testAdjustForDST() throws Exception {
 		Calendar cal = calc.getLocalTimeAsCalendar(BigDecimal.valueOf(6.2072), testDate);
 		assertEquals(BigDecimal.valueOf(1.0), calc.adjustForDST(BigDecimal.valueOf(25.0), cal));
 		assertEquals(BigDecimal.valueOf(10.0), calc.adjustForDST(BigDecimal.valueOf(10.0), cal));
@@ -178,7 +178,7 @@ class SolarEventCalculatorTest {
 	}
 
 	@Test
-	public void testGetLocalTimeAsString() throws Exception {
+	void testGetLocalTimeAsString() throws Exception {
 		assertEquals("00:00", calc.getLocalTimeAsString(BigDecimal.ZERO));
 		assertEquals("99:99", calc.getLocalTimeAsString(null));
 		assertEquals("00:07", calc.getLocalTimeAsString(BigDecimal.valueOf(-25.1234)));

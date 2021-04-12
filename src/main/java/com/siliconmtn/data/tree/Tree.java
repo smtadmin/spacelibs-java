@@ -6,23 +6,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-// Apache commons 3.x
-import org.apache.commons.lang3.StringUtils;
-
+// Spacelibs 1.x
 import com.siliconmtn.core.HashCodeUtil;
+import com.siliconmtn.data.text.StringUtil;
 
 /****************************************************************************
- * <b>Title</b>: Tree.java<p/>
+ * <b>Title</b>: Tree.java
  * <b>Description: Builds a Tree structure that can take data input with a parent id
  * and store in a branch and node configuration.  Will export data in a preorder list
  * format for display or other uses
  * </b>  
- * <p/>
- * <b>Copyright:</b> Copyright (c) 2005<p/>
- * <b>Company:</b> Silicon Mountain Technologies<p/>
+ * 
+ * <b>Copyright:</b> Copyright (c) 2005
+ * <b>Company:</b> Silicon Mountain Technologies
  * @author James Camire
  * @version 1.0
- * @since Jan 14, 2021<p/>
+ * @since Jan 14, 2021
  * <b>Changes: </b>
  ****************************************************************************/
 public class Tree implements Serializable {
@@ -102,7 +101,7 @@ public class Tree implements Serializable {
 
 	/**
 	 * for JSTL's "I need a getter" inflexability
-	 * @return
+	 * @return List of nodeds in the preorder format
 	 */
 	public List<Node> getPreorderList() {
 		return preorderList(false);
@@ -139,25 +138,23 @@ public class Tree implements Serializable {
 	/**
 	 * Recursive method that orders the elements in the appropriate order
 	 * This method is stateless; changed to public/static to be usable as a utility.  -JM 05/14/13
-	 * @param nodes
-	 * @param hldr
+	 * @param nodes List of nodes in this tree
+	 * @param hldr List of nodes in preorder form
 	 */
-	public static void createPreorder(List<Node> nodes, List<Node> hldr) {
+	public void createPreorder(List<Node> nodes, List<Node> hldr) {
 		if (!nodes.isEmpty()) {
 			for (Node n : nodes) {
 				hldr.add(n);
 				createPreorder(n.getChildren(), hldr);
 			}
-		} else {
-			return;
 		}
 	}
 
 	/**
 	 * Iterate from the given node through all it's children and set their total
 	 * number of children to be inclusive of 
-	 * @param node
-	 * @return
+	 * @param node Node of this tree
+	 * @return Total children (includes grandchildren)
 	 */
 	public static int calculateTotalChildren(Node node) {
 		if (node == null) return 0;
@@ -166,6 +163,7 @@ public class Tree implements Serializable {
 			total += calculateTotalChildren(n);
 			total++;
 		}
+		
 		node.setTotalChildren(total);
 
 		return total;
@@ -191,7 +189,7 @@ public class Tree implements Serializable {
 		List<Node> removed = new ArrayList<>();
 		for (Node dataNode : data) {
 			for (Node childNode : children) {
-				if (StringUtils.defaultString(dataNode.getParentId()).equalsIgnoreCase(childNode.getNodeId())) {
+				if (StringUtil.defaultString(dataNode.getParentId()).equalsIgnoreCase(childNode.getNodeId())) {
 					// To avoid recursive pointers within the nodes, assign the 
 					// Data node to a new node object. Also assign the 
 					// current depth level
@@ -212,25 +210,28 @@ public class Tree implements Serializable {
 		}
 		// Remove the assigned elements from the data list
 		data.removeAll(removed);
-		if (newChildren.isEmpty()) return;
-		else build(data, newChildren);
+		if (! newChildren.isEmpty()) build(data, newChildren);
 	}
 
 	/**
 	 * Returns the total depth of the tree
-	 * @return
+	 * @return Depth level of the tree
 	 */
 	public int getDepth() { return depth; }
 	
 	/**
 	 * Assigns the root node to the tree
-	 * @param rootNode
+	 * @param rootNode Node to set as the root of the tree
 	 */
 	public void setRootNode(Node rootNode) { this.rootNode = rootNode; }
+	
+	/**
+	 * 
+	 * @return Gets the root node
+	 */
 	public Node getRootNode() {
 		return rootNode;
 	}
-
 
 	/**
 	 * Set the fullPath variable of all nodes in the tree
@@ -244,7 +245,7 @@ public class Tree implements Serializable {
 	/**
 	 * Set the fullPath variable of all nodes in the tree
 	 * using a custom external delimiter
-	 * @param delimiter
+	 * @param delimiter delimiter/character to use in the path
 	 */
 	public void buildNodePaths(String delimiter) {
 		buildNodePaths(rootNode, delimiter, false);
@@ -253,7 +254,7 @@ public class Tree implements Serializable {
 	/**
 	 * Set the fullPath variable of all nodes in the tree
 	 * using a custom external delimiter
-	 * @param delimiter
+	 * @param delimiter delimiter/character to use in the path
 	 * @param useName determines if the name or id of the node is used for the path
 	 */
 	public void buildNodePaths(String delimiter, boolean useName) {
@@ -266,22 +267,22 @@ public class Tree implements Serializable {
 	 * variable for each Node in the Tree, starting from the supplied Node and
 	 * moving downwards.  Pass a boolean usage value if the hierarchy should be
 	 * based off names or nodeIds.
-	 * @param parentNode
-	 * @param delimiter
-	 * @param useName
+	 * @param parentNode Node representing the parent node
+	 * @param delimiter delimiter/character to use in the path
+	 * @param useName Deternmines whether to use the name or id in the path
 	 */
 	public void buildNodePaths(Node parentNode, String delimiter, boolean useName) {
+		if (StringUtil.isEmpty(parentNode.getFullPath())) parentNode.setFullPath(delimiter);
+		
 		for (Node child : parentNode.getChildren()) {
 			StringBuilder path = new StringBuilder(50);
-			if (parentNode.getFullPath() != null) path.append(parentNode.getFullPath());
-			if (path.length() > 0) path.append(delimiter);
-			if(useName) {
-				if (child.getNodeName() != null) path.append(child.getNodeName());
-			} else {
-				if (child.getNodeId() != null) path.append(child.getNodeId());
-			}
-			if (path.length() > 0) child.setFullPath(path.toString());
+			child.setFullPath(child.getFullPath().replace("null", ""));
 
+			if (StringUtil.isEmpty(child.getFullPath())) path.append(parentNode.getFullPath());
+			path.append(child.getFullPath());
+			path.append(useName && !StringUtil.isEmpty(child.getNodeName()) ? child.getNodeName() : child.getNodeId());
+
+			child.setFullPath(path.toString());
 			buildNodePaths(child, delimiter, useName);
 		}
 	}

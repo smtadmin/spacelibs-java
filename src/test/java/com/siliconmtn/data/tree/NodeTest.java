@@ -205,20 +205,20 @@ class NodeTest {
 	 */
 	@Test
 	void testEqualsObject() {
-		assertTrue(rootNode.equals(rootNode));
-		assertFalse(rootNode.equals(childNode));
+		assertEquals(rootNode, rootNode);
+		assertNotEquals(rootNode, childNode);
 		
 		rootNode.setNodeId(null);
-		assertFalse(rootNode.equals(childNode));
+		assertNotEquals(rootNode, childNode);
 		
 		Object o = new Object();
-		assertFalse(rootNode.equals(o));
-		assertFalse(rootNode.equals(null));
-		assertFalse(childNode.equals(new Node()));
+		assertNotEquals(rootNode, o);
+		assertNotEquals(null, rootNode);
+		assertNotEquals(childNode, new Node());
 		
 		Node n = new Node("one", "two", "three");
 		Node n1 = new Node("one", "two");
-		assertTrue(n.equals(n1));
+		assertEquals(n, n1);
 	}
 
 	/**
@@ -330,12 +330,24 @@ class NodeTest {
 	 * Test method for {@link com.smt.data.tree.Node#(java.lang.String, java.lang.String, java.lang.Object)}.
 	 */
 	@Test
-	public void testNodeStringStringObject() throws Exception {
+	void testNodeStringStringObject() throws Exception {
 		Object o = new Object();
 		Node n = new Node("one", "two", o);
 		assertEquals("one", n.getNodeId());
 		assertEquals("two", n.getParentId());
 		assertEquals(o, n.getUserObject());
+	}
+
+	@Test
+	void testEquals() throws Exception {
+		boolean isEqual = rootNode.equals(null);
+		assertFalse(isEqual);
+		
+		assertNotEquals(childNode, rootNode);
+		assertEquals(rootNode, rootNode);
+		
+		isEqual = rootNode.equals(null);
+		assertFalse(isEqual);
 	}
 
 }

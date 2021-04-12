@@ -1,12 +1,13 @@
 package com.siliconmtn.core;
 
 // Junit 5
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // JDK 11.x
 import java.util.Arrays;
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 /****************************************************************************
  * <b>Title</b>: HashCodeUtilTest.java
@@ -27,8 +28,9 @@ class HashCodeUtilTest {
 	 */
 	@Test
 	void testHashBoolean() {
-		assertEquals(HashCodeUtil.hash(true), 852);
-		assertEquals(HashCodeUtil.hash(false), 851);
+		
+		assertEquals(852, HashCodeUtil.hash(true));
+		assertEquals(851, HashCodeUtil.hash(false));
 	}
 
 	/**
@@ -36,8 +38,8 @@ class HashCodeUtilTest {
 	 */
 	@Test
 	void testHashChar() {
-		assertEquals(HashCodeUtil.hash('c'), 950);
-		assertEquals(HashCodeUtil.hash('%'), 888);
+		assertEquals(950,HashCodeUtil.hash('c'));
+		assertEquals(888, HashCodeUtil.hash('%'));
 	}
 
 	/**
@@ -45,9 +47,9 @@ class HashCodeUtilTest {
 	 */
 	@Test
 	void testHashInt() {
-		assertEquals(HashCodeUtil.hash(24567), 25418);
-		assertEquals(HashCodeUtil.hash(0), 851);
-		assertEquals(HashCodeUtil.hash(-128), 723);
+		assertEquals(25418, HashCodeUtil.hash(24567));
+		assertEquals(851, HashCodeUtil.hash(0));
+		assertEquals(723, HashCodeUtil.hash(-128));
 	}
 
 	/**
@@ -55,8 +57,8 @@ class HashCodeUtilTest {
 	 */
 	@Test
 	void testHashFloat() {
-		assertEquals(HashCodeUtil.hash(12.32f), 785);
-		assertEquals(HashCodeUtil.hash(-1.123f), 975);
+		assertEquals(785, HashCodeUtil.hash(12.32f));
+		assertEquals(975, HashCodeUtil.hash(-1.123f));
 	}
 
 	/**
@@ -64,8 +66,8 @@ class HashCodeUtilTest {
 	 */
 	@Test
 	void testHashDouble() {
-		assertEquals(HashCodeUtil.hash(12.32), 1333);
-		assertEquals(HashCodeUtil.hash(-1.123), 1393);
+		assertEquals(1333, HashCodeUtil.hash(12.32));
+		assertEquals(1393, HashCodeUtil.hash(-1.123));
 	}
 
 	/**
@@ -76,10 +78,10 @@ class HashCodeUtilTest {
 		String[] data = new String[] {"one", "two", "three"};
 		List<String> list = Arrays.asList(data);
 		
-		assertEquals(HashCodeUtil.hash(data), 1204);
-		assertEquals(HashCodeUtil.hash("Hello World"), 1052);
-		assertEquals(HashCodeUtil.hash(list), 1540);
-		assertEquals(HashCodeUtil.hash(null), 0);
+		assertEquals(1204, HashCodeUtil.hash(data));
+		assertEquals(1052, HashCodeUtil.hash("Hello World"));
+		assertEquals(1540, HashCodeUtil.hash(list));
+		assertEquals(0, HashCodeUtil.hash(null));
 	}
 
 }

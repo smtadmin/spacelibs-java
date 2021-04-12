@@ -10,13 +10,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /****************************************************************************
- * <b>Title</b>: AbstractReport.java<p/>
+ * <b>Title</b>: AbstractReport.java
  * <b>Project</b> SpaceLibs-java
  * <b>Description: Abstract and commonality across any downloadable report we
  *  might generate.</b> 
- * <p/>
- * <b>Copyright:</b> Copyright (c) 2021<p/>
- * <b>Company:</b> Silicon Mountain Technologies<p/>
+ * 
+ * <b>Copyright:</b> Copyright (c) 2021
+ * <b>Company:</b> Silicon Mountain Technologies
  * @author James Camire
  * @version 1.0
  * @since Feb 14, 2021
@@ -28,13 +28,15 @@ public abstract class AbstractReport implements Serializable {
 	protected String contentType = null;
 	protected String fileName = null;
 	protected boolean isAttachment = false;
-	protected Map<String, Object> attributes = new LinkedHashMap<>();
+	protected transient Map<String, Object> attributes = new LinkedHashMap<>();
 	
 	
 	/**
 	 * method called by PageBuilderServlet to write the report into the response object.
 	 * must be overwritten by all implementing classes.
 	 * must always return a byte array
+	 * @return byte array of the generated report
+	 * @throws IOException Error creating the report object
 	 */
 	public abstract byte[] generateReport() throws IOException;
 	
@@ -49,7 +51,7 @@ public abstract class AbstractReport implements Serializable {
 	/**
 	 * Each report will set it's content type so when it is being streamed back
 	 * to the user, the proper type can be set in the stream
-	 * @return
+	 * @return String representation of the content type
 	 */
 	public String getContentType() {
 		return this.contentType;
@@ -69,7 +71,7 @@ public abstract class AbstractReport implements Serializable {
 	
 	/**
 	 * Returns the name of the report file
-	 * @return
+	 * @return name of the file to be created
 	 */
 	public String getFileName() {
 		return fileName;
@@ -86,7 +88,7 @@ public abstract class AbstractReport implements Serializable {
 	
 	/**
 	 * Sets the header attachment, which is used when streaming a file to the browser
-	 * @param b
+	 * @param b assigns whether the report is set as a header attachment
 	 */
 	public void setHeaderAttachment(boolean b) {
 		isAttachment = b;
@@ -94,7 +96,7 @@ public abstract class AbstractReport implements Serializable {
 	
 	/**
 	 * Gets the header attachment, which is used when streaming a file to the browser
-	 * @return
+	 * @return Whether or not report is an attachment
 	 */
 	public boolean isHeaderAttachment() {
 		return isAttachment;
@@ -102,15 +104,15 @@ public abstract class AbstractReport implements Serializable {
 	
 	/**
 	 * Gets the attribute by the provided key
-	 * @return
+	 * @return Gets all attributes of this report
 	 */
-	public Map<String,?> getAttributes() {
+	public Map<String,Object> getAttributes() {
 		return attributes;
 	}
 
 	/**
 	 * Overwrites the existing attributes with the new map
-	 * @param attributes
+	 * @param attributes Sets the attributes of the report
 	 */
 	public void setAttributes(Map<String, ?> attributes) {
 		if (attributes == null) {
@@ -122,8 +124,8 @@ public abstract class AbstractReport implements Serializable {
 	
 	/**
 	 * Adds an element to the attribute map
-	 * @param key
-	 * @param value
+	 * @param key Unique keyfor adding to the attributes
+	 * @param value Value to add to the attribute key
 	 */
 	public void addAttribute(String key, Object value) {
 		attributes.put(key, value);

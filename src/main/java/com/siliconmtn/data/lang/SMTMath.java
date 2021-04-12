@@ -27,8 +27,8 @@ public class SMTMath {
 
 	/**
 	 * Calculates the Arc Cosine for the given value
-	 * @param radians
-	 * @return
+	 * @param radians Decimal value 
+	 * @return Arccosine for the provided radians
 	 */
     public static BigDecimal getArcCosineFor(BigDecimal radians) {
         BigDecimal arcCosine = BigDecimal.valueOf(Math.acos(radians.doubleValue()));
@@ -37,8 +37,8 @@ public class SMTMath {
 
     /**
      * Converts Radians to degrees
-     * @param radians
-     * @return
+     * @param radians Unit for measuring angles
+     * @return degrees of the radian
      */
     public static  BigDecimal convertRadiansToDegrees(BigDecimal radians) {
         return multiplyBy(radians, BigDecimal.valueOf(180 / Math.PI));
@@ -46,8 +46,8 @@ public class SMTMath {
 
     /**
      * Converts degrees to radians
-     * @param degrees
-     * @return
+     * @param degrees Degrees to be converted
+     * @return Unit for measuring angles from degrees
      */
     public static BigDecimal convertDegreesToRadians(BigDecimal degrees) {
         return multiplyBy(degrees, BigDecimal.valueOf(Math.PI / 180.0));
@@ -55,9 +55,9 @@ public class SMTMath {
 
     /**
      * BigDecimal multiplication with rounding to 4 digits
-     * @param multiplicand
-     * @param multiplier
-     * @return
+     * @param multiplicand value to be multiplied
+     * @param multiplier value to by multiplied by
+     * @return multiplied value
      */
     public static  BigDecimal multiplyBy(BigDecimal multiplicand, BigDecimal multiplier) {
         return multiplicand.multiply(multiplier).setScale(4, RoundingMode.HALF_EVEN);
@@ -65,9 +65,9 @@ public class SMTMath {
 
     /**
      * BigDecimal division with rounding to 4 digits
-     * @param dividend
-     * @param divisor
-     * @return
+     * @param dividend value to be divided
+     * @param divisor value to be divided by
+     * @return divided value
      */
     public static  BigDecimal divideBy(BigDecimal dividend, BigDecimal divisor) {
     	if (divisor == null || divisor.intValue() == 0) return BigDecimal.valueOf(0.0);

@@ -11,9 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-// Apache commons 3.x
-import org.apache.commons.lang3.StringUtils;
-
 // Apache POI 3.13
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -30,16 +27,17 @@ import com.siliconmtn.data.format.DateFormat;
 import com.siliconmtn.data.format.NumberUtil;
 import com.siliconmtn.data.format.DateFormat.DatePattern;
 import com.siliconmtn.data.report.ExcelStyleFactory.Styles;
+import com.siliconmtn.data.text.StringUtil;
 
 /****************************************************************************
- * <b>Title</b>: ExcelReport.java<p/>
- * <b>Project</b>: SpaceLibs-Java<p/>
+ * <b>Title</b>: ExcelReport.java
+ * <b>Project</b>: SpaceLibs-Java
  * <b>Description: takes a passed map of data and builds an Excel file dynamically.
  * The constructor takes the headerMap, which is used for column headings and 
  * to align the rows (responses).</b> 
- * <p/>
- * <b>Copyright:</b> Copyright (c) 2021<p/>
- * <b>Company:</b> Silicon Mountain Technologies<p/>
+ * 
+ * <b>Copyright:</b> Copyright (c) 2021
+ * <b>Company:</b> Silicon Mountain Technologies
  * @author James Camire
  * @version 1.0
  * @since Feb 14, 2021
@@ -77,7 +75,7 @@ public class ExcelReport extends AbstractReport {
 
 	/**
 	 * Constructor utilizes the NoStyle formatting
-	 * @param headerMap
+	 * @param headerMap Assigns a map with various report styles
 	 */
 	public ExcelReport(Map<String, String> headerMap) {
 		this(headerMap, ExcelStyleFactory.getExcelStyle(Styles.NO_STYLE));
@@ -85,7 +83,8 @@ public class ExcelReport extends AbstractReport {
 	
 	/**
 	 * Constructor utilizes the NoStyle formatting
-	 * @param headerMap
+	 * @param headerMap  Assigns a map with various report style
+	 * @param s Style map to utilize
 	 */
 	public ExcelReport(Map<String, String> headerMap, Styles s) {
 		this(headerMap, ExcelStyleFactory.getExcelStyle(s));
@@ -94,7 +93,7 @@ public class ExcelReport extends AbstractReport {
 	/**
 	 * Excel report using the provided style
 	 * @param headerMap Map of the id and name for each column heading
-	 * @param style
+	 * @param style Style map to utilize
 	 */
 	public ExcelReport(Map<String, String> headerMap, ExcelStyleInterface style) {
 		super();
@@ -122,8 +121,10 @@ public class ExcelReport extends AbstractReport {
 
 	/**
 	 * Create a sheet in the Workbook using the passed args
-	 * @param title
-	 * @param header
+	 * @param sheetName Name of the sheet
+	 * @param title Sheet title
+	 * @param header Header style map
+	 * @param rows Row data for the sheet
 	 */
 	protected void createSheet(String sheetName, String title,Map<String, String> header, Collection<Map<String, Object>> rows) {
 		Sheet s = buildSheet(sheetName, title, header);
@@ -149,11 +150,15 @@ public class ExcelReport extends AbstractReport {
 		resizeSheetColumns(s, header, rows.size());
 	}
 	
-	/*
+	/**
 	 * 	Making the cell more readable by expanding the cell widths. NOTE: This 
 	 *  column resizing can be very costly on larger reports. Calculate a cost
 	 *  based on rows*columns, and don't resize columns on larger reports.  
 	 *  An 8500-row report was taking 14s to resize!
+	 * @param s Sheet to resize
+	 * @param header Header map for the sheet
+	 * @param rowCount number of rows.  Used to determine the cost as resizing 
+	 * takes a considerable amount of time
 	 */
 	protected void resizeSheetColumns(Sheet s, Map<String, String> header, int rowCount) {
 		int cost = rowCount * s.getLastRowNum();
@@ -167,20 +172,20 @@ public class ExcelReport extends AbstractReport {
 	/**
 	 * Manage creating a sheet for the workbook.
 	 * Will generate header row at the top of the sheet.
-	 * @param sheetName
-	 * @param title
-	 * @param header
-	 * @return
+	 * @param sheetName Name of the sheet
+	 * @param title Title of the sheet
+	 * @param header Sheet header styles and info
+	 * @return Excel sheet with the header and title
 	 */
 	private Sheet buildSheet(String sheetName, String title, Map<String, String> header) {
 		//Create Excel Sheet inside the Workbook
 		Sheet s = wb.createSheet();
 
 		//name the sheet if desired
-		if (!StringUtils.isEmpty(sheetName)) wb.setSheetName(wb.getSheetIndex(s), sheetName);
+		if (!StringUtil.isEmpty(sheetName)) wb.setSheetName(wb.getSheetIndex(s), sheetName);
 
 		//if requested add title row
-		if (!StringUtils.isEmpty(title)) addTitleCell(s, title, header.keySet().size());
+		if (!StringUtil.isEmpty(title)) addTitleCell(s, title, header.keySet().size());
 
 		// if requested, add current date
 		if (displayDate) addDateRow(s, header.keySet().size());
@@ -193,8 +198,8 @@ public class ExcelReport extends AbstractReport {
 
 	/**
 	 * Adds the header row to the excel spreadsheet
-	 * @param s
-	 * @param header
+	 * @param s Excel sheet to update
+	 * @param header Header styles and info to update
 	 */
 	protected void addHeaderRow(Sheet s, Map<String, String> header) {
 		Row row = s.createRow(s.getPhysicalNumberOfRows());
@@ -210,11 +215,9 @@ public class ExcelReport extends AbstractReport {
 
 	/**
 	 * iterates the row data and creates a Row on the Sheet for each one
-	 * @param s
-	 * @param row
-	 * @param lineData
-	 * @param rowCnt
-	 * @param header
+	 * @param row Excel row object on a given sheet
+	 * @param lineData Data to addd to the row
+	 * @param header Header map to assign the data elements to the proper column
 	 */
 	private void addRowData(Row row, Map<String, Object> lineData, Map<String, String> header) {
 		//loop across the headerMap and find the matching value for each column
@@ -247,7 +250,9 @@ public class ExcelReport extends AbstractReport {
 
 	/**
 	 * This method adds a cell to the top of the report with the title string info inside it
-	 * @param s
+	 * @param s Excel sheet to add the title
+	 * @param title Title verbiage to be added
+	 * @param headerMapSize size of the header map (merging columns)
 	 */
 	protected void addTitleCell(Sheet s,String title, int headerMapSize) {
 		Row r = s.createRow(s.getPhysicalNumberOfRows());
@@ -271,10 +276,19 @@ public class ExcelReport extends AbstractReport {
 		else if (rows instanceof Collection)
 			this.rowData = (Collection<Map<String, Object>>) rows;
 	}
+	
+	/**
+	 * Gets the row data passed in
+	 * @return Collection of maps
+	 */
+	public Collection<Map<String, Object>> getRowData() {
+		return rowData;
+	}
 
 	/**
 	 * This method adds a cell to the top of the report with the title string info inside it
-	 * @param s
+	 * @param s Excel sheet to add the date row
+	 * @param headerMapSize size of the header map (merging columns)
 	 */
 	protected void addDateRow(Sheet s, int headerMapSize) {
 		int numRows = s.getPhysicalNumberOfRows();
@@ -300,7 +314,7 @@ public class ExcelReport extends AbstractReport {
 	
 	/**
 	 * Returns the title of the Report
-	 * @return
+	 * @return Title of the report
 	 */
 	public String getTitle() {
 		return this.titleText;
@@ -310,8 +324,9 @@ public class ExcelReport extends AbstractReport {
 	 * static helper method reusable by all Excel reports - turns a POI Workbook
 	 * into a byte[] to be streamed back to the client.
 	 * This is public because it's static; 3rd party classes can use it to serialize custom-build Workbooks.
-	 * @param wb
-	 * @return
+	 * @param wb Excel workbook
+	 * @return byte array of the workbook
+	 * @throws IOException is thrown converting form the workbook toa  byte array
 	 */
 	public byte[] getBytes(Workbook wb) throws IOException {
 		if (wb == null) return new byte[0];
@@ -335,13 +350,14 @@ public class ExcelReport extends AbstractReport {
 	 * Determines the cell type based upon the cell data and sets cell value appropriately
 	 * @param value Value to store in the cell
 	 * @param c XSSF cell object
+	 * @return Cell or data type of the value
 	 */
 	public CellValueType setCellValue(Object value, Cell c) {
 		CellValueType cvt = CellValueType.STRING;
 		if (value == null) value = "";
 
 		// Determines the type of data nd csts it into the cell
-		if (Pattern.matches("^[+-]?(?:\\d*\\.)?\\d+$", value.toString())) {
+		if (Pattern.matches("^[+-]?\\d*\\.?\\d+$", value.toString())) {
 			Number num = NumberUtil.getNumber(value.toString());
 			if (num instanceof Long) {
 				c.setCellValue(num.longValue());
@@ -368,7 +384,7 @@ public class ExcelReport extends AbstractReport {
 				c.setCellValue(d);
 				cvt = CellValueType.DATE;
 			} else {
-				c.setCellValue(StringUtils.defaultString(value.toString()));
+				c.setCellValue(StringUtil.defaultString(value.toString()));
 			}
 		}
 		
@@ -378,7 +394,7 @@ public class ExcelReport extends AbstractReport {
 	/**
 	 * Sets the max rows per sheet up to the maximum value for Excel.  If greater,
 	 * max is reduced to the max allowable.  A minimum of 10 rows per sheet
-	 * @param max
+	 * @param max max rows per sheet.  Must be less than the MAX_ROWS_PER_SHEET value
 	 */
 	public void setMaxRowsPerSheet(int max) {
 		max = max < 10 ? 10 : max;
@@ -387,7 +403,7 @@ public class ExcelReport extends AbstractReport {
 	
 	/**
 	 * Retrieves the valueof the max rows per sheet
-	 * @return
+	 * @return max muber of rows per sheet
 	 */
 	public int getMaxRowsPerSheet() {
 		return maxRowsPerSheet;
@@ -395,7 +411,7 @@ public class ExcelReport extends AbstractReport {
 	
 	/**
 	 * Returns the workbook
-	 * @return
+	 * @return Retreives the workbook created by this report
 	 */
 	public Workbook getWorkbook() {
 		return wb;

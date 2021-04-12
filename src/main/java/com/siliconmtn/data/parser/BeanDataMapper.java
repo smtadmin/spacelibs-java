@@ -18,13 +18,14 @@ import org.apache.commons.beanutils.converters.DateTimeConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+// Space Libs 1.x
 import com.siliconmtn.data.util.EnumUtil;
 
 /********************************************************************
- * <b>Title: </b>BeanDataMapper.java<br/>
+ * <b>Title: </b>BeanDataMapper.java
  * <b>Description: </b>Parses out the bean setters and assigns the values based upon
- * the data map passed into the class <br/>
- * <b>Copyright: </b>Copyright (c) 2016<br/>
+ * the data map passed into the class 
+ * <b>Copyright: </b>Copyright (c) 2016
  * <b>Company: </b>Silicon Mountain Technologies
  * @author james
  * @version 3.x
@@ -39,7 +40,6 @@ public final class BeanDataMapper {
 	static {
 		// Bean utils requires that the date formats be set into the class
 		dtConverter = new DateConverter();
-		//dtConverter.setPatterns(Convert.loadDatePatterns());
 		ConvertUtils.register(dtConverter, Date.class);
 	}
 
@@ -56,56 +56,67 @@ public final class BeanDataMapper {
 	 * fields into the bean's member variables
 	 * @param o Java Bean
 	 * @param data Data to be mapped into the bean
+	 * @param suffix Suffix added in the UI for parsing purposes
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void parseBean(Object o, Map<String, String[]> data, String suffix) {
-
+		
 		for (Method m : o.getClass().getMethods()) {
-			// Get the setters
-			if (! m.getName().startsWith("set")) continue;
-
-			// Parse out the set out of the method name and lowercase the first letter
-			String fieldName = m.getName().substring(3);
-			fieldName = Character.toLowerCase(fieldName.charAt(0)) + fieldName.substring(1);
-
-			//Create a Request FieldName with the passed Suffix.
-			String reqFieldName = fieldName + suffix;
-			
-			//Lookup FieldValue using reqFieldName instead.
-			Object fieldValue = data.get(reqFieldName);
-			if (fieldValue == null) continue;
-			
-			// If the array of values is larger than 1, convert it to a List instead
-			fieldValue = getBeanArrayValue(fieldValue, m);
-
-			// Make sure the type is not an enum.  If so, convert it to the proper
-			// Class type
-			if (m.getParameterTypes()[0].isEnum()) {
+			if (m.getName().startsWith("set")) {
+				// Parse out the set out of the method name and lowercase the first letter
+				String fieldName = m.getName().substring(3);
+				fieldName = Character.toLowerCase(fieldName.charAt(0)) + fieldName.substring(1);
+	
+				//Create a Request FieldName with the passed Suffix.
+				String reqFieldName = fieldName + suffix;
+				
+				//Lookup FieldValue using reqFieldName instead.
+				Object fieldValue = data.get(reqFieldName);
+				if (fieldValue == null) continue;
+				
+				// If the array of values is larger than 1, convert it to a List instead
+				fieldValue = getBeanArrayValue(fieldValue, m);
+	
+				// Check the enum values
+				fieldValue = checkEnum(fieldValue, m);
+	
+				// Assign value to the class
 				try {
-					fieldValue = EnumUtil.safeValueOf((Class<Enum>) Class.forName(m.getParameterTypes()[0].getName()), fieldValue.toString());
-				} catch(ClassNotFoundException cnfe) { /* Nothing to do */ }
-			}
-
-			// Assign value to the class
-			try {
-				BeanUtils.setProperty(o, fieldName, fieldValue);
-			} catch (Exception e) {
-				// Typically this is circumstantial (missing or uncastable data), not an error.
-				// We don't print the exception stack here - it's just noise in the logs.
-				// This exception is thrown when you pass a blank to a Date field (one scenario).
-				// log level changed to debug. -JM- 04/03/18
-				log.error(String.format("Unable to parse data for %s=%s (%s)", fieldName, fieldValue, e.getMessage()));
+					BeanUtils.setProperty(o, fieldName, fieldValue);
+				} catch (Exception e) {
+					// Typically this is circumstantial (missing or uncastable data), not an error.
+					// We don't print the exception stack here - it's just noise in the logs.
+					// This exception is thrown when you pass a blank to a Date field (one scenario).
+					// log level changed to debug. -JM- 04/03/18
+					log.error(String.format("Unable to parse data for %s=%s (%s)", fieldName, fieldValue, e.getMessage()));
+				}
 			}
 		}
+	}
+	
+	/**
+	 * Checks for an enum and assigns it
+	 * @param fieldValue Value to be converted to an enum
+	 * @param m Method to assign the enum
+	 * @return fieldValue as an enum.  Original value otherwise
+	 */
+	protected static Object checkEnum(Object fieldValue, Method m) {
+		
+		// Make sure the type is not an enum.  If so, convert it to the proper
+		// Class type
+		if (m.getParameterTypes()[0].isEnum()) {
+			String name = m.getParameterTypes()[0].getName();
+			fieldValue = EnumUtil.safeValueOf(name, fieldValue.toString());
+		}
+		
+		return fieldValue;
 	}
 
 
 	/**
 	 * Gets the field value when the setter is an array
-	 * @param fieldValue
-	 * @param m
-	 * @param dtConverter 
-	 * @return
+	 * @param fieldValue value of the field
+	 * @param m Method to assign the value
+	 * @return List of values in the field value
 	 */
 	static Object getBeanArrayValue(Object fieldValue, Method m) {
 
@@ -126,24 +137,23 @@ public final class BeanDataMapper {
 	 * @param cls Generic type of the list.  Used to convert the data from a String / Object
 	 * to the appropriate type.
 	 * @param data Data to add to the List
-	 * @return
+	 * @return Collection of objects formt he array of values
 	 */
-	protected static List<?> createList(Class<?> cls, Object[] data) {
+	protected static List<Object> createList(Class<?> cls, Object[] data) {
 		// Create the converter and register the date converter
 		ConvertUtilsBean cub = new ConvertUtilsBean();
 		cub.register(dtConverter, Date.class);
 
 		// Loop the items in the array and convert data types and add to list
 		List<Object> coll = new ArrayList<>();
-		try {
-			for (Object o : data) {
-				Object entry = cub.convert(o, cls);
 
-				// Make sure the class types are compatible
-				if (entry.getClass().isAssignableFrom(cls))
-					coll.add(entry);
-			}
-		} catch (Exception e) { /* Nothing to do */ }
+		for (Object o : data) {
+			Object entry = cub.convert(o, cls);
+
+			// Make sure the class types are compatible
+			if (entry.getClass().isAssignableFrom(cls))
+				coll.add(entry);
+		}
 
 		return coll;
 	}

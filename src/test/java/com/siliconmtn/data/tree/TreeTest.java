@@ -33,6 +33,7 @@ class TreeTest {
 	@BeforeEach
 	void setUpBeforeEach() throws Exception {
 		root = new Node("root_node_id", null);
+		root.setNodeName("Root Node");
 		Node firstChild = new Node("child_node_1", "root_node_id");
 		Node secondChild = new Node("child_node_2", "root_node_id");
 		Node firstFirstChild = new Node("child_node_3", "child_node_1");
@@ -49,7 +50,7 @@ class TreeTest {
 	@Test
 	void testHashCode() {
 		Tree t = new Tree(nodes, root);
-		assertEquals(90184, t.hashCode());	
+		assertEquals(91381, t.hashCode());	
 		
 		t = new Tree(nodes, null);
 		assertEquals(21254, t.hashCode());
@@ -112,7 +113,10 @@ class TreeTest {
 	 */
 	@Test
 	void testCreatePreorder() {
-		Tree.createPreorder(nodes, new ArrayList<Node>());
+		Tree t = new Tree(nodes, root);
+		//t.createPreorder(nodes, new ArrayList<Node>());
+		assertEquals(3, t.preorderList(root).size());
+		
 	}
 
 	/**
@@ -156,9 +160,14 @@ class TreeTest {
 	@Test
 	void testBuildNodePaths() {
 		Node firstChild = new Node("child_node_1", "root_node_id");
+		firstChild.setNodeName("first child");
+		
 		Node secondChild = new Node("child_node_2", "root_node_id");
 		secondChild.setNodeName("my second child");
+		
 		Node firstFirstChild = new Node("child_node_3", "child_node_1");
+		firstFirstChild.setNodeName("first first child");
+		
 		firstChild.addChild(secondChild);
 		secondChild.addChild(firstFirstChild);
 		
@@ -166,11 +175,18 @@ class TreeTest {
 		pathNodes.add(firstChild);
 		
 		Tree t = new Tree(pathNodes, root);
-		t.buildNodePaths();
+		t.buildNodePaths(root, "/", true);
+		System.out.println(firstFirstChild.getFullPath());
+		assertEquals(2, firstFirstChild.getDepthLevel());
 		
+		t = new Tree(nodes, root);
+		t.buildNodePaths("/", true);
+		
+		assertEquals(1, secondChild.getDepthLevel());
 		
 		t = new Tree(nodes, root);
 		t.buildNodePaths();
+		assertEquals(1, secondChild.getDepthLevel());		
 	}
 
 	/**
@@ -180,6 +196,7 @@ class TreeTest {
 	void testBuildNodePathsString() {
 		Tree t = new Tree(nodes, root);
 		t.buildNodePaths("/");
+		assertEquals(2, root.getNumberChildren());
 	}
 
 	/**
@@ -192,6 +209,7 @@ class TreeTest {
 		Tree t = new Tree(nodes, root);
 		t.buildNodePaths("/", true);
 		t.buildNodePaths("/", false);
+		assertEquals(0, nodes.get(0).getDepthLevel());
 	}
 
 	/**
@@ -216,6 +234,7 @@ class TreeTest {
 		Tree t = new Tree(pathNodes, root);
 		t.buildNodePaths(firstChild, "/", true);
 		t.buildNodePaths(firstChild, "/", false);
+		assertEquals(2, firstFirstChild.getDepthLevel());
 	}
 
 	/**
@@ -224,7 +243,18 @@ class TreeTest {
 	@Test
 	void testEqualsObject() {
 		Tree t = new Tree(nodes, root);
-		assertFalse(t.equals(null));
+		assertNotNull(t);
+	}
+
+	/**
+	 * Tests the equals method
+	 * @throws Exception
+	 */
+	@Test
+	void testEquals() throws Exception {
+		Tree t = new Tree(nodes);
+		boolean isEqual = t.equals(null);
+		assertFalse(isEqual);
 	}
 
 }

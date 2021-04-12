@@ -42,7 +42,7 @@ class NoStyleCellStyleTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testSetDisplayDate() throws Exception {
+	void testSetDisplayDate() throws Exception {
 		NoStyleCellStyle ncs = new NoStyleCellStyle();
 		ncs.setDisplayDate(false);
 		assertFalse(ncs.displayDate);

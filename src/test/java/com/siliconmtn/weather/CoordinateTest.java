@@ -19,7 +19,7 @@ import java.math.BigDecimal;
  * @since Jan 22, 2021
  * @updates:
  ****************************************************************************/
-public class CoordinateTest {
+class CoordinateTest {
 
 	/**
 	 * Test method for {@link com.siliconmtn.weather.Coordinate#Coordinate(java.lang.String, java.lang.String)}.

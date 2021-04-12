@@ -36,8 +36,8 @@ public class GenericVO implements Serializable, Comparable<GenericVO> {
 	
 	/**
 	 * Assigns key and value to the bean
-	 * @param key
-	 * @param value
+	 * @param key Key for this bean
+	 * @param value Stored value for the associated key
 	 */
 	public GenericVO(Serializable key, Serializable value) {
 		this();
@@ -61,6 +61,7 @@ public class GenericVO implements Serializable, Comparable<GenericVO> {
 	}
 
 	/**
+	 * Sets the key object (Must be serializable)
 	 * @param key the key to set
 	 */
 	public void setKey(Serializable key) {
@@ -68,6 +69,7 @@ public class GenericVO implements Serializable, Comparable<GenericVO> {
 	}
 
 	/**
+	 * Gets the value object
 	 * @return the value
 	 */
 	public Object getValue() {
@@ -75,6 +77,7 @@ public class GenericVO implements Serializable, Comparable<GenericVO> {
 	}
 
 	/**
+	 * Sets the value object (Must be serializable)
 	 * @param value the value to set
 	 */
 	public void setValue(Serializable value) {

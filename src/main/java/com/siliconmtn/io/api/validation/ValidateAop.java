@@ -61,12 +61,11 @@ public class ValidateAop {
 	public void beforeAdvice(JoinPoint pjp, Object body, Object pathVar) throws EndpointRequestException {
 		Method m = MethodSignature.class.cast(pjp.getSignature()).getMethod();
 		Validate validate = m.getAnnotation(Validate.class);
-		System.out.println(validate+"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 
 		if (validate != null) {
 			Map<AttributeKey, Object> attributes = new EnumMap<>(AttributeKey.class);
 			attributes.put(AttributeKey.PATH_VAR, pathVar);
-System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
 			List<ValidationErrorDTO> errors = validateReponse(body, attributes,
 					m.getDeclaringClass().getName() + "." + m.getName());
 			if (! errors.isEmpty()) {
@@ -93,7 +92,6 @@ System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 		List<ValidationDTO> fields;
 		try {
-			System.out.println(key);
 			ParserIntfc parser = pFact.parserDispatcher(key, attributes);
 
 			if (parser == null)

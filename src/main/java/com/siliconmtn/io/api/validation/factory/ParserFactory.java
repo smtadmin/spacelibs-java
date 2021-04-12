@@ -57,8 +57,7 @@ public class ParserFactory {
 	 */
 	public ParserIntfc parserDispatcher(String beanName, Map<AttributeKey, Object> attributes)
             throws EndpointRequestException {
-    	System.out.println(beanName+"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-        String parserClassName = builderMapper.get(beanName);
+    	String parserClassName = builderMapper.get(beanName);
         if (StringUtil.isEmpty(parserClassName))
             return null;
 

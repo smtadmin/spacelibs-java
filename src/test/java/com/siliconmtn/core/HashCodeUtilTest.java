@@ -2,12 +2,11 @@ package com.siliconmtn.core;
 
 // Junit 5
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 // JDK 11.x
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.jupiter.api.Test;
 
 /****************************************************************************
  * <b>Title</b>: HashCodeUtilTest.java

@@ -36,6 +36,7 @@ public class UUIDValidator extends StringValidator {
 	 */
 	@Override
 	public List<ValidationErrorDTO> validate(ValidationDTO validation) {
+		
 		if (validation.getMin() == null) {
 			validation.setMin(UUID_LENGTH);
 		}

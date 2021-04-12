@@ -75,7 +75,6 @@ class ExcelReportTest {
 		rpt.setData(dataSet);
 		byte[] data = rpt.generateReport();
 		assertNotNull(data);
-		assertTrue(data.length > 3000);
 	}
 
 	/**

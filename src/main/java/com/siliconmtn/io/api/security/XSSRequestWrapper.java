@@ -24,9 +24,7 @@ import org.apache.commons.io.IOUtils;
 // Jsoup 1.13.x
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
-
-// 2.2.x
-import org.owasp.esapi.ESAPI;
+import org.owasp.encoder.Encode;
 
 // Spacelibs 1.x
 import com.siliconmtn.data.text.StringUtil;
@@ -73,7 +71,7 @@ public class XSSRequestWrapper extends HttpServletRequestWrapper{
     public static String stripXSS(String value) {
         if (StringUtil.isEmpty(value)) return value;
         
-        value = ESAPI.encoder().canonicalize(value).replace("\0", "");
+        value = Encode.forJava(value).replace("\0", "");
         return Jsoup.clean(value, Whitelist.none());
     }
     

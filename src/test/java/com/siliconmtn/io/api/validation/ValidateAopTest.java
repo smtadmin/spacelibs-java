@@ -1,31 +1,30 @@
 package com.siliconmtn.io.api.validation;
 
+//Junit 5
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+// Spacelibs 1.x
+import com.siliconmtn.io.api.EndpointRequestException;
+import com.siliconmtn.io.api.validation.factory.AbstractParser;
+import com.siliconmtn.io.api.validation.factory.ParserFactory;
+import com.siliconmtn.io.api.validation.validator.ValidationDTO;
+
+// JDK 11.x
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
+// AspectJ
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-
-//Junit 5
-import org.junit.jupiter.api.Test;
-
-// Jackson
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-// Spacelibs
-import com.siliconmtn.io.api.ApiRequestException;
-import com.siliconmtn.io.api.validation.factory.ParserFactory;
-import com.siliconmtn.io.api.validation.factory.ParserIntfc;
-import com.siliconmtn.io.api.validation.validator.ValidationDTO;
-import com.siliconmtn.io.api.validation.validator.ValidatorIntfc.ValidatorType;
 
 /****************************************************************************
  * <b>Title</b>: ValidateAopTest.java
@@ -37,147 +36,145 @@ import com.siliconmtn.io.api.validation.validator.ValidatorIntfc.ValidatorType;
  * @author Eric Damschroder
  * @version 3.0
  * @since Mar 16, 2021
- * @updates:
+ * updates:
+ * March 18 - James Camire - Rewrote the test to accomodate for API changes
  ****************************************************************************/
 
 class ValidateAopTest {
-
+	
+	// Mocked Members
+	ParserFactory pFact;
+	ValidateAop va;
+	Method myMethod;
+	JoinPoint joinPoint;
+	MethodSignature signature;
+	
 	/**
-	 * Check to see if a succeeding set of validators does nothing
-	 * @throws Throwable
+	 * Runs before each unit test
+	 */
+	@BeforeEach
+	void initBeforeMethods() throws Exception {
+		va = new ValidateAop();
+		
+		// Setup the mocks
+		pFact = mock(ParserFactory.class);
+		va.pFact = pFact;
+		
+		// mocks
+		myMethod = ValidateAopTest.class.getDeclaredMethod("myTestMethod");
+		joinPoint = mock(JoinPoint.class);
+		signature = mock(MethodSignature.class);
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.validation.ValidateAop#beforeAdvice(org.aspectj.lang.JoinPoint, java.lang.Object, java.lang.Object)}.
 	 */
 	@Test
-	void testValidateAOPPassValidation() throws Throwable {
-		getResults("validateTestMethod", true, false, false);
+	void testValidateAop() throws Exception {
+		ValidateAop va = new ValidateAop();
+		assertNotNull(va);
 	}
-	
+
 	/**
-	 * Check to see if a failing set of validators returns a proper ApiResponse
-	 * @throws Throwable
+	 * Test method for {@link com.siliconmtn.io.api.validation.ValidateAop#beforeAdvice(org.aspectj.lang.JoinPoint, java.lang.Object, java.lang.Object)}.
 	 */
 	@Test
-	void testValidateAOPFailValidation() throws Throwable {
-		getResults("validateTestMethod", false, false, false);
-	}
+	void testBeforeAdvice() throws Exception {
+		when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getMethod()).thenReturn(myMethod);
+		when(pFact.parserDispatcher(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(null);
 
+		assertDoesNotThrow(() -> va.beforeAdvice(joinPoint, "body", "PathVar"));
+	}
 	
 	/**
-	 * Ensure that providing nothing doesn't throw an exception
-	 * @throws Throwable
+	 * Test method for {@link com.siliconmtn.io.api.validation.ValidateAop#beforeAdvice(org.aspectj.lang.JoinPoint, java.lang.Object, java.lang.Object)}.
 	 */
 	@Test
-	void testNoValidation() throws Throwable {
-		getResults("dontValidateTestMethod", false, false, false);
+	void testBeforeAdviceBaseParser() throws Exception {
+		when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getMethod()).thenReturn(myMethod);
+		when(pFact.parserDispatcher(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(new MyTestParser());
+
+		assertDoesNotThrow(() -> va.beforeAdvice(joinPoint, "body", "PathVar"));
 	}
 	
-
 	/**
-	 * Test if handling eceptions thrown from not being able to
-	 * instantiate a parser occur correctly.
-	 * @throws Throwable
+	 * Test method for {@link com.siliconmtn.io.api.validation.ValidateAop#beforeAdvice(org.aspectj.lang.JoinPoint, java.lang.Object, java.lang.Object)}.
 	 */
 	@Test
-	void testThrowException() throws Throwable {
-		getResults("validateTestMethod", false, true, false);
+	void testBeforeAdviceErrorParser() throws Exception {
+		when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getMethod()).thenReturn(myMethod);
+		when(pFact.parserDispatcher(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(new MyTestParserError());
+
+		assertThrows(EndpointRequestException.class, () -> {
+			va.beforeAdvice(joinPoint, "body", "PathVar");
+		});
 	}
 	
-	
 	/**
-	 * Test the proper return when there is no parser for the supplied key
-	 * @throws Throwable
+	 * Test method for {@link com.siliconmtn.io.api.validation.ValidateAop#beforeAdvice(org.aspectj.lang.JoinPoint, java.lang.Object, java.lang.Object)}.
 	 */
 	@Test
-	void testNoParser() throws Throwable {
-		getResults("validateTestMethod", false, false, true);
+	void testBeforeAdviceErrorParserRequest() throws Exception {
+		when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getMethod()).thenReturn(myMethod);
+		when(pFact.parserDispatcher(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(new MyTestParserThrow());
+
+		assertThrows(EndpointRequestException.class, () -> {
+			va.beforeAdvice(joinPoint, "body", "PathVar");
+		});
 	}
 	
-	
 	/**
-	 * Creates all needed items to test the validator with the name of the method being validated and
-	 * whether the validation should pass or fail, returning the results of the request.
-	 * @param methodName
-	 * @param pass
-	 * @return
-	 * @throws Throwable
+	 * Test method for {@link com.siliconmtn.io.api.validation.ValidateAop#beforeAdvice(org.aspectj.lang.JoinPoint, java.lang.Object, java.lang.Object)}.
 	 */
-	void getResults(String methodName, boolean pass, boolean throwError, boolean nullParser) throws Throwable {
-
-		ValidateAop validate = new ValidateAop();
-
-        JoinPoint joinPoint = mock(JoinPoint.class);
-        MethodSignature signature = mock(MethodSignature.class);
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        ParserFactory pFact = mock(ParserFactory.class);
-        ParserIntfc parser = mock(ParserIntfc.class);
-        
-        Method m = this.getClass().getDeclaredMethod(methodName);
-
-        when(joinPoint.getSignature()).thenReturn(signature);
-        when(signature.getMethod()).thenReturn(m);
-        if (nullParser) {
-            when(pFact.parserDispatcher("com.siliconmtn.io.api.validation.ValidateAopTest." + methodName)).thenReturn(null);
-        } else {
-            when(pFact.parserDispatcher("com.siliconmtn.io.api.validation.ValidateAopTest." + methodName)).thenReturn(parser);
-        }
-        
-        if (throwError) {
-            when(parser.requestParser("Test")).thenThrow(new JsonProcessingException("Gonna fail here") {private static final long serialVersionUID = 1L;});
-        } else {
-            when(parser.requestParser("Test")).thenReturn(pass? buildPassingTestValidators():buildFailingTestValidators());
-        }
-        
-        validate.request = request;
-        validate.pFact = pFact;
-        
-        if (throwError || (!pass && !nullParser && !"dontValidateTestMethod".equals(methodName))) {
-            assertThrows(ApiRequestException.class, () -> validate.beforeAdvice(joinPoint, "Test"));
-        } else {
-        	assertDoesNotThrow(() -> validate.beforeAdvice(joinPoint, "Test"));
-        }
+	@Test
+	void testBeforeAdviceNoValidate() throws Exception {
+		myMethod = ValidateAopTest.class.getDeclaredMethod("noValidateMethod");
+		when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.getMethod()).thenReturn(myMethod);
+		assertDoesNotThrow(() -> va.beforeAdvice(joinPoint, "body", "PathVar"));
 	}
 	
 	/**
-	 * Blank method used to allow the ValidateAOP to properly get a validate annotation
+	 * Dummy method to test with an annotation
 	 */
 	@Validate
-	public void validateTestMethod() {
-		// Not Needed
-	}
+	public void myTestMethod() { /* Nothing to do */ }
 	
 	/**
-	 * Blank method used to allow the ValidateAOP to test not getting a validate annotation
+	 * Dummy method to test with no annotation
 	 */
-	public void dontValidateTestMethod() {
-		// Not Needed
+	public void noValidateMethod() { /* Nothing to do */ }
+
+}
+
+/**
+ * Empty parser to return with no errors
+ */
+class MyTestParser extends AbstractParser { /* Nothing to do */ }
+
+/**
+ * Error parser to return with multiple errors
+ */
+class MyTestParserError extends AbstractParser { 
+	public List<ValidationDTO> requestParser(Object obj) {
+		List<ValidationDTO> errors = new ArrayList<>();
+		errors.add(ValidationDTO.builder().build());
+		errors.add(ValidationDTO.builder().build());
+		return errors;
 	}
-	
-	/**
-	 * Build a list of validators that will all pass
-	 * @return
-	 */
-	private List<ValidationDTO> buildPassingTestValidators() {
-		List<ValidationDTO> fields = new ArrayList<>();
+}
 
-		fields.add(ValidationDTO.builder().type(ValidatorType.STRING).value("test").min("1").max("20").isRequired(true).build());
-		fields.add(ValidationDTO.builder().type(ValidatorType.NUMBER).value("5").min("1").max("7").isRequired(true).build());
-		
-		return fields;
+/**
+ * Exception parser that throws an exception when called
+ */
+class MyTestParserThrow extends AbstractParser { 
+	public List<ValidationDTO> requestParser(Object obj) 
+	throws IOException {
+		if (obj != null) throw new IOException();
+		return null;
 	}
-	
-	/**
-	 * Build a list of validators that will fail Despite having succeeding validators amongst them.
-	 * @return
-	 */
-	private List<ValidationDTO> buildFailingTestValidators() {
-		List<ValidationDTO> fields = new ArrayList<>();
-
-
-		fields.add(ValidationDTO.builder().type(ValidatorType.STRING).value("test").min("1").max("20").isRequired(true).build());
-		fields.add(ValidationDTO.builder().type(ValidatorType.NUMBER).value("5").min("1").max("7").isRequired(true).build());
-		fields.add(ValidationDTO.builder().type(ValidatorType.STRING).value("").min("1").max("20").isRequired(true).build());
-		fields.add(ValidationDTO.builder().type(ValidatorType.NUMBER).value("").min("1").max("7").isRequired(true).build());
-		
-		return fields;
-	}
-
 }

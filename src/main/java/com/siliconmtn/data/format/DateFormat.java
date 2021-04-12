@@ -17,9 +17,6 @@ import java.time.ZonedDateTime;
 // Spaceforce 1.x
 import com.siliconmtn.data.text.StringUtil;
 
-// Lombok 1.18.x
-import lombok.extern.log4j.Log4j2;
-
 /*********************************************************************************************************
  * <b>Title</b>: Convert Utilities for Date parsing, formatting and conversions
  * <b>Copyright:</b> Copyright (c) 2021
@@ -30,7 +27,6 @@ import lombok.extern.log4j.Log4j2;
  * @since 01.25.2021 
  * @updates:         
  **********************************************************************************************************/
-@Log4j2
 public class DateFormat {
 	
 	/**
@@ -162,9 +158,7 @@ public class DateFormat {
 		Date theDate = null;
 		try {
 			theDate = formatter.parse(dateText);
-		} catch (Exception e) {
-			log.error("Unable to convert date", e);
-		}
+		} catch (Exception e) { /* nothing to do */ }
 		
 		return theDate;
 	}

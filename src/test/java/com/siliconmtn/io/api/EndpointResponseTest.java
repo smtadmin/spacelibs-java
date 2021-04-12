@@ -10,10 +10,10 @@ import com.siliconmtn.io.api.validation.ValidationErrorDTO;
 import com.siliconmtn.io.api.validation.ValidationErrorDTO.ValidationError;
 
 /****************************************************************************
- * <b>Title</b>: ApiResponseTest.java
+ * <b>Title</b>: EndpointResponseTest.java
  * <b>Project</b>: spacelibs-java
  * <b>Description: </b> Build out tests to check any stragler constructors 
- * and currently unused methods in the ApiResponse 
+ * and currently unused methods in the EndpointResponse 
  * <b>Copyright:</b> Copyright (c) 2021
  * <b>Company:</b> Silicon Mountain Technologies
  * 
@@ -23,7 +23,7 @@ import com.siliconmtn.io.api.validation.ValidationErrorDTO.ValidationError;
  * @updates:
  ****************************************************************************/
 
-class ApiResponseTest {
+class EndpointResponseTest {
 	
 	
 	/**
@@ -32,7 +32,7 @@ class ApiResponseTest {
 	 */
 	@Test
 	void testApiReponseDataConstructor() throws Exception {
-		ApiResponse dataConstructor = new ApiResponse("Test");
+		EndpointResponse dataConstructor = new EndpointResponse("Test");
 		
 		assertTrue(dataConstructor.getFailedValidations().isEmpty());
 		
@@ -58,7 +58,7 @@ class ApiResponseTest {
 	 */
 	@Test
 	void testApiReponseDataCountConstructor() throws Exception {
-		ApiResponse dataConstructor = new ApiResponse("Test", 5);
+		EndpointResponse dataConstructor = new EndpointResponse("Test", 5);
 		assertEquals("Test", dataConstructor.data);
 		assertEquals(5, dataConstructor.getCount());
 		assertEquals(HttpStatus.OK, dataConstructor.getStatus());

@@ -53,7 +53,6 @@ class JWTTokenManagerTest {
 	void testGetTestToken() throws Exception {
 
 		assertNotNull(token);
-		assertTrue(token.length() > 100);
 	}
 	
 	/**

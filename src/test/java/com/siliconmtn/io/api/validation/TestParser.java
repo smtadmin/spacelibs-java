@@ -6,9 +6,9 @@ import java.util.List;
 
 // Jackson JSON Parser
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.siliconmtn.io.api.validation.factory.AbstractParser;
 
 // Spacelibs
-import com.siliconmtn.io.api.validation.factory.ParserIntfc;
 import com.siliconmtn.io.api.validation.validator.ValidationDTO;
 
 /****************************************************************************
@@ -24,7 +24,7 @@ import com.siliconmtn.io.api.validation.validator.ValidationDTO;
  * @updates:
  ****************************************************************************/
 
-public class TestParser implements ParserIntfc {
+public class TestParser extends AbstractParser {
 
 	/**
 	 * Returns a single ValidationDTO to test the parser factory with

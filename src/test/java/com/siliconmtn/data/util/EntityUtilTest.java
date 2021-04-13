@@ -111,6 +111,7 @@ class EntityUtilTest {
 	@Test
 	void testDtoToEntityNull() throws Exception {
 		assertEquals(null, entityUtil.dtoToEntity(null, Category.class));
+		assertEquals((Object)null, entityUtil.dtoToEntity(category, null));
 	}
 	
 	/**
@@ -170,6 +171,7 @@ class EntityUtilTest {
 	@Test
 	void testEntityToDtoNull() throws Exception {
 		assertEquals(null, entityUtil.entityToDto(null, CategoryDTO.class));
+		assertEquals((Object)null, entityUtil.entityToDto(category, null));
 	}
 
 	/**

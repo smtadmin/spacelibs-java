@@ -10,10 +10,14 @@ import java.util.List;
 
 // JPA
 import javax.persistence.EntityManager;
+import javax.persistence.Id;
 
 // Spring 5.3.x
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+// SpaceLibs 1.x
+import com.siliconmtn.data.lang.ClassUtil;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -54,6 +58,7 @@ public class EntityUtil {
 	 * @return an entity that was mapped by a dto
 	 */
 	public <T extends Object> T dtoToEntity(Object dto, Class<T> entity) {
+		if (dto == null || entity == null) return null;
 		T entityInstance = null;
 
 		try {
@@ -79,6 +84,46 @@ public class EntityUtil {
 	}
 	
 	/**
+	 * To map any given entity object into its respective dto object
+	 * @param <T> type of dto object being returned
+	 * @param entity the entity that needs to be mapped into dto
+	 * @param dto the dto type to map the entity into
+	 * @return a dto that was mapped by an entity
+	 */
+	public <T extends Object> T entityToDto(Object entity, Class<T> dto) {
+		if (entity == null || dto == null) return null;
+		T dtoInstance = null;
+
+		try {
+			dtoInstance = dto.getDeclaredConstructor().newInstance();
+
+			for (Field dtoField : dto.getDeclaredFields()) {
+				Object value = getValueFromInstance(dtoField.getName(), entity);
+				Field entityField = entity.getClass().getDeclaredField(dtoField.getName());
+				
+				if (entityField.getType() != dtoField.getType() && value != null) {
+					List<Field> fieldsWithId = ClassUtil.getFieldsByAnnotation(value.getClass(), Id.class);
+					if (fieldsWithId.isEmpty()) {
+						value = null;
+					} else {
+						String fieldName = fieldsWithId.get(0).getName();
+						value = getValueFromInstance(fieldName, value);
+					}
+
+				}
+
+				setValueIntoInstance(dtoField.getName(), dtoInstance, value);
+			}
+
+		} catch (Exception ex) {
+			log.error("unable to convert to dto", ex);
+			return null;
+		}
+
+		return dtoInstance;
+	}
+	
+	/**
 	 * Converts a List of DTO objects into a list of their corresponding entity
 	 * @param <T> Type of Entity object being returned
 	 * @param dtos List of DTO objects
@@ -93,6 +138,23 @@ public class EntityUtil {
 		}
 		
 		return entities;
+	}
+	
+	/**
+	 * Coverts a List of DTO objects into a list of their corresponding dto
+	 * @param <T> Type of DTO object being returned
+	 * @param entities List of Entity objects
+	 * @param dto DTO to convert the entities
+	 * @return Collection of DTOs
+	 */
+	public <T extends Object> List<T> entityListToDto(List<?> entities, Class<T> dto) {
+		List<T> dtos = new ArrayList<>();
+
+		for (Object entity : entities) {
+			dtos.add(entityToDto(entity, dto));
+		}
+
+		return dtos;
 	}
 	
 	/**

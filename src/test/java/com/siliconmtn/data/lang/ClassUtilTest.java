@@ -37,9 +37,27 @@ class ClassUtilTest {
 	 * Test method for {@link com.siliconmtn.data.lang.ClassUtil#getFieldsByAnnotation(java.lang.Class, java.lang.Class)}.
 	 */
 	@Test
+	void testGetFieldsByAnnotationNullClass() throws Exception {
+		var fieldList = ClassUtil.getFieldsByAnnotation(null, FieldAnnotation.class);
+		Assertions.assertEquals(0, fieldList.size());
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.lang.ClassUtil#getFieldsByAnnotation(java.lang.Class, java.lang.Class)}.
+	 */
+	@Test
 	void testGetFieldsByAnnotation() throws Exception {
 		var fieldList = ClassUtil.getFieldsByAnnotation(AnnotatedClass.class, FieldAnnotation.class);
 		Assertions.assertEquals("field", fieldList.get(0).getName());
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.lang.ClassUtil#getMethodsByAnnotation(java.lang.Class, java.lang.Class)}.
+	 */
+	@Test
+	void testGetMethodsByAnnotationNullClass() throws Exception {
+		var methodList = ClassUtil.getMethodsByAnnotation(null, MethodAnnotation.class);
+		Assertions.assertEquals(0, methodList.size());
 	}
 
 	/**

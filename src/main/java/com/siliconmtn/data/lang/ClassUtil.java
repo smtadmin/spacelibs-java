@@ -37,6 +37,7 @@ public class ClassUtil {
 	 */
 	public static List<Field> getFieldsByAnnotation(Class<?> clazz, Class<? extends Annotation> annotation) {
 		List<Field> fieldsWithAnnotation = new ArrayList<>();
+		if (clazz == null) return fieldsWithAnnotation;
 		
 		for (Field field : clazz.getDeclaredFields()) 
 			if (field.isAnnotationPresent(annotation))
@@ -53,6 +54,7 @@ public class ClassUtil {
 	 */
 	public static List<Method> getMethodsByAnnotation(Class<?> clazz, Class<? extends Annotation> annotation) {
 		List<Method> methodsWithAnnotation = new ArrayList<>();
+		if (clazz == null) return methodsWithAnnotation;
 		
 		for (Method method : clazz.getDeclaredMethods()) 
 			if (method.isAnnotationPresent(annotation))

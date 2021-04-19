@@ -43,6 +43,7 @@ public abstract class AbstractValidator implements ValidatorIntfc {
 			return errors;
 		}
 		
+		if (validation.getUriText() != null) validateUriText(validation, errors);		
 		if (validation.getMin() != null) validateMin(validation, errors);
 		if (validation.getMax() != null) validateMax(validation, errors);
 		if (validation.getRegex() != null) validateRegex(validation, errors);
@@ -79,6 +80,23 @@ public abstract class AbstractValidator implements ValidatorIntfc {
 		if (validation.isRequired() && StringUtil.isEmpty(validation.getValue())) {
 			errors.add(ValidationErrorDTO.builder().elementId(validation.getElementId()).value(validation.getValue()).errorMessage("Value is required and nothing was set").validationError(ValidationError.REQUIRED).build());
 		}
+	}
+	
+	/**
+	 * Check to ensure that the supplied URI parameter matches the provided value.
+	 * This is used to ensure that the payload of the request and the uri we are using
+	 * to get through security are the same.
+	 * @param validation DTO to be validated
+	 * @param errors list of errors that will be returned after all validation is completed
+	 */
+	public void validateUriText(ValidationDTO validation, List<ValidationErrorDTO> errors) {
+		if (!validation.getUriText().equals(validation.getValue()))
+			errors.add(ValidationErrorDTO.builder()
+					.elementId(validation.getElementId())
+					.value(validation.getValue())
+					.errorMessage("Payload did not match provided uri.")
+					.validationError(ValidationError.URIMATCH)
+					.build());
 	}
 
 	/*

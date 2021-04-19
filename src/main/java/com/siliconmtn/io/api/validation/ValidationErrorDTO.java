@@ -28,7 +28,7 @@ public class ValidationErrorDTO implements Serializable {
 	 * Enum containing the type of validation failed on the field
 	 */
 	public enum ValidationError {
-		REQUIRED, REGEX, RANGE, OPTION, CATASTROPHE, PARSE
+		REQUIRED, REGEX, RANGE, OPTION, CATASTROPHE, PARSE, URIMATCH
 	}
 
 	/**

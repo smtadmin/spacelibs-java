@@ -53,6 +53,7 @@ public class EntityUtil {
 	 * @param entity Object to which the dto has to be mapped
 	 * @return an entity that was mapped by a dto
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T extends Object> T dtoToEntity(Object dto, Class<T> entity) {
 		T entityInstance = null;
 
@@ -63,7 +64,9 @@ public class EntityUtil {
 				Object value = getValueFromInstance(dtoField.getName(), dto);
 				Field entityField = entity.getDeclaredField(dtoField.getName());
 				
-				if (entityField.getType() != dtoField.getType() && value != null) {
+				if (entityField.getType().isEnum() && value != null) {
+					value = Enum.valueOf(((Class<Enum>)entityField.getType()), value.toString());
+				} else if (entityField.getType() != dtoField.getType() && value != null) {
 					value = entityManager.getReference(entityField.getType(), value);
 				}
 

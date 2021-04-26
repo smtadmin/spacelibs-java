@@ -75,7 +75,7 @@ class BaseServiceTest {
 	@Test
 	void testToEntity() throws Exception {
 		doReturn(testEntity).when(entityUtil).dtoToEntity(ArgumentMatchers.any(), ArgumentMatchers.any());
-		assertEquals(testEntity, testService.toEntity(testDTO, TestEntity.class));
+		assertEquals(testEntity, testService.toEntity(testDTO));
 	}
 	
 	/**
@@ -84,7 +84,7 @@ class BaseServiceTest {
 	@Test
 	void testToEntityList() throws Exception {
 		doReturn(entities).when(entityUtil).dtoListToEntity(ArgumentMatchers.any(), ArgumentMatchers.any());
-		assertEquals(entities, testService.toEntityList(dtos, TestEntity.class));
+		assertEquals(entities, testService.toEntityList(dtos));
 	}
 
 	/**
@@ -93,7 +93,7 @@ class BaseServiceTest {
 	@Test
 	void testToDTO() throws Exception {
 		doReturn(testDTO).when(entityUtil).entityToDto(ArgumentMatchers.any(), ArgumentMatchers.any());
-		assertEquals(testDTO, testService.toDTO(testEntity, TestEntity.class));
+		assertEquals(testDTO, testService.toDTO(testEntity));
 	}
 
 	/**
@@ -102,7 +102,7 @@ class BaseServiceTest {
 	@Test
 	void testToDTOList() throws Exception {
 		doReturn(dtos).when(entityUtil).entityListToDto(ArgumentMatchers.any(), ArgumentMatchers.any());
-		assertEquals(dtos, testService.toDTOList(entities, TestDTO.class));
+		assertEquals(dtos, testService.toDTOList(entities));
 	}
 
 	/**
@@ -130,7 +130,7 @@ class BaseServiceTest {
 	void testFindDTO() throws Exception {
 		doReturn(testDTO).when(entityUtil).entityToDto(ArgumentMatchers.any(), ArgumentMatchers.any());
 		doReturn(Optional.of(testEntity)).when(testRepository).findById(ArgumentMatchers.any());
-		assertEquals(testDTO, testService.findDTO(testEntity.getId(), TestDTO.class));
+		assertEquals(testDTO, testService.findDTO(testEntity.getId()));
 	}
 
 	/**
@@ -148,7 +148,7 @@ class BaseServiceTest {
 	@Test
 	void testSaveDTO() throws Exception {
 		doReturn(testDTO).when(testRepository).save(ArgumentMatchers.any());
-		assertEquals(null, testService.save(testDTO, TestEntity.class));
+		assertEquals(null, testService.save(testDTO));
 	}
 
 	/**
@@ -165,8 +165,8 @@ class BaseServiceTest {
 	 */
 	@Test
 	void testSaveAllDTO() throws Exception {
-		doReturn(entities).when(testRepository).saveAll(ArgumentMatchers.any());
-		assertEquals(new ArrayList<>(), testService.saveAll(dtos, TestEntity.class));
+		doReturn(entities).when(testRepository).saveAll(dtos);
+		assertEquals(new ArrayList<>(), testService.saveAll(dtos));
 	}
 
 	/**
@@ -197,22 +197,20 @@ class BaseServiceTest {
 	}
 	
 	@Data
-	class TestEntity{
+	class TestEntity implements BaseEntity{
 		private UUID id;
 		private String name;
 	}
 	@Data
-	class TestDTO {
+	class TestDTO implements BaseDTO{
 		private UUID id;
 		private String name;
 	}
 	interface TestRepository extends BaseRepository<TestEntity>{}
-	class TestService extends BaseService<TestEntity>{
-
+	class TestService extends BaseService<TestEntity, TestDTO> {
 		protected TestService(TestRepository repository, EntityUtil entityUtil) {
 			super(repository, entityUtil);
-		}
-		
+		}		
 	}
 	
 }

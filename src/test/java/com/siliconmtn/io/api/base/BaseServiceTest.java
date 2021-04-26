@@ -150,6 +150,22 @@ class BaseServiceTest {
 		doReturn(testDTO).when(testRepository).save(ArgumentMatchers.any());
 		assertEquals(null, testService.save(testDTO));
 	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.base.BaseService#saveAll(java.lang.Object)}.
+	 */
+	@Test
+	void testSaveAllNull() throws Exception {
+		assertEquals(new ArrayList<>(), testService.saveAll(null));
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.base.BaseService#saveAll(java.lang.Object)}.
+	 */
+	@Test
+	void testSaveAllEmpty() throws Exception {
+		assertEquals(new ArrayList<>(), testService.saveAll(new ArrayList<>()));
+	}
 
 	/**
 	 * Test method for {@link com.siliconmtn.io.api.base.BaseService#saveAll(java.lang.Object)}.
@@ -165,7 +181,8 @@ class BaseServiceTest {
 	 */
 	@Test
 	void testSaveAllDTO() throws Exception {
-		doReturn(entities).when(testRepository).saveAll(dtos);
+		doReturn(dtos).when(entityUtil).dtoListToEntity(ArgumentMatchers.any(), ArgumentMatchers.any());
+		doReturn(entities).when(testRepository).saveAll(ArgumentMatchers.any());
 		assertEquals(new ArrayList<>(), testService.saveAll(dtos));
 	}
 

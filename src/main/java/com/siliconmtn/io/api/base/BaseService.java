@@ -2,6 +2,7 @@ package com.siliconmtn.io.api.base;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -132,7 +133,8 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<T> saveAll(List<?> entities) {
-		if (entities instanceof BaseDTO)
+		if (entities == null || entities.isEmpty()) return new ArrayList<>();
+		if (entities.get(0) instanceof BaseDTO)
 			return repository.saveAll(toEntityList((List<V>)entities));
 		return repository.saveAll((List<T>)entities);
 	}

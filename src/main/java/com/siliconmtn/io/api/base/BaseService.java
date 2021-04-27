@@ -1,5 +1,8 @@
 package com.siliconmtn.io.api.base;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,58 +21,71 @@ import com.siliconmtn.data.util.EntityUtil;
  * <b>updates:</b>
  *  
  ****************************************************************************/
-public class BaseService<T> {
+public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 
 	private final BaseRepository<T> repository;
 	private EntityUtil entityUtil;
+	private Class<T> entityClass;
+	private Class<V> dtoClass;
 	
-	protected BaseService(BaseRepository<T> repository, EntityUtil entityUtil) {
+	@SuppressWarnings("unchecked")
+	protected BaseService(BaseRepository<T> repository, EntityUtil entityUtil) {		
 		this.repository = repository;
 		this.entityUtil = entityUtil;
+		
+		var types = getInternalTypes();
+		this.entityClass = (Class<T>) types[0];
+		this.dtoClass = (Class<V>) types[1];		
+	}
+	
+	/**
+	 * Get the class types of T, V set in the child class using this base class
+	 * @return array of types T, V
+	 */
+	private Type[] getInternalTypes(){
+		Type type = getClass().getGenericSuperclass();
+		ParameterizedType parameterizedType = (ParameterizedType) type;
+		return parameterizedType.getActualTypeArguments();
 	}
 	
 	/**
 	 * Convert a dto into an entity
-	 * @param <V> the dtos type
 	 * @param dto the dto to convert
 	 * @param entity the resulting entity type
 	 * @return an entity based on a dto
 	 */
-	public <V> T toEntity(V dto, Class<T> entity) {
-		return entityUtil.dtoToEntity(dto, entity);
+	public T toEntity(V dto) {
+		return entityUtil.dtoToEntity(dto, entityClass);
 	}
 
 	/**
 	 * Convert a list of dtos into a list of entities
-	 * @param <V> the dtos type
 	 * @param dtos the list of dtos
 	 * @param entity the resulting entity type
 	 * @return a list of entities
 	 */
-	public <V> List<T> toEntityList(List<V> dtos, Class<T> entity) {
-		return entityUtil.dtoListToEntity(dtos, entity);
+	public List<T> toEntityList(List<V> dtos) {
+		return entityUtil.dtoListToEntity(dtos, entityClass);
 	}
 
 	/**
 	 * Convert an entity into a dto
-	 * @param <V> the dtos type
 	 * @param entity the entity to convert
 	 * @param dto the resulting dto type
 	 * @return the dto based on an entity
 	 */
-	public <V> V toDTO(T entity, Class<V> dto) {
-		return entityUtil.entityToDto(entity, dto);
+	public V toDTO(T entity) {
+		return entityUtil.entityToDto(entity, dtoClass);
 	}
 
 	/**
 	 * Convert a list of entities into a list of DTOs
-	 * @param <V> the dtos type
 	 * @param entities the list of entities
 	 * @param dto the resulting dto type
 	 * @return a list of dtos converted from entities
 	 */
-	public <V> List<V> toDTOList(List<T> entities, Class<V> dto) {
-		return entityUtil.entityListToDto(entities, dto);
+	public List<V> toDTOList(List<T> entities) {
+		return entityUtil.entityListToDto(entities, dtoClass);
 	}
 
 	/**
@@ -83,13 +99,12 @@ public class BaseService<T> {
 
 	/**
 	 * Find an entity based on id and convert to DTO
-	 * @param <V> the dtos type
 	 * @param id the primary key
 	 * @param dto the resulting dto type
 	 * @return a dto converted from the found entity
 	 */
-	public <V> V findDTO(UUID id, Class<V> dto) {
-		return toDTO(find(id), dto);
+	public V findDTO(UUID id) {
+		return toDTO(find(id));
 	}
 
 	/**
@@ -103,33 +118,25 @@ public class BaseService<T> {
 
 	/**
 	 * Save a dto to the repository, after converting into an entity
-	 * @param <V> the dtos type
 	 * @param dto the dto to save
 	 * @param entity the resulting entity type
 	 * @return an entity that was saved
 	 */
-	public <V> T save(V dto, Class<T> entity) {
-		return save(toEntity(dto, entity));
+	public T save(V dto) {
+		return save(toEntity(dto));
 	}
 
 	/**
-	 * Batch save a list of entities to the repository
-	 * @param entities the list of entities
+	 * Batch save a list of entities or dtos to the repository
+	 * @param entities the list of entities/dtos
 	 * @return the list of saved entities with updated ids
 	 */
-	public List<T> saveAll(List<T> entities) {
-		return repository.saveAll(entities);
-	}
-
-	/**
-	 * Batch save a list of dtos, converted into entities first
-	 * @param <V> the dtos type
-	 * @param dtos the list of dtos
-	 * @param entity the resulting entity type
-	 * @return the list of saved entities with updated ids
-	 */
-	public <V> List<T> saveAll(List<V> dtos, Class<T> entity) {
-		return saveAll(toEntityList(dtos, entity));
+	@SuppressWarnings("unchecked")
+	public List<T> saveAll(List<?> entities) {
+		if (entities == null || entities.isEmpty()) return new ArrayList<>();
+		if (entities.get(0) instanceof BaseDTO)
+			return repository.saveAll(toEntityList((List<V>)entities));
+		return repository.saveAll((List<T>)entities);
 	}
 
 	/**

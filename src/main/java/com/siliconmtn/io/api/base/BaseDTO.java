@@ -1,4 +1,8 @@
 package com.siliconmtn.io.api.base;
+
+// JDK 11.x
+import java.io.Serializable;
+
 /****************************************************************************
  * <b>Title:</b> BaseDTO.java
  * <b>Project:</b> spacelibs-java
@@ -12,6 +16,6 @@ package com.siliconmtn.io.api.base;
  * <b>updates:</b>
  *  
  ****************************************************************************/
-public interface BaseDTO {
+public interface BaseDTO extends Serializable {
 	// Intentionally blank
 }

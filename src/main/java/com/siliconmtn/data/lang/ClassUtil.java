@@ -4,6 +4,8 @@ package com.siliconmtn.data.lang;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +29,17 @@ public class ClassUtil {
 	 */
 	private ClassUtil() {
 		super();
+	}
+	
+	
+	/**
+	 * Get the class types of T, V set in the child class using this base class
+	 * @return array of types T, V
+	 */
+	public static Type[] getInternalTypes(Class<?> c){
+		Type type = c.getGenericSuperclass();
+		ParameterizedType parameterizedType = (ParameterizedType) type;
+		return parameterizedType.getActualTypeArguments();
 	}
 	
 	/**

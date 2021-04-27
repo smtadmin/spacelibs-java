@@ -1,4 +1,8 @@
 package com.siliconmtn.io.api.base;
+
+// JDK 11.x
+import java.io.Serializable;
+
 /****************************************************************************
  * <b>Title:</b> BaseEntity.java
  * <b>Project:</b> spacelibs-java
@@ -12,6 +16,6 @@ package com.siliconmtn.io.api.base;
  * <b>updates:</b>
  *  
  ****************************************************************************/
-public interface BaseEntity {
+public interface BaseEntity extends Serializable  {
 	// Intentionally blank
 }

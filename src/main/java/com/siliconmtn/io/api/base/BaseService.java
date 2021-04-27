@@ -1,11 +1,12 @@
 package com.siliconmtn.io.api.base;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+// JDK 11.x
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+// Spacelibs 1.x
+import com.siliconmtn.data.lang.ClassUtil;
 import com.siliconmtn.data.util.EntityUtil;
 
 /****************************************************************************
@@ -28,24 +29,19 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	private Class<T> entityClass;
 	private Class<V> dtoClass;
 	
+	/**
+	 * Initializes the service with the repository and entity util
+	 * @param repository Repository to connect for crud operations
+	 * @param entityUtil Util class which converts a DTO to an entity and vice-versa
+	 */
 	@SuppressWarnings("unchecked")
 	protected BaseService(BaseRepository<T> repository, EntityUtil entityUtil) {		
 		this.repository = repository;
 		this.entityUtil = entityUtil;
 		
-		var types = getInternalTypes();
+		var types = ClassUtil.getInternalTypes(getClass());
 		this.entityClass = (Class<T>) types[0];
 		this.dtoClass = (Class<V>) types[1];		
-	}
-	
-	/**
-	 * Get the class types of T, V set in the child class using this base class
-	 * @return array of types T, V
-	 */
-	private Type[] getInternalTypes(){
-		Type type = getClass().getGenericSuperclass();
-		ParameterizedType parameterizedType = (ParameterizedType) type;
-		return parameterizedType.getActualTypeArguments();
 	}
 	
 	/**
@@ -93,6 +89,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @param id the primary key
 	 * @return the entity with the given id
 	 */
+	@TransactionInjector
 	public T find(UUID id) {
 		return repository.findById(id).orElse(null);
 	}
@@ -112,6 +109,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @param entity the entity to save
 	 * @return the saved entity with updated id
 	 */
+	@TransactionInjector
 	public T save(T entity) {
 		return repository.save(entity);
 	}
@@ -132,6 +130,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @return the list of saved entities with updated ids
 	 */
 	@SuppressWarnings("unchecked")
+	@TransactionInjector
 	public List<T> saveAll(List<?> entities) {
 		if (entities == null || entities.isEmpty()) return new ArrayList<>();
 		if (entities.get(0) instanceof BaseDTO)
@@ -143,6 +142,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * Delete an entity by given id from the repository (do nothing if not found)
 	 * @param id the id to delete by
 	 */
+	@TransactionInjector
 	public void delete(UUID id) {
 		repository.deleteById(id);
 	}
@@ -151,6 +151,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * Delete a given entity from the repository (do nothing if not found)
 	 * @param entity the entity to delete
 	 */
+	@TransactionInjector
 	public void delete(T entity) {
 		repository.delete(entity);
 	}
@@ -159,6 +160,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * Batch delete a list of entities from the repository (do nothing if not found)
 	 * @param entities the list of entities to delete
 	 */
+	@TransactionInjector
 	public void deleteAll(List<T> entities) {
 		repository.deleteInBatch(entities);
 	}

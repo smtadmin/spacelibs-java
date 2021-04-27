@@ -181,7 +181,6 @@ class BaseServiceTest {
 	 */
 	@Test
 	void testSaveAllDTO() throws Exception {
-		doReturn(dtos).when(entityUtil).dtoListToEntity(ArgumentMatchers.any(), ArgumentMatchers.any());
 		doReturn(entities).when(testRepository).saveAll(ArgumentMatchers.any());
 		assertEquals(new ArrayList<>(), testService.saveAll(dtos));
 	}

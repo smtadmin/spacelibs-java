@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.validation.BindException;
@@ -342,6 +343,17 @@ class RestExceptionHandlerTest {
 		ResponseEntity<Object> resp = rest.handleSecurityAuthorizationException(new SecurityAuthorizationException("test"));
 		assertEquals(HttpStatus.FORBIDDEN, resp.getStatusCode());
 		assertEquals("test", ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleAll(java.lang.Exception, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleAll() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleAll(new HttpMessageConversionException(""), null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals(HttpMessageConversionException.class.getName(), ((EndpointResponse)resp.getBody()).getMessage());
 	}
 
 }

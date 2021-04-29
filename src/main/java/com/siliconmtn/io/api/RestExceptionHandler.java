@@ -406,6 +406,22 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         apiErrorResponse.setMessage(String.format(msg, ex.getName(), ex.getValue(), name));
         apiErrorResponse.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiErrorResponse);
+    } 
+    
+    /**
+     * Catch all handler to pick up any exceptions missed from the previous handlers
+     * 
+     * @param ex the Exception
+     * @param request WebRequest Metadata
+     * @return the ApiErrorResponse object
+     */
+    @ExceptionHandler({ Exception.class })
+    protected ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
+        log.error(ex);
+        EndpointResponse apiErrorResponse = new EndpointResponse(BAD_REQUEST);
+        apiErrorResponse.setMessage(ex.getClass().getName());
+        apiErrorResponse.setDebugMessage(ex.getMessage());
+        return buildResponseEntity(apiErrorResponse);
     }
 
     /**

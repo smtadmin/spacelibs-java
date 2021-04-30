@@ -25,5 +25,17 @@ import java.lang.annotation.Target;
  * 
  ****************************************************************************/
 public @interface TransactionInjector {
-	// Nothing to do here
+	
+	/**
+	 * Enum for the action types
+	 */
+	public enum ActionType {
+		CREATE, DELETE, DELETE_ALL, FIND, SAVE, SAVE_ALL
+	}
+
+	/**
+	 * Assigns the action type for the transaction
+	 * @return
+	 */
+	public ActionType type();
 }

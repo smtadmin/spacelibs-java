@@ -266,4 +266,31 @@ class StringUtilTest {
 		
 		assertEquals("", StringUtil.getJsonString(new Object()));
 	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.data.text.StringUtil#removeNonAlpha(java.lang.String)}.
+	 */
+	@Test
+	void testRemoveNonAlpha() throws Exception {
+		assertNull(StringUtil.removeNonAlpha(null));
+		assertEquals("hello", StringUtil.removeNonAlpha("he- +ll#o"));
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.data.text.StringUtil#removeNonAlphaUpper(java.lang.String)}.
+	 */
+	@Test
+	void testRemoveNonAlphaUpper() throws Exception {
+		assertNull(StringUtil.removeNonAlphaUpper(null));
+		assertEquals("HELLO", StringUtil.removeNonAlphaUpper("HE- +LL#Oagain"));
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.data.text.StringUtil#removeNonAlphaLower(java.lang.String)}.
+	 */
+	@Test
+	void testRemoveNonAlphaLower() throws Exception {
+		assertNull(StringUtil.removeNonAlphaLower(null));
+		assertEquals("hellagain", StringUtil.removeNonAlphaLower("heHE- ll +LL#Oagain"));
+	}
 }

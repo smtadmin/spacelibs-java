@@ -95,7 +95,7 @@ public abstract class AbstractParser implements ParserIntfc {
 	 * @param validationDTOList the list of ValidationDTO
 	 * @param validationDTO the Validation DTO object
 	 */
-	protected void addDTOToList(List<ValidationDTO> validationDTOList, ValidationDTO validationDTO) {
+	public void addDTOToList(List<ValidationDTO> validationDTOList, ValidationDTO validationDTO) {
 		validationDTOList.add(validationDTO);
 	}
 	
@@ -107,7 +107,7 @@ public abstract class AbstractParser implements ParserIntfc {
 	 * @param max The max range of value
 	 * @param min The min range of value
 	 */
-	protected ValidationDTO build(ValidatorType type, String value,
+	public ValidationDTO build(ValidatorType type, String value,
 			Map<String, String> validOptions, boolean alternate, String max, String min) {
 		return ValidationDTO
 		.builder()

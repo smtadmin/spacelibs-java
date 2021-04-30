@@ -75,4 +75,15 @@ class EnumUtilTest {
 		assertNotEquals(DatePattern.DATE_FULL_MONTH, EnumUtil.safeValueOf("", "DATE_FULL_MONTH"));
 	}
 
+	/**
+	 * Test method for {@link com.siliconmtn.data.util.EnumUtil#toStringList(java.lang.Enum<E>[])}.
+	 */
+	@Test
+	void testToStringList() throws Exception {
+		DatePattern[] enums = {DatePattern.DATE_DASH, DatePattern.DATE_LONG};
+		List<String> enumStrs = EnumUtil.toStringList(enums);
+		assertEquals(true, enumStrs.get(0) instanceof String);
+		assertEquals(true, enumStrs.get(1) instanceof String);
+	}
+
 }

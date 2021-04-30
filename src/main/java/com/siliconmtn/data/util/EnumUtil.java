@@ -2,6 +2,8 @@ package com.siliconmtn.data.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /********************************************************************
  * <b>Title: </b>EnumUtil.java
@@ -12,6 +14,7 @@ import java.util.List;
  * @version 3.x
  * @since Dec 13, 2017
  * Last Updated: 
+ * Chris Scarola - Apr 30, 2021 - Add convert to list of strings
  *******************************************************************/
 public class EnumUtil {
 	
@@ -100,6 +103,19 @@ public class EnumUtil {
 		}
 		
 		return enums;
+	}
+	
+	/**
+	 * Take an array of Enums and convert it into a List of strings
+	 * @param <E> Type of the Enum
+	 * @param enumArray An array of enums of any enum type. For Example: MyEnum.class
+	 * @return a List of the enums as strings
+	 */
+	public static <E extends Enum<E>> List<String> toStringList(final Enum<E>[] enumArray){
+		if (enumArray == null) return new ArrayList<>();
+		return Stream.of(enumArray)
+				.map(Enum::name)
+				.collect(Collectors.toList());
 	}
 
 }

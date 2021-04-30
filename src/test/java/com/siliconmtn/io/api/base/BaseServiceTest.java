@@ -214,11 +214,13 @@ class BaseServiceTest {
 	
 	@Data
 	class TestEntity implements BaseEntity{
+		private static final long serialVersionUID = 1L;
 		private UUID id;
 		private String name;
 	}
 	@Data
 	class TestDTO implements BaseDTO{
+		private static final long serialVersionUID = 1L;
 		private UUID id;
 		private String name;
 	}

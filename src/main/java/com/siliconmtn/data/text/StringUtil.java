@@ -153,6 +153,51 @@ public class StringUtil {
 	}
 	
 	/**
+	 * Deletes all of the non-alpha (Aa-Zz) characters in the data
+	 * @param data String to be parsed
+	 * @return parsed data.
+	 */
+	public static String removeNonAlpha(String data) {
+		if (isEmpty(data)) return data;
+		StringBuilder newVal = new StringBuilder();
+		for (char c : data.toCharArray()) {
+			if (Character.isLetter(c)) newVal.append(c);
+		}
+		
+		return newVal.toString();
+	}
+	
+	/**
+	 * Deletes all of the non-alpha (A-Z) upper case characters in the data
+	 * @param data String to be parsed
+	 * @return parsed data.
+	 */
+	public static String removeNonAlphaUpper(String data) {
+		if (isEmpty(data)) return data;
+		StringBuilder newVal = new StringBuilder();
+		for (char c : data.toCharArray()) {
+			if (Character.isLetter(c) && Character.isUpperCase(c)) newVal.append(c);
+		}
+		
+		return newVal.toString();
+	}
+	
+	/**
+	 * Deletes all of the non-alpha (a-z) characters in the data
+	 * @param data String to be parsed
+	 * @return parsed data.
+	 */
+	public static String removeNonAlphaLower(String data) {
+		if (isEmpty(data)) return data;
+		StringBuilder newVal = new StringBuilder();
+		for (char c : data.toCharArray()) {
+			if (Character.isLetter(c) && Character.isLowerCase(c)) newVal.append(c);
+		}
+		
+		return newVal.toString();
+	}
+	
+	/**
 	 * Deletes all of the non-alpha (Aa-Zz) and NoN-Numeric (0-9) characters in the data
 	 * @param data String to be parsed
 	 * @return parsed data.
@@ -168,7 +213,7 @@ public class StringUtil {
 	 * @return parsed data.
 	 */
 	public static String removeNonAlphaNumeric(String data, boolean removeSpace) {
-		if (data == null || data.length() < 1) return data;
+		if (isEmpty(data)) return data;
 
 		StringBuilder newVal = new StringBuilder();
 		for (char a : data.toCharArray()) {

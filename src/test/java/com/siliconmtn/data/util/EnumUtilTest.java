@@ -1,8 +1,11 @@
 package com.siliconmtn.data.util;
 
 // Junit 5
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -73,6 +76,14 @@ class EnumUtilTest {
 		String enumString = "com.siliconmtn.data.format.DateFormat$DatePattern";
 		assertEquals(DatePattern.DATE_FULL_MONTH, EnumUtil.safeValueOf(enumString, "DATE_FULL_MONTH"));
 		assertNotEquals(DatePattern.DATE_FULL_MONTH, EnumUtil.safeValueOf("", "DATE_FULL_MONTH"));
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.util.EnumUtil#toStringList(java.lang.Enum<E>[])}.
+	 */
+	@Test
+	void testToStringListNull() throws Exception {		
+		assertEquals(new ArrayList<>(), EnumUtil.toStringList(null));
 	}
 
 	/**

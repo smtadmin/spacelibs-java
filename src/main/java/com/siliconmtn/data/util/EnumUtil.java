@@ -112,6 +112,7 @@ public class EnumUtil {
 	 * @return a List of the enums as strings
 	 */
 	public static <E extends Enum<E>> List<String> toStringList(final Enum<E>[] enumArray){
+		if (enumArray == null) return new ArrayList<>();
 		return Stream.of(enumArray)
 				.map(Enum::name)
 				.collect(Collectors.toList());

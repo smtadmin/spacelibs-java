@@ -5,6 +5,7 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 
 // SpaceLibs 1.x
 import com.siliconmtn.data.lang.ClassUtil;
+import com.siliconmtn.io.api.base.BaseDTO;
+import com.siliconmtn.io.api.base.BaseEntity;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -58,7 +61,7 @@ public class EntityUtil {
 	 * @return an entity that was mapped by a dto
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T extends Object> T dtoToEntity(Object dto, Class<T> entity) {
+	public <T extends BaseEntity> T dtoToEntity(BaseDTO dto, Class<T> entity) {
 		if (dto == null || entity == null) return null;
 		T entityInstance = null;
 
@@ -66,6 +69,9 @@ public class EntityUtil {
 			entityInstance = entity.getConstructor().newInstance();
 
 			for (Field dtoField : dto.getClass().getDeclaredFields()) {
+				// Check for constants and continue
+				if (Modifier.isFinal(dtoField.getModifiers())) continue;
+				
 				Object value = getValueFromInstance(dtoField.getName(), dto);
 				Field entityField = entity.getDeclaredField(dtoField.getName());
 				
@@ -93,7 +99,7 @@ public class EntityUtil {
 	 * @param dto the dto type to map the entity into
 	 * @return a dto that was mapped by an entity
 	 */
-	public <T extends Object> T entityToDto(Object entity, Class<T> dto) {
+	public <T extends BaseDTO> T entityToDto(BaseEntity entity, Class<T> dto) {
 		if (entity == null || dto == null) return null;
 		T dtoInstance = null;
 
@@ -101,6 +107,9 @@ public class EntityUtil {
 			dtoInstance = dto.getDeclaredConstructor().newInstance();
 
 			for (Field dtoField : dto.getDeclaredFields()) {
+				// Check for constants and continue
+				if (Modifier.isFinal(dtoField.getModifiers())) continue;
+				
 				Object value = getValueFromInstance(dtoField.getName(), entity);
 				Field entityField = entity.getClass().getDeclaredField(dtoField.getName());
 				
@@ -133,10 +142,11 @@ public class EntityUtil {
 	 * @param entity Entity to convert the DTOs
 	 * @return Collection of entities
 	 */
-	public <T extends Object> List<T> dtoListToEntity(List<?> dtos, Class<T> entity) {
+	@SuppressWarnings("unchecked")
+	public <T extends BaseEntity> List<T> dtoListToEntity(List<?> dtos, Class<T> entity) {
 		List<T> entities = new ArrayList<>();
 		
-		for (Object dto : dtos) {
+		for (BaseDTO dto : (List<BaseDTO>)dtos) {
 			entities.add(dtoToEntity(dto, entity));
 		}
 		
@@ -150,10 +160,11 @@ public class EntityUtil {
 	 * @param dto DTO to convert the entities
 	 * @return Collection of DTOs
 	 */
-	public <T extends Object> List<T> entityListToDto(List<?> entities, Class<T> dto) {
+	@SuppressWarnings("unchecked")
+	public <T extends BaseDTO> List<T> entityListToDto(List<?> entities, Class<T> dto) {
 		List<T> dtos = new ArrayList<>();
 
-		for (Object entity : entities) {
+		for (BaseEntity entity : (List<BaseEntity>)entities) {
 			dtos.add(entityToDto(entity, dto));
 		}
 

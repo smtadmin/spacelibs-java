@@ -111,7 +111,7 @@ public class EnumUtil {
 	 * @param enumArray An array of enums of any enum type. For Example: MyEnum.class
 	 * @return a List of the enums as strings
 	 */
-	public static <E extends Enum<E>> List<String> toStringList(final Enum<E>[] enumArray){
+	public static <E extends Enum<E>> List<String> toStringList(Enum<E>[] enumArray){
 		if (enumArray == null) return new ArrayList<>();
 		return Stream.of(enumArray)
 				.map(Enum::name)

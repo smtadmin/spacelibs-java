@@ -74,6 +74,7 @@ class EntityUtilTest {
 		category.setParentCode(null);
 		category.setDepth((short) 0);
 		category.setName("Name");
+		category.setTest(TestEnum.ONE);
 		
 		categoryWithoutId = new CategoryWithoutId();
 		categoryWithoutId.setCode("CODE");
@@ -81,6 +82,7 @@ class EntityUtilTest {
 		categoryWithoutId.setParentCode(null);
 		categoryWithoutId.setDepth((short) 0);
 		categoryWithoutId.setName("Name");
+		categoryWithoutId.setTest(TestEnum.ONE);
 		
 		nestedDTO = new CategoryDTO();
 		nestedDTO.setCode("CODE2");
@@ -88,6 +90,7 @@ class EntityUtilTest {
 		nestedDTO.setParentCode("CODE");
 		nestedDTO.setDepth((short) 1);
 		nestedDTO.setName("Name2");
+		nestedDTO.setTest(TestEnum.ONE);
 		
 		nestedCategory = new Category();
 		nestedCategory.setCode("CODE2");
@@ -95,6 +98,7 @@ class EntityUtilTest {
 		nestedCategory.setParentCode(category);
 		nestedCategory.setDepth((short) 1);
 		nestedCategory.setName("Name2");
+		nestedCategory.setTest(TestEnum.ONE);
 		
 		nestedCategoryWithoutId = new CategoryWithoutId();
 		nestedCategoryWithoutId.setCode("CODE2");
@@ -102,6 +106,7 @@ class EntityUtilTest {
 		nestedCategoryWithoutId.setParentCode(categoryWithoutId);
 		nestedCategoryWithoutId.setDepth((short) 1);
 		nestedCategoryWithoutId.setName("Name2");
+		nestedCategoryWithoutId.setTest(TestEnum.ONE);
 
 		entityManager = Mockito.mock(EntityManager.class);
 		entityUtil = new EntityUtil(entityManager);
@@ -242,6 +247,10 @@ class EntityUtilTest {
 
 }
 
+enum TestEnum {
+	ONE, TWO, THREE
+}
+
 @Data
 @NoArgsConstructor
 class CategoryDTO implements BaseDTO {	
@@ -251,6 +260,7 @@ class CategoryDTO implements BaseDTO {
 	private String parentCode;
 	private short depth;
 	private String name;
+	private TestEnum test;
 }
 
 @Data
@@ -263,6 +273,7 @@ class Category implements BaseEntity {
 	private Category parentCode;
 	private short depth;
 	private String name;
+	private TestEnum test;
 	private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
 }
 
@@ -275,5 +286,6 @@ class CategoryWithoutId implements BaseEntity {
 	private CategoryWithoutId parentCode;
 	private short depth;
 	private String name;
+	private TestEnum test;
 	private ZonedDateTime createdDate = ZonedDateTime.now(ZoneOffset.UTC);
 }

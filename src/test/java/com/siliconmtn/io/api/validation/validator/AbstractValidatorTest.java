@@ -1,20 +1,23 @@
 package com.siliconmtn.io.api.validation.validator;
 
+// Junit 5
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
+// JDK 11.x
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Test;
-
+// spacelibs 1.x
 import com.siliconmtn.io.api.validation.ValidationErrorDTO;
 
 /****************************************************************************
  * <b>Title:</b> AbstractValidatorTest.java
  * <b>Project:</b> spacelibs-java
- * <b>Description:</b> CHANGE ME!!
+ * <b>Description:</b> Unit tests for the abstract.  This tests the concrete 
+ * methods for the class
  * <b>Copyright:</b> Copyright (c) 2021
  * <b>Company:</b> Silicon Mountain Technologies
  * 
@@ -64,11 +67,11 @@ class AbstractValidatorTest {
 	@Test
 	void testValidateOptions() throws Exception {
 		Map<String, String> validOptions = new HashMap<>();
-		validOptions.put("one", "oneVal");
+		validOptions.put("one", "VALID");
 		
 		List<ValidationErrorDTO> errors = new ArrayList<>();
 		ValidationDTO val = ValidationDTO.builder()
-		.value("oneVal")
+		.value("VALID")
 		.validOptions(validOptions)
 		.build();
 		
@@ -76,7 +79,7 @@ class AbstractValidatorTest {
 		tv.validateOptions(val, errors);
 		assertEquals(0, errors.size());
 	}
-
+	
 	/**
 	 * Test method for {@link com.siliconmtn.io.api.validation.validator.AbstractValidator#validateOptions(com.siliconmtn.io.api.validation.validator.ValidationDTO, java.util.List)}.
 	 */
@@ -87,7 +90,7 @@ class AbstractValidatorTest {
 		
 		List<ValidationErrorDTO> errors = new ArrayList<>();
 		ValidationDTO val = ValidationDTO.builder()
-		.value("oneVal")
+		.value("VALID")
 		.validOptions(validOptions)
 		.build();
 		
@@ -144,20 +147,12 @@ class AbstractValidatorTest {
 		TestValidator tv = new TestValidator();
 		tv.validateRequired(val, errors);
 		assertEquals(0, errors.size());
-	}
-	
-	/**
-	 * Test method for {@link com.siliconmtn.io.api.validation.validator.AbstractValidator#validateRequired(com.siliconmtn.io.api.validation.validator.ValidationDTO, java.util.List)}.
-	 */
-	@Test
-	void testValidateRequiredEmpty() throws Exception {
-		ValidationDTO val = ValidationDTO.builder()
+		
+		val = ValidationDTO.builder()
 		.isRequired(true)
 		.value(null)
 		.build();
-		
-		List<ValidationErrorDTO> errors = new ArrayList<>();
-		TestValidator tv = new TestValidator();
+
 		tv.validateRequired(val, errors);
 		assertEquals(1, errors.size());
 	}
@@ -208,20 +203,12 @@ class AbstractValidatorTest {
 		TestValidator tv = new TestValidator();
 		tv.validateRegex(val, errors);
 		assertEquals(0, errors.size());
-	}
-	
-	/**
-	 * Test method for {@link com.siliconmtn.io.api.validation.validator.AbstractValidator#validateRegex(com.siliconmtn.io.api.validation.validator.ValidationDTO, java.util.List)}.
-	 */
-	@Test
-	void testValidateRegexEmpty() throws Exception {
-		List<ValidationErrorDTO> errors = new ArrayList<>();
-		ValidationDTO val = ValidationDTO.builder()
+		
+		val = ValidationDTO.builder()
 		.regex(null)
 		.value("test")
 		.build();
-		
-		TestValidator tv = new TestValidator();
+
 		tv.validateRegex(val, errors);
 		assertEquals(0, errors.size());
 	}

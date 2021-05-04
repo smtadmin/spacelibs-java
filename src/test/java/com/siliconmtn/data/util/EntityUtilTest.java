@@ -12,7 +12,6 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 // JDK 11.x
-import java.io.Serializable;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -23,6 +22,8 @@ import javax.persistence.Id;
 
 // spacelibs-java 1.1.x
 import com.siliconmtn.data.lang.ClassUtil;
+import com.siliconmtn.io.api.base.BaseDTO;
+import com.siliconmtn.io.api.base.BaseEntity;
 
 // Lombok 1.18.x
 import lombok.Data;
@@ -111,7 +112,7 @@ class EntityUtilTest {
 	@Test
 	void testDtoToEntityNull() throws Exception {
 		assertEquals(null, entityUtil.dtoToEntity(null, Category.class));
-		assertEquals((Object)null, entityUtil.dtoToEntity(category, null));
+		assertEquals((Object)null, entityUtil.dtoToEntity(dto, null));
 	}
 	
 	/**
@@ -157,7 +158,7 @@ class EntityUtilTest {
 	 */
 	@Test
 	void testDtoListToEntity() throws Exception {
-		List<CategoryDTO> dtos = new ArrayList<>();
+		List<BaseDTO> dtos = new ArrayList<>();
 		dtos.add(dto);
 		dtos.add(nestedDTO);
 		
@@ -231,7 +232,7 @@ class EntityUtilTest {
 	 */
 	@Test
 	void testEntityListToDto() throws Exception {
-		List<Category> entities = new ArrayList<>();
+		List<BaseEntity> entities = new ArrayList<>();
 		entities.add(category);
 		entities.add(nestedCategory);
 		
@@ -243,7 +244,8 @@ class EntityUtilTest {
 
 @Data
 @NoArgsConstructor
-class CategoryDTO {	
+class CategoryDTO implements BaseDTO {	
+	private static final long serialVersionUID = 210128864839657123L;
 	private String code;
 	private String groupCode;
 	private String parentCode;
@@ -253,7 +255,7 @@ class CategoryDTO {
 
 @Data
 @NoArgsConstructor
-class Category implements Serializable {	
+class Category implements BaseEntity {	
 	private static final long serialVersionUID = 4457516413601618139L;
 	@Id
 	private String code;
@@ -266,7 +268,7 @@ class Category implements Serializable {
 
 @Data
 @NoArgsConstructor
-class CategoryWithoutId implements Serializable {	
+class CategoryWithoutId implements BaseEntity {	
 	private static final long serialVersionUID = 6215676666713039022L;
 	private String code;
 	private String groupCode;

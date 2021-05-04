@@ -61,7 +61,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @param entity the resulting entity type
 	 * @return a list of entities
 	 */
-	public List<T> toEntityList(List<V> dtos) {
+	public List<T> toEntityList(List<?> dtos) {
 		return entityUtil.dtoListToEntity(dtos, entityClass);
 	}
 
@@ -81,7 +81,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @param dto the resulting dto type
 	 * @return a list of dtos converted from entities
 	 */
-	public List<V> toDTOList(List<T> entities) {
+	public List<V> toDTOList(List<?> entities) {
 		return entityUtil.entityListToDto(entities, dtoClass);
 	}
 
@@ -135,7 +135,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	public List<T> saveAll(List<?> entities) {
 		if (entities == null || entities.isEmpty()) return new ArrayList<>();
 		if (entities.get(0) instanceof BaseDTO)
-			return repository.saveAll(toEntityList((List<V>)entities));
+			return repository.saveAll(toEntityList((List<BaseDTO>)entities));
 		return repository.saveAll((List<T>)entities);
 	}
 

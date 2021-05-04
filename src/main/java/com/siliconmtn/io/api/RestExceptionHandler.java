@@ -415,7 +415,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
      * @param request WebRequest Metadata
      * @return the ApiErrorResponse object
      */
-    //@ExceptionHandler({ })
+    @ExceptionHandler({ NullPointerException.class })
     protected ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
         log.error(ex);
         EndpointResponse apiErrorResponse = new EndpointResponse(BAD_REQUEST);

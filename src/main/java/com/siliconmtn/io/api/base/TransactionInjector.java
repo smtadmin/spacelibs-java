@@ -30,7 +30,7 @@ public @interface TransactionInjector {
 	 * Enum for the action types
 	 */
 	public enum ActionType {
-		CREATE, DELETE, DELETE_ALL, FIND, SAVE, SAVE_ALL
+		CLONE, CREATE, DELETE, DELETE_ALL, FIND, REORDER, SAVE, SAVE_ALL
 	}
 
 	/**

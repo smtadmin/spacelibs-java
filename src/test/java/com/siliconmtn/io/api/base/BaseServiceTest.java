@@ -20,6 +20,7 @@ import org.mockito.Spy;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.siliconmtn.data.util.EntityUtil;
+import com.siliconmtn.io.api.base.TransactionInjector.ActionType;
 
 import lombok.Data;
 
@@ -210,6 +211,14 @@ class BaseServiceTest {
 	void testDeleteAll() throws Exception {
 		testService.deleteAll(entities);
 		verify(testService).deleteAll(entities);
+	}
+	
+	/*
+	 * Test method for {@link com.siliconmtn.io.api.base.TransactionInjector.ActionType}.
+	 */
+	@Test
+	void testActionType() {
+		assertEquals(8, ActionType.values().length);
 	}
 	
 	@Data

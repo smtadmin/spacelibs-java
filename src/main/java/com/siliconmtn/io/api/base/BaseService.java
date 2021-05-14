@@ -8,7 +8,6 @@ import java.util.UUID;
 // Spacelibs 1.x
 import com.siliconmtn.data.lang.ClassUtil;
 import com.siliconmtn.data.util.EntityUtil;
-import com.siliconmtn.io.api.base.TransactionInjector.ActionType;
 
 /****************************************************************************
  * <b>Title:</b> BaseService.java
@@ -90,7 +89,6 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @param id the primary key
 	 * @return the entity with the given id
 	 */
-	@TransactionInjector(type=ActionType.FIND)
 	public T find(UUID id) {
 		return repository.findById(id).orElse(null);
 	}
@@ -110,7 +108,6 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @param entity the entity to save
 	 * @return the saved entity with updated id
 	 */
-	@TransactionInjector(type=ActionType.SAVE)
 	public T save(T entity) {
 		return repository.save(entity);
 	}
@@ -131,7 +128,6 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @return the list of saved entities with updated ids
 	 */
 	@SuppressWarnings("unchecked")
-	@TransactionInjector(type=ActionType.SAVE_ALL)
 	public List<T> saveAll(List<?> entities) {
 		if (entities == null || entities.isEmpty()) return new ArrayList<>();
 		if (entities.get(0) instanceof BaseDTO)
@@ -143,7 +139,6 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * Delete an entity by given id from the repository (do nothing if not found)
 	 * @param id the id to delete by
 	 */
-	@TransactionInjector(type=ActionType.DELETE)
 	public void delete(UUID id) {
 		repository.deleteById(id);
 	}
@@ -152,7 +147,6 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * Delete a given entity from the repository (do nothing if not found)
 	 * @param entity the entity to delete
 	 */
-	@TransactionInjector(type=ActionType.DELETE)
 	public void delete(T entity) {
 		repository.delete(entity);
 	}
@@ -161,7 +155,6 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * Batch delete a list of entities from the repository (do nothing if not found)
 	 * @param entities the list of entities to delete
 	 */
-	@TransactionInjector(type=ActionType.DELETE_ALL)
 	public void deleteAll(List<T> entities) {
 		repository.deleteInBatch(entities);
 	}

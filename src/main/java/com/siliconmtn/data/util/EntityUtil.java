@@ -114,7 +114,7 @@ public class EntityUtil {
 				Field entityField = entity.getClass().getDeclaredField(dtoField.getName());
 				
 				if (entityField.getType() != dtoField.getType() && value != null) {
-					List<Field> fieldsWithId = ClassUtil.getFieldsByAnnotation(value.getClass(), Id.class);
+					List<Field> fieldsWithId = ClassUtil.getFieldsByAnnotation(entityField.getType(), Id.class);
 					if (fieldsWithId.isEmpty()) {
 						value = null;
 					} else {

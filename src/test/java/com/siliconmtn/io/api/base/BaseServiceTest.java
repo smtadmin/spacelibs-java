@@ -75,7 +75,7 @@ class BaseServiceTest {
 	 */
 	@Test
 	void testToEntity() throws Exception {
-		doReturn(testEntity).when(entityUtil).dtoToEntity(ArgumentMatchers.any(), ArgumentMatchers.any());
+		doReturn(testEntity).when(entityUtil).dtoToEntity(ArgumentMatchers.any(), testEntity.getClass());
 		assertEquals(testEntity, testService.toEntity(testDTO));
 	}
 	

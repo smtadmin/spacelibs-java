@@ -15,10 +15,12 @@ import javax.persistence.Id;
 
 // Spring 5.3.x
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 // SpaceLibs 1.x
 import com.siliconmtn.data.lang.ClassUtil;
+import com.siliconmtn.io.api.EndpointRequestException;
 import com.siliconmtn.io.api.base.BaseDTO;
 import com.siliconmtn.io.api.base.BaseEntity;
 
@@ -85,11 +87,48 @@ public class EntityUtil {
 			}
 
 		} catch (Exception e) {
-			log.error("unable to convert entity", e);
+			log.error("unable to convert to entity", e);
 			return null;
 		}
 		
 		return entityInstance;
+	}
+	
+	/**
+	 * Load a dtos data into an existing entity
+	 * 
+	 * @param dto the dto to load data from
+	 * @param entity the entity to update
+	 * @return the newly updated entity
+	 */
+	public BaseEntity dtoToEntity(BaseDTO dto, BaseEntity entity) {
+		if (dto == null || entity == null) return null;
+		
+		try {
+			for (var dtoField : dto.getClass().getDeclaredFields()) {
+				if (Modifier.isFinal(dtoField.getModifiers())) continue;
+				
+				var value = getValueFromInstance(dtoField.getName(), dto);
+				var entityField = entity.getClass().getDeclaredField(dtoField.getName());
+				if (entityField.isAnnotationPresent(Id.class)) continue;
+				
+				if (entityField.getType() != dtoField.getType() && value != null) {
+					value = entityManager.find(entityField.getType(), value);
+					if (value == null) 
+						throw new EndpointRequestException(
+								"dto conversion failed: " + entity.getClass().getSimpleName() + " not found within " + dto.getClass().getSimpleName(), 
+								HttpStatus.NOT_FOUND);
+				}
+				
+				setValueIntoInstance(dtoField.getName(), entity, value);
+			}
+			
+		} catch (Exception e) {
+			log.error("unable to convert to entity", e);
+			return null;
+		}
+		
+		return entity;
 	}
 	
 	/**

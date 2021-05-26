@@ -5,9 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
 // Spacelibs 1.x
 import com.siliconmtn.data.lang.ClassUtil;
 import com.siliconmtn.data.util.EntityUtil;
+import com.siliconmtn.io.api.EndpointRequestException;
 
 /****************************************************************************
  * <b>Title:</b> BaseService.java
@@ -53,6 +57,16 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	public T toEntity(V dto) {
 		return entityUtil.dtoToEntity(dto, entityClass);
 	}
+	
+	/**
+	 * Convert a dto into an entity referenced by JPA
+	 * @param dto the dto to convert
+	 * @param entity the referenced entity to update
+	 * @return an entity update by a dto
+	 */
+	public BaseEntity toEntity(BaseDTO dto, BaseEntity entity) {
+		return entityUtil.dtoToEntity(dto, entity);
+	}
 
 	/**
 	 * Convert a list of dtos into a list of entities
@@ -88,9 +102,13 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * Find an entity based on id
 	 * @param id the primary key
 	 * @return the entity with the given id
+	 * @throws EndpointRequestException 
 	 */
 	public T find(UUID id) {
-		return repository.findById(id).orElse(null);
+		return repository.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(
+						HttpStatus.NOT_FOUND,
+						entityClass.getSimpleName() + " id not found"));
 	}
 
 	/**
@@ -98,6 +116,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @param id the primary key
 	 * @param dto the resulting dto type
 	 * @return a dto converted from the found entity
+	 * @throws EndpointRequestException 
 	 */
 	public V findDTO(UUID id) {
 		return toDTO(find(id));

@@ -111,13 +111,26 @@ class EntityUtilTest {
 		entityManager = Mockito.mock(EntityManager.class);
 		entityUtil = new EntityUtil(entityManager);
 	}
+	
 	/**
 	 * Test method for {@link com.smt.ezform.core.EntityUtil#dtoToEntity(Object, Class<T>, EntityManager)}
+	 * @param <T>
 	 */
 	@Test
-	void testDtoToEntityNull() throws Exception {
+	void testDtoToEntityClassNull() throws Exception {
+		Class<Category> clazz = null;
 		assertEquals(null, entityUtil.dtoToEntity(null, Category.class));
-		assertEquals((Object)null, entityUtil.dtoToEntity(dto, null));
+		assertEquals((Object) null, entityUtil.dtoToEntity(dto, clazz));
+	}
+	
+	/**
+	 * Test method for {@link com.smt.ezform.core.EntityUtil#dtoToEntity(Object, Class<T>, EntityManager)}
+	 * @param <T>
+	 */
+	@Test
+	void testDtoToEntityObjectNull() throws Exception {
+		assertEquals(null, entityUtil.dtoToEntity(null, category));
+		assertEquals((Object) null, entityUtil.dtoToEntity(dto, (BaseEntity) null));
 	}
 	
 	/**

@@ -15,10 +15,12 @@ import javax.persistence.Id;
 
 // Spring 5.3.x
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 // SpaceLibs 1.x
 import com.siliconmtn.data.lang.ClassUtil;
+import com.siliconmtn.io.api.EndpointRequestException;
 import com.siliconmtn.io.api.base.BaseDTO;
 import com.siliconmtn.io.api.base.BaseEntity;
 
@@ -60,36 +62,57 @@ public class EntityUtil {
 	 * @param entity Object to which the dto has to be mapped
 	 * @return an entity that was mapped by a dto
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public <T extends BaseEntity> T dtoToEntity(BaseDTO dto, Class<T> entity) {
 		if (dto == null || entity == null) return null;
 		T entityInstance = null;
 
 		try {
 			entityInstance = entity.getConstructor().newInstance();
-
-			for (Field dtoField : dto.getClass().getDeclaredFields()) {
-				// Check for constants and continue
-				if (Modifier.isFinal(dtoField.getModifiers())) continue;
-				
-				Object value = getValueFromInstance(dtoField.getName(), dto);
-				Field entityField = entity.getDeclaredField(dtoField.getName());
-				
-				if (entityField.getType().isEnum() && value != null) {
-					value = Enum.valueOf(((Class<Enum>)entityField.getType()), value.toString());
-				} else if (entityField.getType() != dtoField.getType() && value != null) {
-					value = entityManager.getReference(entityField.getType(), value);
-				}
-
-				setValueIntoInstance(dtoField.getName(), entityInstance, value);
-			}
-
+			
 		} catch (Exception e) {
-			log.error("unable to convert entity", e);
+			log.error("unable to create an entity from given class", e);
 			return null;
 		}
 		
-		return entityInstance;
+		return (T) dtoToEntity(dto, entityInstance);
+	}
+	
+	/**
+	 * Load a dtos data into an existing entity
+	 * 
+	 * @param dto the dto to load data from
+	 * @param entity the entity to update
+	 * @return the newly updated entity
+	 */
+	public BaseEntity dtoToEntity(BaseDTO dto, BaseEntity entity) {
+		if (dto == null || entity == null) return null;
+		
+		try {
+			for (var dtoField : dto.getClass().getDeclaredFields()) {
+				// Check for constants and continue
+				if (Modifier.isFinal(dtoField.getModifiers())) continue;
+				
+				var value = getValueFromInstance(dtoField.getName(), dto);
+				var entityField = entity.getClass().getDeclaredField(dtoField.getName());
+				
+				if (entityField.getType() != dtoField.getType() && value != null) {
+					value = entityManager.getReference(entityField.getType(), value);
+					if (value == null) 
+						throw new EndpointRequestException(
+								"dto conversion failed: " + entity.getClass().getSimpleName() + " not found within " + dto.getClass().getSimpleName(), 
+								HttpStatus.NOT_FOUND);
+				}
+				
+				setValueIntoInstance(dtoField.getName(), entity, value);
+			}
+			
+		} catch (Exception e) {
+			log.error("unable to convert dto to entity", e);
+			return null;
+		}
+		
+		return entity;
 	}
 	
 	/**
@@ -111,10 +134,10 @@ public class EntityUtil {
 				if (Modifier.isFinal(dtoField.getModifiers())) continue;
 				
 				Object value = getValueFromInstance(dtoField.getName(), entity);
-				Field entityField = entity.getClass().getDeclaredField(dtoField.getName());
+				var entityField = entity.getClass().getDeclaredField(dtoField.getName());
 				
 				if (entityField.getType() != dtoField.getType() && value != null) {
-					List<Field> fieldsWithId = ClassUtil.getFieldsByAnnotation(value.getClass(), Id.class);
+					List<Field> fieldsWithId = ClassUtil.getFieldsByAnnotation(entityField.getType(), Id.class);
 					if (fieldsWithId.isEmpty()) {
 						value = null;
 					} else {

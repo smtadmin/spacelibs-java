@@ -23,7 +23,7 @@ import com.siliconmtn.io.api.validation.ValidationErrorDTO;
  * @since Mar 4, 2021
  * @updates:
  ****************************************************************************/
-public class EndpointRequestException extends Exception {
+public class EndpointRequestException extends RuntimeException {
 
 	/**
 	 * Serial Version UID

@@ -1,8 +1,8 @@
 package com.siliconmtn.io.api.base;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
@@ -17,7 +17,8 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.siliconmtn.data.util.EntityUtil;
 import com.siliconmtn.io.api.base.TransactionInjector.ActionType;
@@ -37,18 +38,18 @@ import lombok.Data;
  * <b>updates:</b>
  *  
  ****************************************************************************/
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class BaseServiceTest {
+	
+	@Spy
+	@InjectMocks
+	private TestService testService;
 	
 	@Mock
 	private EntityUtil entityUtil;
 	
 	@Mock
-	private TestRepository testRepository = mock(TestRepository.class);
-	
-	@Spy
-	@InjectMocks
-	private TestService testService = new TestService(testRepository, entityUtil);
+	private TestRepository testRepository;	
 	
 	private TestEntity testEntity;
 	private List<TestEntity> entities;
@@ -75,8 +76,17 @@ class BaseServiceTest {
 	 */
 	@Test
 	void testToEntity() throws Exception {
-		doReturn(testEntity).when(entityUtil).dtoToEntity(ArgumentMatchers.any(), testEntity.getClass());
+		doReturn(testEntity).when(entityUtil).dtoToEntity(ArgumentMatchers.any(), ArgumentMatchers.eq(testEntity.getClass()));
 		assertEquals(testEntity, testService.toEntity(testDTO));
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.base.BaseService#toEntity(com.siliconmtn.io.api.base.BaseDTO, com.siliconmtn.io.api.base.BaseEntity)}.
+	 */
+	@Test
+	void testToEntityBaseDTOBaseEntity() throws Exception {
+		doReturn(testEntity).when(entityUtil).dtoToEntity(testDTO, testEntity);
+		assertEquals(testEntity, testService.toEntity(testDTO, testEntity));
 	}
 	
 	/**
@@ -111,17 +121,18 @@ class BaseServiceTest {
 	 */
 	@Test
 	void testFind() throws Exception {
-		doReturn(Optional.of(testEntity)).when(testRepository).findById(ArgumentMatchers.any());
-		assertEquals(null, testService.find(testEntity.getId()));
+		doReturn(Optional.of(testEntity)).when(testRepository).findById(testEntity.getId());
+		assertEquals(testEntity, testService.find(testEntity.getId()));
 	}
 	
 	/**
 	 * Test method for {@link com.siliconmtn.io.api.base.BaseService#find(java.util.UUID)}.
 	 */
 	@Test
-	void testFindNull() throws Exception {
+	void testFindThrow() throws Exception {
+		var uuid = UUID.randomUUID();
 		doReturn(Optional.ofNullable(null)).when(testRepository).findById(ArgumentMatchers.any());
-		assertEquals(null, testService.find(testEntity.getId()));
+		assertThrows(ResponseStatusException.class, () -> testService.find(uuid));
 	}
 
 	/**
@@ -130,7 +141,7 @@ class BaseServiceTest {
 	@Test
 	void testFindDTO() throws Exception {
 		doReturn(testDTO).when(entityUtil).entityToDto(ArgumentMatchers.any(), ArgumentMatchers.any());
-		doReturn(Optional.of(testEntity)).when(testRepository).findById(ArgumentMatchers.any());
+		doReturn(Optional.of(testEntity)).when(testRepository).findById(testEntity.getId());
 		assertEquals(testDTO, testService.findDTO(testEntity.getId()));
 	}
 
@@ -140,7 +151,7 @@ class BaseServiceTest {
 	@Test
 	void testSaveEntity() throws Exception {
 		doReturn(testEntity).when(testRepository).save(ArgumentMatchers.any());
-		assertEquals(null, testService.save(testEntity));
+		assertEquals(testEntity, testService.save(testEntity));
 	}
 	
 	/**
@@ -148,8 +159,8 @@ class BaseServiceTest {
 	 */
 	@Test
 	void testSaveDTO() throws Exception {
-		doReturn(testDTO).when(testRepository).save(ArgumentMatchers.any());
-		assertEquals(null, testService.save(testDTO));
+		doReturn(testEntity).when(testRepository).save(ArgumentMatchers.any());
+		assertEquals(testEntity, testService.save(testDTO));
 	}
 	
 	/**
@@ -174,7 +185,7 @@ class BaseServiceTest {
 	@Test
 	void testSaveAll() throws Exception {
 		doReturn(entities).when(testRepository).saveAll(ArgumentMatchers.any());
-		assertEquals(new ArrayList<>(), testService.saveAll(entities));
+		assertEquals(entities, testService.saveAll(entities));
 	}
 	
 	/**
@@ -183,7 +194,7 @@ class BaseServiceTest {
 	@Test
 	void testSaveAllDTO() throws Exception {
 		doReturn(entities).when(testRepository).saveAll(ArgumentMatchers.any());
-		assertEquals(new ArrayList<>(), testService.saveAll(dtos));
+		assertEquals(entities, testService.saveAll(dtos));
 	}
 
 	/**
@@ -220,24 +231,32 @@ class BaseServiceTest {
 	void testActionType() {
 		assertEquals(8, ActionType.values().length);
 	}
-	
-	@Data
-	class TestEntity implements BaseEntity{
-		private static final long serialVersionUID = 1L;
-		private UUID id;
-		private String name;
-	}
-	@Data
-	class TestDTO implements BaseDTO{
-		private static final long serialVersionUID = 1L;
-		private UUID id;
-		private String name;
-	}
-	interface TestRepository extends BaseRepository<TestEntity>{}
-	class TestService extends BaseService<TestEntity, TestDTO> {
-		protected TestService(TestRepository repository, EntityUtil entityUtil) {
-			super(repository, entityUtil);
-		}		
-	}
-	
 }
+
+/*
+ * Test Classes for base service
+ */
+@Data
+class TestEntity implements BaseEntity {
+	private static final long serialVersionUID = 1L;
+	private UUID id;
+	private String name;
+}
+
+@Data
+class TestDTO implements BaseDTO {
+	private static final long serialVersionUID = 1L;
+	private UUID id;
+	private String name;
+}
+
+interface TestRepository extends BaseRepository<TestEntity> {
+}
+
+class TestService extends BaseService<TestEntity, TestDTO> {
+	protected TestService(TestRepository repository, EntityUtil entityUtil) {
+		super(repository, entityUtil);
+	}
+}
+	
+

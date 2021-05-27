@@ -62,36 +62,20 @@ public class EntityUtil {
 	 * @param entity Object to which the dto has to be mapped
 	 * @return an entity that was mapped by a dto
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public <T extends BaseEntity> T dtoToEntity(BaseDTO dto, Class<T> entity) {
 		if (dto == null || entity == null) return null;
 		T entityInstance = null;
 
 		try {
 			entityInstance = entity.getConstructor().newInstance();
-
-			for (Field dtoField : dto.getClass().getDeclaredFields()) {
-				// Check for constants and continue
-				if (Modifier.isFinal(dtoField.getModifiers())) continue;
-				
-				Object value = getValueFromInstance(dtoField.getName(), dto);
-				Field entityField = entity.getDeclaredField(dtoField.getName());
-				
-				if (entityField.getType().isEnum() && value != null) {
-					value = Enum.valueOf(((Class<Enum>)entityField.getType()), value.toString());
-				} else if (entityField.getType() != dtoField.getType() && value != null) {
-					value = entityManager.getReference(entityField.getType(), value);
-				}
-
-				setValueIntoInstance(dtoField.getName(), entityInstance, value);
-			}
-
+			
 		} catch (Exception e) {
-			log.error("unable to convert to entity", e);
+			log.error("unable to create an entity from given class", e);
 			return null;
 		}
 		
-		return entityInstance;
+		return (T) dtoToEntity(dto, entityInstance);
 	}
 	
 	/**
@@ -106,14 +90,14 @@ public class EntityUtil {
 		
 		try {
 			for (var dtoField : dto.getClass().getDeclaredFields()) {
+				// Check for constants and continue
 				if (Modifier.isFinal(dtoField.getModifiers())) continue;
 				
 				var value = getValueFromInstance(dtoField.getName(), dto);
 				var entityField = entity.getClass().getDeclaredField(dtoField.getName());
-				if (entityField.isAnnotationPresent(Id.class)) continue;
 				
 				if (entityField.getType() != dtoField.getType() && value != null) {
-					value = entityManager.find(entityField.getType(), value);
+					value = entityManager.getReference(entityField.getType(), value);
 					if (value == null) 
 						throw new EndpointRequestException(
 								"dto conversion failed: " + entity.getClass().getSimpleName() + " not found within " + dto.getClass().getSimpleName(), 
@@ -124,7 +108,7 @@ public class EntityUtil {
 			}
 			
 		} catch (Exception e) {
-			log.error("unable to convert to entity", e);
+			log.error("unable to convert dto to entity", e);
 			return null;
 		}
 		
@@ -150,7 +134,7 @@ public class EntityUtil {
 				if (Modifier.isFinal(dtoField.getModifiers())) continue;
 				
 				Object value = getValueFromInstance(dtoField.getName(), entity);
-				Field entityField = entity.getClass().getDeclaredField(dtoField.getName());
+				var entityField = entity.getClass().getDeclaredField(dtoField.getName());
 				
 				if (entityField.getType() != dtoField.getType() && value != null) {
 					List<Field> fieldsWithId = ClassUtil.getFieldsByAnnotation(entityField.getType(), Id.class);

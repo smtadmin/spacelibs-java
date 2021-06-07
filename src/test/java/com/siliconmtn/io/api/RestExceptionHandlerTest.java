@@ -2,7 +2,6 @@ package com.siliconmtn.io.api;
 
 // JEE 7
 import javax.persistence.EntityNotFoundException;
-import javax.validation.ConstraintViolationException;
 
 //Junit 5
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,19 +90,6 @@ class RestExceptionHandlerTest {
     }
 	
 	/**
-	 * Test handleHttpMediaTypeNotSupported exception
-	 * @throws Exception
-	 */
-	@Test
-    void testHandleConstraintViolation() throws Exception {
-		RestExceptionHandler  rest = new RestExceptionHandler();
-		ResponseEntity<Object> resp = rest.handleConstraintViolation(new ConstraintViolationException(null));
-
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals("Validation error", ((EndpointResponse)resp.getBody()).getMessage());
-    }
-	
-	/**
 	 * Test handleEntityNotFound exception
 	 * @throws Exception
 	 */
@@ -180,22 +166,7 @@ class RestExceptionHandlerTest {
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resp.getStatusCode());
 		assertEquals("Unexpected error", ((EndpointResponse)resp.getBody()).getMessage());
-    }
-	
-	/**
-	 * Test handleDataIntegrityViolation exception
-	 * @throws Exception
-	 */
-	@Test
-    void testHandleDataIntegrityConstraintViolation() throws Exception {
-		RestExceptionHandler  rest = new RestExceptionHandler();
-		ResponseEntity<Object> resp = rest.handleDataIntegrityViolation(new DataIntegrityViolationException("Data error", 
-				new ConstraintViolationException(null)) {private static final long serialVersionUID = 1L;}, null);
-
-		assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
-		assertEquals("Database error", ((EndpointResponse)resp.getBody()).getMessage());
-    }
-	
+    }	
 	
 	/**
 	 * Test handleMethodArgumentTypeMismatch exception

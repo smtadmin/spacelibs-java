@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 
 // Jee 7.x
 import javax.servlet.FilterChain;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -20,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 // Spacelibs 1.x
-import com.siliconmtn.io.ServletOutputStreamMock;
 import com.siliconmtn.io.http.HttpHeaders;
 
 /****************************************************************************

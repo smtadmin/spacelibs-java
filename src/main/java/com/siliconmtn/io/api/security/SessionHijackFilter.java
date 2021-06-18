@@ -119,10 +119,10 @@ public class SessionHijackFilter implements Filter {
 		if (StringUtil.isEmpty(addr)) addr = request.getRemoteAddr();
 		
 		if (! addr.equals(session.getAttribute(USER_IP_ADDRESS)))
-			throw new SecurityAuthorizationException("IP Address Changed");
+			throw new SecurityAuthorizationException("IP Address Changed from " + session.getAttribute(USER_IP_ADDRESS) + " to " + addr);
 		
 		if (! request.getHeader(HttpHeaders.USER_AGENT).equals(session.getAttribute(USER_AGENT)))
-			throw new SecurityAuthorizationException("User Agent Changed");
+			throw new SecurityAuthorizationException("User Agent Changed from " + session.getAttribute(USER_AGENT) + " to " + request.getHeader(HttpHeaders.USER_AGENT));
 		
 	}
 

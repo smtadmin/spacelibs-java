@@ -7,6 +7,9 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import lombok.extern.log4j.Log4j2;
 
 /****************************************************************************
  * <b>Title</b>: StringUtil.java
@@ -21,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @since Jan 12, 2021
  * @updates:
  ****************************************************************************/
+@Log4j2
 public class StringUtil {
 
 	/**
@@ -278,8 +282,10 @@ public class StringUtil {
 
 		try {
 			ObjectMapper om = new ObjectMapper();
+			om.registerModule(new JavaTimeModule());
 			return om.writeValueAsString(o);
 		} catch (JsonProcessingException e) {
+			log.error("Unable to serialize object to json", e);
 			return "";
 		}
 	}

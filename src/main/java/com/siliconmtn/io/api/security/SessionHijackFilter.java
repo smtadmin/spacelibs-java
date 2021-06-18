@@ -2,6 +2,7 @@ package com.siliconmtn.io.api.security;
 
 // JDK 11.x
 import java.io.IOException;
+import java.io.PrintWriter;
 
 // JEE 7.x
 import javax.servlet.Filter;
@@ -65,25 +66,28 @@ public class SessionHijackFilter implements Filter {
     	// Cast the request and get the session
     	HttpServletRequest request = (HttpServletRequest) req;
         HttpSession session = request.getSession();
-        HttpServletResponse response = (HttpServletResponse)res;
         
         // Determine if the session is new and either add to session or compare
         if (session.isNew()) {
         	assignLocationToSession(request, session);
         	
         	// Pass along to next process in chain
-            chain.doFilter(request, response);
+            chain.doFilter(request, res);
         } else {
         	try {
         		validateUserInfo(request, session);
         		
             	// Pass along to next process in chain
-                chain.doFilter(request, response);
+                chain.doFilter(request, res);
         	} catch (Exception e) {
+                HttpServletResponse response = (HttpServletResponse)res;
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                
         		EndpointResponse epres = new EndpointResponse(HttpStatus.FORBIDDEN);
         		epres.setMessage(e.getMessage());
-        		response.setContentType("application/json");
-        		response.getOutputStream().write(epres.toString().getBytes());
+        		PrintWriter out = response.getWriter();
+        		out.print(epres.toString());
+        		out.flush();
         	}
         }
     }

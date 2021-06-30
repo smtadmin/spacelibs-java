@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 
 // Jsoup 1.13.x
 import org.jsoup.Jsoup;
+import org.jsoup.parser.Parser;
 import org.jsoup.safety.Whitelist;
 import org.owasp.encoder.Encode;
 
@@ -72,7 +73,7 @@ public class XSSRequestWrapper extends HttpServletRequestWrapper{
         if (StringUtil.isEmpty(value)) return value;
         
         value = Encode.forCDATA(value).replace("\0", "");
-        return Jsoup.clean(value, Whitelist.none());
+        return Parser.unescapeEntities(Jsoup.clean(value, Whitelist.none()), true); 
     }
     
     /**

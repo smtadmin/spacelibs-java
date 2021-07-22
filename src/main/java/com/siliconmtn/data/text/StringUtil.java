@@ -472,7 +472,7 @@ public class StringUtil {
 				StringUtil.defaultString(delimiter, ","), 
 				list
 					.stream()
-					.map(item -> (StringUtil.defaultString(symbol,"'") + item + StringUtil.defaultString(symbol,"'")))
+					.map(item -> (StringUtil.defaultString(symbol,"") + item + StringUtil.defaultString(symbol,"")))
 					.collect(Collectors.toList()));
 	}
 }

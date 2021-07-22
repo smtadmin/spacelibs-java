@@ -9,6 +9,7 @@ import java.util.Map;
 
 // Spacelibs java
 import com.siliconmtn.io.api.validation.validator.ValidationDTO;
+import com.siliconmtn.io.api.validation.validator.ValidatorIntfc.ValidatorType;
 
 /****************************************************************************
  * <b>Title:</b> AbstractParser.java
@@ -87,6 +88,37 @@ public abstract class AbstractParser implements ParserIntfc {
 	@Override
 	public List<ValidationDTO> requestParser(Object dataElement) throws IOException {
 		return new ArrayList<>();
+	}
+	
+	/**
+	 * Method to add to validation dto to lists
+	 * @param validationDTOList the list of ValidationDTO
+	 * @param validationDTO the Validation DTO object
+	 */
+	public void addDTOToList(List<ValidationDTO> validationDTOList, ValidationDTO validationDTO) {
+		validationDTOList.add(validationDTO);
+	}
+	
+	/**
+	 * Method to build List of Validation DTO 
+	 * @param validationDTOList The List of Validation DTO
+	 * @param value The value of response
+	 * @param type The ValidatorType of value
+	 * @param max The max range of value
+	 * @param min The min range of value
+	 */
+	public ValidationDTO build(ValidatorType type, String value,
+			Map<String, String> validOptions, boolean alternate, String max, String min) {
+		return ValidationDTO
+		.builder()
+		.value(value)
+		.type(type)
+		.validOptions(validOptions)
+		.alternateValidationId(alternate)
+		.min(min)
+		.max(max)
+		.build();
+		
 	}
 
 }

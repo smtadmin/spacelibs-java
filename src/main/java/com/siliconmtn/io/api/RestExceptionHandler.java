@@ -2,7 +2,6 @@ package com.siliconmtn.io.api;
 
 // Spring JPA
 import javax.persistence.EntityNotFoundException;
-import javax.validation.ConstraintViolationException;
 
 // Spring 5.x
 import org.springframework.beans.ConversionNotSupportedException;
@@ -263,20 +262,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handles javax.validation.ConstraintViolationException. Thrown when @Validated fails.
-     *
-     * @param ex the ConstraintViolationException
-     * @return the ApiErrorResponse object
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    protected ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex) {
-    	log.error(ex);
-    	EndpointResponse apiErrorResponse = new EndpointResponse(BAD_REQUEST);
-        apiErrorResponse.setMessage("Validation error");
-        return buildResponseEntity(apiErrorResponse);
-    }
-
-    /**
      * Handles EntityNotFoundException. Created to encapsulate errors with more 
      * detail than javax.persistence.EntityNotFoundException.
      *
@@ -382,9 +367,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     protected ResponseEntity<Object> handleDataIntegrityViolation(DataIntegrityViolationException ex,WebRequest request) {
     	log.error(ex);
-    	if (ex.getCause() instanceof ConstraintViolationException) {
-            return buildResponseEntity(new EndpointResponse(HttpStatus.CONFLICT, "Database error", ex.getCause()));
-        }
         return buildResponseEntity(new EndpointResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex));
     }
 
@@ -404,6 +386,22 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         String name = type == null ? "" : type.getSimpleName();
         String msg = "The parameter '%s' of value '%s' could not be converted to type '%s'";
         apiErrorResponse.setMessage(String.format(msg, ex.getName(), ex.getValue(), name));
+        apiErrorResponse.setDebugMessage(ex.getMessage());
+        return buildResponseEntity(apiErrorResponse);
+    } 
+    
+    /**
+     * Catch all handler to pick up any exceptions missed from the previous handlers
+     * 
+     * @param ex the Exception
+     * @param request WebRequest Metadata
+     * @return the ApiErrorResponse object
+     */
+    @ExceptionHandler({ NullPointerException.class })
+    protected ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
+        log.error(ex);
+        EndpointResponse apiErrorResponse = new EndpointResponse(BAD_REQUEST);
+        apiErrorResponse.setMessage(ex.getClass().getName());
         apiErrorResponse.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiErrorResponse);
     }

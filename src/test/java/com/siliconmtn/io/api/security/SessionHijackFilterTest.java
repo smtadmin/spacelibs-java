@@ -1,8 +1,11 @@
 package com.siliconmtn.io.api.security;
 
+import java.io.ByteArrayOutputStream;
+// JDK 11.x
+import java.io.PrintWriter;
+
 // Jee 7.x
 import javax.servlet.FilterChain;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -16,7 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 // Spacelibs 1.x
-import com.siliconmtn.io.ServletOutputStreamMock;
 import com.siliconmtn.io.http.HttpHeaders;
 
 /****************************************************************************
@@ -119,17 +121,17 @@ class SessionHijackFilterTest {
 	 */
 	@Test
 	void testDoFilterExistingMismatchIP() throws Exception {
-        ServletOutputStream sos = new ServletOutputStreamMock();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintWriter out = new PrintWriter(baos);
         when(req.getSession()).thenReturn(session);
         when(req.getRemoteAddr()).thenReturn("127.0.0.1");
 		when(session.getAttribute(SessionHijackFilter.USER_IP_ADDRESS)).thenReturn("128.0.0.1");
 		when(session.getAttribute(SessionHijackFilter.USER_AGENT)).thenReturn("MyBrowser");
 		when(req.getHeader(HttpHeaders.USER_AGENT)).thenReturn("MyBrowser");
         when(session.isNew()).thenReturn(false);
-        when(response.getOutputStream()).thenReturn(sos);
+        when(response.getWriter()).thenReturn(out);
         shj.doFilter(req, response, chain);
-        System.out.println("SOS: " + sos.toString());
-        assertTrue(sos.toString().indexOf("IP Address Changed") > -1);
+        assertTrue(new String(baos.toByteArray()).indexOf("IP Address Changed") > -1);
 	}
 
 	
@@ -138,16 +140,17 @@ class SessionHijackFilterTest {
 	 */
 	@Test
 	void testDoFilterExistingMismatchUA() throws Exception {
-		ServletOutputStream sos = new ServletOutputStreamMock();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		PrintWriter out = new PrintWriter(baos);
         when(req.getSession()).thenReturn(session);
         when(req.getRemoteAddr()).thenReturn("127.0.0.1");
 		when(session.getAttribute(SessionHijackFilter.USER_IP_ADDRESS)).thenReturn("127.0.0.1");
 		when(session.getAttribute(SessionHijackFilter.USER_AGENT)).thenReturn("MyBrowser");
 		when(req.getHeader(HttpHeaders.USER_AGENT)).thenReturn("YourBrowser");
         when(session.isNew()).thenReturn(false);
-        when(response.getOutputStream()).thenReturn(sos);
+        when(response.getWriter()).thenReturn(out);
         shj.doFilter(req, response, chain);
         
-        assertTrue(sos.toString().indexOf("User Agent Changed") > -1);
+        assertTrue(new String(baos.toByteArray()).indexOf("User Agent Changed") > -1);
 	}
 }

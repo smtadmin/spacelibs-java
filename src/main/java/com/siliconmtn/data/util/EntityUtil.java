@@ -5,15 +5,24 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
 // JPA
 import javax.persistence.EntityManager;
+import javax.persistence.Id;
 
 // Spring 5.3.x
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
+// SpaceLibs 1.x
+import com.siliconmtn.data.lang.ClassUtil;
+import com.siliconmtn.io.api.EndpointRequestException;
+import com.siliconmtn.io.api.base.BaseDTO;
+import com.siliconmtn.io.api.base.BaseEntity;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -53,29 +62,100 @@ public class EntityUtil {
 	 * @param entity Object to which the dto has to be mapped
 	 * @return an entity that was mapped by a dto
 	 */
-	public <T extends Object> T dtoToEntity(Object dto, Class<T> entity) {
+	@SuppressWarnings("unchecked")
+	public <T extends BaseEntity> T dtoToEntity(BaseDTO dto, Class<T> entity) {
+		if (dto == null || entity == null) return null;
 		T entityInstance = null;
 
 		try {
 			entityInstance = entity.getConstructor().newInstance();
-
-			for (Field dtoField : dto.getClass().getDeclaredFields()) {
-				Object value = getValueFromInstance(dtoField.getName(), dto);
-				Field entityField = entity.getDeclaredField(dtoField.getName());
-				
-				if (entityField.getType() != dtoField.getType() && value != null) {
-					value = entityManager.getReference(entityField.getType(), value);
-				}
-
-				setValueIntoInstance(dtoField.getName(), entityInstance, value);
-			}
-
+			
 		} catch (Exception e) {
-			log.error("unable to convert entity", e);
+			log.error("unable to create an entity from given class", e);
 			return null;
 		}
 		
-		return entityInstance;
+		return (T) dtoToEntity(dto, entityInstance);
+	}
+	
+	/**
+	 * Load a dtos data into an existing entity
+	 * 
+	 * @param dto the dto to load data from
+	 * @param entity the entity to update
+	 * @return the newly updated entity
+	 */
+	public BaseEntity dtoToEntity(BaseDTO dto, BaseEntity entity) {
+		if (dto == null || entity == null) return null;
+		
+		try {
+			for (var dtoField : dto.getClass().getDeclaredFields()) {
+				// Check for constants and continue
+				if (Modifier.isFinal(dtoField.getModifiers())) continue;
+				
+				var value = getValueFromInstance(dtoField.getName(), dto);
+				var entityField = entity.getClass().getDeclaredField(dtoField.getName());
+				
+				if (entityField.getType() != dtoField.getType() && value != null) {
+					value = entityManager.getReference(entityField.getType(), value);
+					if (value == null) 
+						throw new EndpointRequestException(
+								"dto conversion failed: " + entity.getClass().getSimpleName() + " not found within " + dto.getClass().getSimpleName(), 
+								HttpStatus.NOT_FOUND);
+				}
+				
+				setValueIntoInstance(dtoField.getName(), entity, value);
+			}
+			
+		} catch (Exception e) {
+			log.error("unable to convert dto to entity", e);
+			return null;
+		}
+		
+		return entity;
+	}
+	
+	/**
+	 * To map any given entity object into its respective dto object
+	 * @param <T> type of dto object being returned
+	 * @param entity the entity that needs to be mapped into dto
+	 * @param dto the dto type to map the entity into
+	 * @return a dto that was mapped by an entity
+	 */
+	public <T extends BaseDTO> T entityToDto(BaseEntity entity, Class<T> dto) {
+		if (entity == null || dto == null) return null;
+		T dtoInstance = null;
+
+		try {
+			dtoInstance = dto.getDeclaredConstructor().newInstance();
+
+			for (Field dtoField : dto.getDeclaredFields()) {
+				// Check for constants and continue
+				if (Modifier.isFinal(dtoField.getModifiers())) continue;
+				
+				Object value = getValueFromInstance(dtoField.getName(), entity);
+				var entityField = entity.getClass().getDeclaredField(dtoField.getName());
+				
+				if (entityField.getType() != dtoField.getType() && value != null) {
+					List<Field> fieldsWithId = ClassUtil.getFieldsByAnnotation(entityField.getType(), Id.class);
+					if (fieldsWithId.isEmpty()) {
+						value = null;
+					} else {
+						String fieldName = fieldsWithId.get(0).getName();
+						value = getValueFromInstance(fieldName, value);
+					}
+
+				}
+
+				setValueIntoInstance(dtoField.getName(), dtoInstance, value);
+			}
+
+		} catch (Exception ex) {
+			log.error("unable to convert to dto", ex);
+			return null;
+		}
+
+		return dtoInstance;
 	}
 	
 	/**
@@ -85,14 +165,33 @@ public class EntityUtil {
 	 * @param entity Entity to convert the DTOs
 	 * @return Collection of entities
 	 */
-	public <T extends Object> List<T> dtoListToEntity(List<?> dtos, Class<T> entity) {
+	@SuppressWarnings("unchecked")
+	public <T extends BaseEntity> List<T> dtoListToEntity(List<?> dtos, Class<T> entity) {
 		List<T> entities = new ArrayList<>();
 		
-		for (Object dto : dtos) {
+		for (BaseDTO dto : (List<BaseDTO>)dtos) {
 			entities.add(dtoToEntity(dto, entity));
 		}
 		
 		return entities;
+	}
+	
+	/**
+	 * Coverts a List of DTO objects into a list of their corresponding dto
+	 * @param <T> Type of DTO object being returned
+	 * @param entities List of Entity objects
+	 * @param dto DTO to convert the entities
+	 * @return Collection of DTOs
+	 */
+	@SuppressWarnings("unchecked")
+	public <T extends BaseDTO> List<T> entityListToDto(List<?> entities, Class<T> dto) {
+		List<T> dtos = new ArrayList<>();
+
+		for (BaseEntity entity : (List<BaseEntity>)entities) {
+			dtos.add(entityToDto(entity, dto));
+		}
+
+		return dtos;
 	}
 	
 	/**

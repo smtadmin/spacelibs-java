@@ -34,6 +34,7 @@ public class ValidationDTO {
 	private String min;
 	private String max;
 	private String regex;
+	private String uriText;
 	private boolean isRequired;
 	private ValidatorType type;
 	

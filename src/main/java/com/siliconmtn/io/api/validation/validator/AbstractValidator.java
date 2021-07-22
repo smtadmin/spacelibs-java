@@ -4,6 +4,7 @@ package com.siliconmtn.io.api.validation.validator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 // Spacelibs
 import com.siliconmtn.data.text.StringUtil;
@@ -43,6 +44,7 @@ public abstract class AbstractValidator implements ValidatorIntfc {
 			return errors;
 		}
 		
+		if (validation.getUriText() != null) validateUriText(validation, errors);		
 		if (validation.getMin() != null) validateMin(validation, errors);
 		if (validation.getMax() != null) validateMax(validation, errors);
 		if (validation.getRegex() != null) validateRegex(validation, errors);
@@ -80,13 +82,44 @@ public abstract class AbstractValidator implements ValidatorIntfc {
 			errors.add(ValidationErrorDTO.builder().elementId(validation.getElementId()).value(validation.getValue()).errorMessage("Value is required and nothing was set").validationError(ValidationError.REQUIRED).build());
 		}
 	}
+	
+	/**
+	 * Check to ensure that the supplied URI parameter matches the provided value.
+	 * This is used to ensure that the payload of the request and the uri we are using
+	 * to get through security are the same.
+	 * @param validation DTO to be validated
+	 * @param errors list of errors that will be returned after all validation is completed
+	 */
+	public void validateUriText(ValidationDTO validation, List<ValidationErrorDTO> errors) {
+		if (!validation.getUriText().equals(validation.getValue()))
+			errors.add(ValidationErrorDTO.builder()
+					.elementId(validation.getElementId())
+					.value(validation.getValue())
+					.errorMessage("Payload did not match provided uri.")
+					.validationError(ValidationError.URIMATCH)
+					.build());
+	}
 
 	/*
 	 * (non-javadoc)
 	 * @see com.siliconmtn.io.api.validation.validator.ValidatorIntfc#validateRegex(com.siliconmtn.io.api.validation.validator.ValidationDTO, java.util.List)
 	 */
 	@Override
-	public void validateRegex(ValidationDTO validation, List<ValidationErrorDTO> errors) { /* Empty default method */ }
+	public void validateRegex(ValidationDTO validation, List<ValidationErrorDTO> errors) { 
+		// If the value or the regex is empty, there's nothing to do
+		if (StringUtil.isEmpty(validation.getValue()) || StringUtil.isEmpty(validation.getRegex())) return;
+		
+		// Validate the regex against the data
+		if (Pattern.matches(validation.getRegex(), validation.getValue())) return;
+		
+		// If the metching fails, add the error
+		errors.add(ValidationErrorDTO.builder()
+				.elementId(validation.getElementId())
+				.value(validation.getValue())
+				.errorMessage("Payload did not match provided regex value.")
+				.validationError(ValidationError.REGEX)
+				.build());
+	}
 	
 	
 }

@@ -1,9 +1,14 @@
 package com.siliconmtn.data.text;
 
+import java.lang.reflect.Array;
 // JDK 11.x
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -422,5 +427,52 @@ public class StringUtil {
 	 */
 	public static String padRight(String src, char fill, int length) {
 		return pad(src, fill, length, true);
+	}
+	
+	/**
+	 * Join an array into a single string with a chosen symbol around each item, using
+	 * a delimiter to separate each item
+	 * @param array an array of objects
+	 * @param delimiter the delimiter between each item
+	 * @param symbol the type of encapsulating symbol
+	 * @return a `delimiter` delimited list surrounded by chosen symbols
+	 */
+	public static String join(Object array, String delimiter, String symbol) {        
+        List<Object> result = new ArrayList<>();
+        
+		for (var i = 0; i < Array.getLength(array); i++) 
+            result.add(Array.get(array, i));        
+    
+		return join(result, delimiter, symbol);
+	}
+	
+	/**
+	 * Join with default values of delimiter as a comma (,) and quote as a single quote (')
+	 * @param list the list to join into a string
+	 * @return the joined string
+	 */
+	public static String join(Collection<Object> list) {
+		return join(list, ",", "'");
+	}
+	
+	/**
+	 * Join a Collection into a single string with symbols around each item.
+	 * The delimiter can be added as a string, the quotes/symbols can also be added as a string.
+	 * Escape quotes/symbols as needed eg: "\"".
+	 * 
+	 * @param list the List to join
+	 * @param delimiter the delimiter between each item
+	 * @param symbol the type of quote/bracket/symbol around each item
+	 * @return a `delimiter` delimited list surrounded by `symbol` quotes
+	 */
+	public static String join(Collection<Object> list, String delimiter, String symbol) {
+		if (list == null) 
+			return "";
+		return String.join(
+				StringUtil.defaultString(delimiter, ","), 
+				list
+					.stream()
+					.map(item -> (StringUtil.defaultString(symbol,"") + item + StringUtil.defaultString(symbol,"")))
+					.collect(Collectors.toList()));
 	}
 }

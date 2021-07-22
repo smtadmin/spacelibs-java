@@ -1,14 +1,19 @@
 package com.siliconmtn.data.text;
 
 // Junit 5
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 // JDK 11.x
+import java.util.List;
 import java.util.UUID;
 
+import org.junit.jupiter.api.Test;
 // Mockito 3.7.0
 import org.mockito.Mockito;
 
@@ -16,7 +21,6 @@ import org.mockito.Mockito;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siliconmtn.data.bean.GenericVO;
-
 // Space Libs 1.x
 import com.siliconmtn.data.tree.Node;
 
@@ -292,5 +296,39 @@ class StringUtilTest {
 	void testRemoveNonAlphaLower() throws Exception {
 		assertNull(StringUtil.removeNonAlphaLower(null));
 		assertEquals("hellagain", StringUtil.removeNonAlphaLower("heHE- ll +LL#Oagain"));
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.text.StringUtil#join(java.lang.String)}.
+	 */
+	@Test
+	void testJoin() throws Exception {
+		Collection<Object> strings = List.of("hello", "world");
+		var result = StringUtil.join(strings);		
+		assertEquals("'hello','world'", result);
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.text.StringUtil#join(java.lang.String)}.
+	 */
+	@Test
+	void testJoinNull() throws Exception {
+		var nullList = (Collection<Object>) null;
+		var nullResult = StringUtil.join(nullList);			
+		assertEquals("", nullResult);				
+	}
+	
+	/**
+	 * Test method for {@link com.siliconmtn.data.text.StringUtil#join(java.lang.String)}.
+	 */
+	@Test
+	void testJoinArray() throws Exception {
+		var array = new int[]{1,2,3};
+		var result = StringUtil.join(array, ",","'");
+		assertEquals("'1','2','3'", result);
+		
+		var array2 = new Integer[]{1,2,3};
+		result = StringUtil.join(array2, ",","'");
+		assertEquals("'1','2','3'", result);		
 	}
 }

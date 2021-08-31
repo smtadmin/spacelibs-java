@@ -19,7 +19,7 @@ plugins {
 }
 
 group = 'com.siliconmtn'
-version = '1.2.0'
+version = '1.1.6.7-SNAPSHOT'
 sourceCompatibility = '11'
 archivesBaseName = "spacelibs-java"
 
@@ -47,7 +47,7 @@ dependencies {
 	
 	// XSS content validation/filtering
 	implementation 'org.owasp.encoder:encoder:1.2.3'
-	implementation 'org.jsoup:jsoup:1.13.1'
+	implementation 'org.jsoup:jsoup:1.14.2'
 	implementation 'com.auth0:java-jwt:3.14.0'
 	
     // Testing

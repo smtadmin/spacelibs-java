@@ -1,11 +1,22 @@
 package com.siliconmtn.io.api;
 
-// JEE 7
-import javax.persistence.EntityNotFoundException;
-
 //Junit 5
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Method;
+// JDK 11.x
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+// JEE 7
+import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Path;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -34,11 +45,6 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.siliconmtn.io.api.security.SecurityAuthorizationException;
-
-import java.lang.reflect.Method;
-// JDK 11.x
-import java.util.ArrayList;
-import java.util.List;
 
 class RestExceptionHandlerTest {
 	
@@ -325,6 +331,31 @@ class RestExceptionHandlerTest {
 		ResponseEntity<Object> resp = rest.handleAll(new HttpMessageConversionException(""), null);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		assertEquals(HttpMessageConversionException.class.getName(), ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#onConstraintViolationException(javax.validation.ConstraintViolationException)}.
+	 */
+	@Test
+	void testOnConstraintViolationException() throws Exception {
+		var exception = mock(ConstraintViolationException.class);
+		var violation = mock(ConstraintViolation.class);
+		var violations = new HashSet<ConstraintViolation<?>>();
+		var path = mock(Path.class);
+		violations.add(violation);
+		
+		when(exception.getConstraintViolations()).thenReturn(violations);
+		when(violation.getPropertyPath()).thenReturn(path);
+		when(path.toString()).thenReturn("dog");
+		when(violation.getInvalidValue()).thenReturn("cat");
+		when(violation.getMessage()).thenReturn("not good");
+		
+		var rest = new RestExceptionHandler();
+		var resp = rest.onConstraintViolationException(exception);
+		
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Input validation error", ((EndpointResponse)resp.getBody()).getMessage());
+		
 	}
 
 }

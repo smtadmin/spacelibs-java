@@ -1,7 +1,13 @@
 package com.siliconmtn.io.api;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
+import java.util.ArrayList;
+
 // Spring JPA
 import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolationException;
 
 // Spring 5.x
 import org.springframework.beans.ConversionNotSupportedException;
@@ -14,27 +20,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.validation.BindException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import com.siliconmtn.io.api.security.SecurityAuthorizationException;
-
-import org.springframework.validation.BindException;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.bind.MissingPathVariableException;
-import org.springframework.web.bind.ServletRequestBindingException;
-import org.springframework.web.multipart.support.MissingServletRequestPartException;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import com.siliconmtn.io.api.validation.ValidationErrorDTO;
+import com.siliconmtn.io.api.validation.ValidationErrorDTO.ValidationError;
 
 // Log4J 2.x
 import lombok.extern.log4j.Log4j2;
@@ -389,6 +395,32 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         apiErrorResponse.setDebugMessage(ex.getMessage());
         return buildResponseEntity(apiErrorResponse);
     } 
+    
+	/**
+	 * Handle Constraint violations in data validation
+	 * 
+	 * @param e The exception
+	 * @return the ApiErrorResponse object
+	 */
+	@ExceptionHandler(ConstraintViolationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	protected ResponseEntity<Object> onConstraintViolationException(ConstraintViolationException e) {
+		var failedValidations = new ArrayList<ValidationErrorDTO>();
+		for (var violation : e.getConstraintViolations()) {
+			var validationError = ValidationErrorDTO.builder()
+					.elementId(violation.getPropertyPath().toString())
+					.value(violation.getInvalidValue())
+					.errorMessage(violation.getMessage())
+					.validationError(ValidationError.PARSE)
+					.build();
+			failedValidations.add(validationError);
+		}
+		var apiErrorResponse = new EndpointResponse(BAD_REQUEST);
+		apiErrorResponse.setFailedValidations(failedValidations);
+		apiErrorResponse.setMessage("Input validation error");
+		apiErrorResponse.setDebugMessage(e.getMessage());
+		return buildResponseEntity(apiErrorResponse);
+	}
     
     /**
      * Catch all handler to pick up any exceptions missed from the previous handlers

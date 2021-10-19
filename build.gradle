@@ -43,6 +43,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	implementation 'org.springframework.security:spring-security-crypto:5.5.2'
 	implementation 'org.hibernate:hibernate-validator:7.0.1.Final'
 	
 	// XSS content validation/filtering

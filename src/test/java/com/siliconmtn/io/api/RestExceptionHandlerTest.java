@@ -2,7 +2,6 @@ package com.siliconmtn.io.api;
 
 // JEE 7
 import javax.persistence.EntityNotFoundException;
-import javax.validation.ConstraintViolationException;
 
 //Junit 5
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.validation.BindException;
@@ -84,19 +84,6 @@ class RestExceptionHandlerTest {
 		
 		RestExceptionHandler  rest = new RestExceptionHandler();
 		ResponseEntity<Object> resp = rest.handleMethodArgumentNotValid(new MethodArgumentNotValidException(p, b), null, null, null);
-
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals("Validation error", ((EndpointResponse)resp.getBody()).getMessage());
-    }
-	
-	/**
-	 * Test handleHttpMediaTypeNotSupported exception
-	 * @throws Exception
-	 */
-	@Test
-    void testHandleConstraintViolation() throws Exception {
-		RestExceptionHandler  rest = new RestExceptionHandler();
-		ResponseEntity<Object> resp = rest.handleConstraintViolation(new ConstraintViolationException(null));
 
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		assertEquals("Validation error", ((EndpointResponse)resp.getBody()).getMessage());
@@ -179,22 +166,7 @@ class RestExceptionHandlerTest {
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, resp.getStatusCode());
 		assertEquals("Unexpected error", ((EndpointResponse)resp.getBody()).getMessage());
-    }
-	
-	/**
-	 * Test handleDataIntegrityViolation exception
-	 * @throws Exception
-	 */
-	@Test
-    void testHandleDataIntegrityConstraintViolation() throws Exception {
-		RestExceptionHandler  rest = new RestExceptionHandler();
-		ResponseEntity<Object> resp = rest.handleDataIntegrityViolation(new DataIntegrityViolationException("Data error", 
-				new ConstraintViolationException(null)) {private static final long serialVersionUID = 1L;}, null);
-
-		assertEquals(HttpStatus.CONFLICT, resp.getStatusCode());
-		assertEquals("Database error", ((EndpointResponse)resp.getBody()).getMessage());
-    }
-	
+    }	
 	
 	/**
 	 * Test handleMethodArgumentTypeMismatch exception
@@ -342,6 +314,17 @@ class RestExceptionHandlerTest {
 		ResponseEntity<Object> resp = rest.handleSecurityAuthorizationException(new SecurityAuthorizationException("test"));
 		assertEquals(HttpStatus.FORBIDDEN, resp.getStatusCode());
 		assertEquals("test", ((EndpointResponse)resp.getBody()).getMessage());
+	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleAll(java.lang.Exception, org.springframework.web.context.request.WebRequest)}.
+	 */
+	@Test
+	void testHandleAll() throws Exception {
+		RestExceptionHandler  rest = new RestExceptionHandler();
+		ResponseEntity<Object> resp = rest.handleAll(new HttpMessageConversionException(""), null);
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals(HttpMessageConversionException.class.getName(), ((EndpointResponse)resp.getBody()).getMessage());
 	}
 
 }

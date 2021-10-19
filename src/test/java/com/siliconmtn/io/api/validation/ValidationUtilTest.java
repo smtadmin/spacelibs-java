@@ -297,13 +297,13 @@ class ValidationUtilTest {
 		
 		List<ValidationErrorDTO> errors = ValidationUtil.validateData(fields);
 		
-		assertEquals(6, errors.size());
-		assertEquals(ValidationError.PARSE, errors.get(0).getValidationError());
+		assertEquals(7, errors.size());
 		assertEquals(ValidationError.PARSE, errors.get(1).getValidationError());
 		assertEquals(ValidationError.PARSE, errors.get(2).getValidationError());
-		assertEquals(ValidationError.RANGE, errors.get(3).getValidationError());
+		assertEquals(ValidationError.PARSE, errors.get(3).getValidationError());
 		assertEquals(ValidationError.RANGE, errors.get(4).getValidationError());
-		assertEquals(ValidationError.REQUIRED, errors.get(5).getValidationError());
+		assertEquals(ValidationError.RANGE, errors.get(5).getValidationError());
+		assertEquals(ValidationError.REQUIRED, errors.get(6).getValidationError());
 		
 	}
 
@@ -400,11 +400,11 @@ class ValidationUtilTest {
 		
 		List<ValidationErrorDTO> errors = ValidationUtil.validateData(fields);
 		
-		assertEquals(4, errors.size());
-		assertEquals(ValidationError.PARSE, errors.get(0).getValidationError());
-		assertEquals(ValidationError.RANGE, errors.get(1).getValidationError());
+		assertEquals(5, errors.size());
+		assertEquals(ValidationError.PARSE, errors.get(1).getValidationError());
 		assertEquals(ValidationError.RANGE, errors.get(2).getValidationError());
-		assertEquals(ValidationError.REQUIRED, errors.get(3).getValidationError());
+		assertEquals(ValidationError.RANGE, errors.get(3).getValidationError());
+		assertEquals(ValidationError.REQUIRED, errors.get(4).getValidationError());
 		
 	}
 	

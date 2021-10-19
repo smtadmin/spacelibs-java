@@ -249,25 +249,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Handle MethodArgumentNotValidException. Triggered when an object fails @Valid validation.
-     *
-     * @param ex      the MethodArgumentNotValidException that is thrown when @Valid validation fails
-     * @param headers HttpHeaders Response headers
-     * @param status  HttpStatus to be returned
-     * @param request WebRequest Request Metadata
-     * @return the ApiErrorResponse object
-     */
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-            HttpHeaders headers, HttpStatus status, WebRequest request) {
-    	log.error(ex);
-    	EndpointResponse apiErrorResponse = new EndpointResponse(BAD_REQUEST);
-        apiErrorResponse.setMessage("Validation error");
-
-        return buildResponseEntity(apiErrorResponse);
-    }
-
-    /**
      * Handles EntityNotFoundException. Created to encapsulate errors with more 
      * detail than javax.persistence.EntityNotFoundException.
      *
@@ -406,7 +387,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	protected ResponseEntity<Object> onConstraintViolationException(ConstraintViolationException e) {
 		var failedValidations = new ArrayList<ValidationErrorDTO>();
-		for (var violation : e.getConstraintViolations()) {
+		for (var violation : e.getConstraintViolations()) 
+		{
 			var validationError = ValidationErrorDTO.builder()
 					.elementId(violation.getPropertyPath().toString())
 					.value(violation.getInvalidValue())
@@ -415,12 +397,49 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 					.build();
 			failedValidations.add(validationError);
 		}
+		
 		var apiErrorResponse = new EndpointResponse(BAD_REQUEST);
 		apiErrorResponse.setFailedValidations(failedValidations);
 		apiErrorResponse.setMessage("Input validation error");
 		apiErrorResponse.setDebugMessage(e.getMessage());
+		
 		return buildResponseEntity(apiErrorResponse);
 	}
+	
+    /**
+     * Handle MethodArgumentNotValidException. Triggered when an object fails @Valid validation.
+     *
+     * @param ex      the MethodArgumentNotValidException that is thrown when @Valid validation fails
+     * @param headers HttpHeaders Response headers
+     * @param status  HttpStatus to be returned
+     * @param request WebRequest Request Metadata
+     * @return the ApiErrorResponse object
+     */
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+    		MethodArgumentNotValidException ex,
+            HttpHeaders headers, 
+            HttpStatus status, 
+            WebRequest request) 
+    {
+    	var failedValidations = new ArrayList<ValidationErrorDTO>();
+    	for (var violation : ex.getBindingResult().getFieldErrors()) 
+    	{
+    		var validationError = ValidationErrorDTO.builder()
+    				.elementId(violation.getField())
+    				.errorMessage(violation.getDefaultMessage())
+    				.value(violation.getRejectedValue())
+    				.validationError(ValidationError.PARSE)
+    				.build();
+    		failedValidations.add(validationError);
+    	}
+    	
+    	var apiErrorResponse = new EndpointResponse(BAD_REQUEST);
+        apiErrorResponse.setMessage("Input validation error");
+        apiErrorResponse.setFailedValidations(failedValidations);
+        
+        return buildResponseEntity(apiErrorResponse);
+    }
     
     /**
      * Catch all handler to pick up any exceptions missed from the previous handlers

@@ -22,6 +22,7 @@ import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.validation.BindException;
 // Spring 5.5.x
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -76,23 +78,6 @@ class RestExceptionHandlerTest {
 
 		assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, resp.getStatusCode());
 		assertEquals("image/png media type is not supported. Supported media types are application/pdf, application/json", ((EndpointResponse)resp.getBody()).getMessage());
-    }
-	
-	/**
-	 * Test handleHttpMediaTypeNotSupported exception
-	 * @throws Exception
-	 */
-	@Test
-    void testHandleMethodArgumentNotValid() throws Exception {
-		Method m = String.class.getDeclaredMethod("concat", String.class);
-		MethodParameter p = new MethodParameter(m, 0);
-		BindingResult b = mock(BindingResult.class);
-		
-		RestExceptionHandler  rest = new RestExceptionHandler();
-		ResponseEntity<Object> resp = rest.handleMethodArgumentNotValid(new MethodArgumentNotValidException(p, b), null, null, null);
-
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals("Validation error", ((EndpointResponse)resp.getBody()).getMessage());
     }
 	
 	/**
@@ -354,8 +339,32 @@ class RestExceptionHandlerTest {
 		var resp = rest.onConstraintViolationException(exception);
 		
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals("Input validation error", ((EndpointResponse)resp.getBody()).getMessage());
-		
+		assertEquals("Input validation error", ((EndpointResponse)resp.getBody()).getMessage());		
 	}
+	
+	/**
+	 * Test handleHttpMediaTypeNotSupported exception
+	 * @throws Exception
+	 */
+	@Test
+    void testHandleMethodArgumentNotValid() throws Exception {
+		var exception = mock(MethodArgumentNotValidException.class);
+		var violation = mock(FieldError.class);
+		var violations = new ArrayList<FieldError>();
+		var bindingResult = mock(BindingResult.class);
+		violations.add(violation);
+		
+		when(exception.getBindingResult()).thenReturn(bindingResult);
+		when(bindingResult.getFieldErrors()).thenReturn(violations);
+		when(violation.getField()).thenReturn("dog");
+		when(violation.getRejectedValue()).thenReturn("cat");
+		when(violation.getDefaultMessage()).thenReturn("not good");
+		
+		var rest = new RestExceptionHandler();
+		var resp = rest.handleMethodArgumentNotValid(exception, mock(HttpHeaders.class), mock(HttpStatus.class), mock(WebRequest.class));
+		
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Input validation error", ((EndpointResponse)resp.getBody()).getMessage());
+    }
 
 }

@@ -10,12 +10,12 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java'
     id 'jacoco'
-    id 'org.springframework.boot' version '2.4.4'
+    id 'org.springframework.boot' version '2.5.2'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-	id 'io.freefair.lombok' version '5.3.0'
+	id 'io.freefair.lombok' version '6.1.0-m1'
 	id 'signing'
 	id 'maven-publish'
-	id "org.owasp.dependencycheck" version "6.1.3"
+	id "org.owasp.dependencycheck" version "6.2.2"
 }
 
 group = 'com.siliconmtn'
@@ -44,18 +44,19 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.security:spring-security-crypto:5.5.2'
 	implementation 'org.hibernate:hibernate-validator:7.0.1.Final'
 	
 	// XSS content validation/filtering
 	implementation 'org.owasp.encoder:encoder:1.2.3'
-	implementation 'org.jsoup:jsoup:1.13.1'
+	implementation 'org.jsoup:jsoup:1.14.2'
 	implementation 'com.auth0:java-jwt:3.14.0'
 	
     // Testing
     testImplementation 'org.springframework.security:spring-security-test'
-    implementation 'org.mockito:mockito-core:3.7.0'
-	implementation 'org.mockito:mockito-inline:3.7.0'
+    testImplementation 'org.mockito:mockito-core:3.10.0'
+	testImplementation 'org.mockito:mockito-inline:3.10.0'
 	testImplementation('org.springframework.boot:spring-boot-starter-test'){
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
@@ -76,9 +77,9 @@ test {
 
 jacocoTestReport {
 	reports {
-        xml.enabled true
-        csv.enabled false
-        html.enabled true
+        xml.required = true
+        csv.required = false
+        html.required = true
 	}
 	dependsOn test
 }

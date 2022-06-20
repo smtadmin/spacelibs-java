@@ -50,6 +50,10 @@ dependencies {
 	implementation 'org.jsoup:jsoup:1.13.1'
 	implementation 'com.auth0:java-jwt:3.14.0'
 	
+	// AWS Imports for the S3 Buckets
+	implementation platform('software.amazon.awssdk:bom:2.17.213')
+	implementation 'software.amazon.awssdk:s3'
+	
     // Testing
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.mockito:mockito-core:3.7.0'

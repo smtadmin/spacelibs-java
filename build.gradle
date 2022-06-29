@@ -10,7 +10,7 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java'
     id 'jacoco'
-    id 'org.springframework.boot' version '2.5.2'
+    id 'org.springframework.boot' version '2.6.5'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'io.freefair.lombok' version '6.1.0-m1'
 	id 'signing'
@@ -19,7 +19,7 @@ plugins {
 }
 
 group = 'com.siliconmtn'
-version = '1.2.0'
+version = '1.1.7-SNAPSHOT'
 sourceCompatibility = '11'
 archivesBaseName = "spacelibs-java"
 
@@ -36,7 +36,7 @@ dependencies {
     implementation 'com.googlecode.libphonenumber:libphonenumber:8.12.16'
 	implementation 'org.apache.logging.log4j:log4j-api:2.14.0'
 	implementation 'org.apache.logging.log4j:log4j-core:2.14.0'
-	implementation 'org.apache.poi:poi:5.0.0'
+	implementation 'org.apache.poi:poi:5.2.1'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3'
 	
 	// Spring Boot (Starters -> https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-starter)

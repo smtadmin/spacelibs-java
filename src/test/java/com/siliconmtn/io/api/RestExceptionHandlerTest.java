@@ -1,16 +1,28 @@
 package com.siliconmtn.io.api;
 
-// JEE 7
-import javax.persistence.EntityNotFoundException;
-
 //Junit 5
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Method;
+// JDK 11.x
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
+// JEE 7
+import javax.persistence.EntityNotFoundException;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Path;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +32,7 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.validation.BindException;
 // Spring 5.5.x
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -34,11 +47,6 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.siliconmtn.io.api.security.SecurityAuthorizationException;
-
-import java.lang.reflect.Method;
-// JDK 11.x
-import java.util.ArrayList;
-import java.util.List;
 
 class RestExceptionHandlerTest {
 	
@@ -70,23 +78,6 @@ class RestExceptionHandlerTest {
 
 		assertEquals(HttpStatus.UNSUPPORTED_MEDIA_TYPE, resp.getStatusCode());
 		assertEquals("image/png media type is not supported. Supported media types are application/pdf, application/json", ((EndpointResponse)resp.getBody()).getMessage());
-    }
-	
-	/**
-	 * Test handleHttpMediaTypeNotSupported exception
-	 * @throws Exception
-	 */
-	@Test
-    void testHandleMethodArgumentNotValid() throws Exception {
-		Method m = String.class.getDeclaredMethod("concat", String.class);
-		MethodParameter p = new MethodParameter(m, 0);
-		BindingResult b = mock(BindingResult.class);
-		
-		RestExceptionHandler  rest = new RestExceptionHandler();
-		ResponseEntity<Object> resp = rest.handleMethodArgumentNotValid(new MethodArgumentNotValidException(p, b), null, null, null);
-
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals("Validation error", ((EndpointResponse)resp.getBody()).getMessage());
     }
 	
 	/**
@@ -326,5 +317,54 @@ class RestExceptionHandlerTest {
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		assertEquals(HttpMessageConversionException.class.getName(), ((EndpointResponse)resp.getBody()).getMessage());
 	}
+
+	/**
+	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#onConstraintViolationException(javax.validation.ConstraintViolationException)}.
+	 */
+	@Test
+	void testOnConstraintViolationException() throws Exception {
+		var exception = mock(ConstraintViolationException.class);
+		var violation = mock(ConstraintViolation.class);
+		var violations = new HashSet<ConstraintViolation<?>>();
+		var path = mock(Path.class);
+		violations.add(violation);
+		
+		when(exception.getConstraintViolations()).thenReturn(violations);
+		when(violation.getPropertyPath()).thenReturn(path);
+		when(path.toString()).thenReturn("dog");
+		when(violation.getInvalidValue()).thenReturn("cat");
+		when(violation.getMessage()).thenReturn("not good");
+		
+		var rest = new RestExceptionHandler();
+		var resp = rest.onConstraintViolationException(exception);
+		
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Input validation error", ((EndpointResponse)resp.getBody()).getMessage());		
+	}
+	
+	/**
+	 * Test handleHttpMediaTypeNotSupported exception
+	 * @throws Exception
+	 */
+	@Test
+    void testHandleMethodArgumentNotValid() throws Exception {
+		var exception = mock(MethodArgumentNotValidException.class);
+		var violation = mock(FieldError.class);
+		var violations = new ArrayList<FieldError>();
+		var bindingResult = mock(BindingResult.class);
+		violations.add(violation);
+		
+		when(exception.getBindingResult()).thenReturn(bindingResult);
+		when(bindingResult.getFieldErrors()).thenReturn(violations);
+		when(violation.getField()).thenReturn("dog");
+		when(violation.getRejectedValue()).thenReturn("cat");
+		when(violation.getDefaultMessage()).thenReturn("not good");
+		
+		var rest = new RestExceptionHandler();
+		var resp = rest.handleMethodArgumentNotValid(exception, mock(HttpHeaders.class), mock(HttpStatus.class), mock(WebRequest.class));
+		
+		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
+		assertEquals("Input validation error", ((EndpointResponse)resp.getBody()).getMessage());
+    }
 
 }

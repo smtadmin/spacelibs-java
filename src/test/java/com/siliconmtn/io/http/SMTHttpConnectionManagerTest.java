@@ -120,8 +120,12 @@ class SMTHttpConnectionManagerTest {
 		// Valid the exception when null is passed
 		String nullUrl = null;
 		URL nullURL = null;
-		assertThrows(IOException.class, () -> connection.getRequestData(nullUrl, null, HttpConnectionType.GET));
-	    assertThrows(IOException.class, () -> connection.getRequestData(nullURL, null, HttpConnectionType.GET));
+		Map<String, Object> nullBodyMap = null;
+		assertThrows(IOException.class, () -> connection.getRequestData(nullUrl, nullBodyMap, HttpConnectionType.GET));
+	    assertThrows(IOException.class, () -> connection.getRequestData(nullURL, nullBodyMap, HttpConnectionType.GET));
+	    byte[] nullBodyBytes = null;
+	    assertThrows(IOException.class, () -> connection.getRequestData(nullURL, nullBodyBytes, HttpConnectionType.GET));
+	    //assertThrows(IOException.class, () -> connection.getRequestData(nullUrl, nullBodyBytes, HttpConnectionType.GET));
 	    
 		// Tests with a URL Class
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
@@ -131,14 +135,14 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getInputStream()).thenReturn(mis);
 		when(mockUrlConn.getErrorStream()).thenReturn(mis);
 		doReturn(200).when(mockUrlConn).getResponseCode();
-	    assertEquals("Hello World", new String(connection.getRequestData(mockUrl, null, HttpConnectionType.GET)));
+	    assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyMap, HttpConnectionType.GET)));
 	}
 
 	/**Cookie
 	 * Retrieves the data from the end server.  Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataString () throws Exception {
+	void testGetRequestDataStringMap () throws Exception {
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
 		Mockito.doReturn(mockUrl).when(connection).createURL(url);
@@ -148,14 +152,33 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getInputStream()).thenReturn(IOUtils.toInputStream("Hello World", "UTF-8"));
 		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
 		doReturn(200).when(mockUrlConn).getResponseCode();
-		assertEquals("Hello World", new String(connection.getRequestData(url, null, HttpConnectionType.GET)));
+		Map<String, Object> nullBodyMap = null;
+		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyMap, HttpConnectionType.GET)));
+	}
+	
+	/**Cookie
+	 * Retrieves the data from the end server.  Needs an http mock
+	 */
+	@Test
+	void testGetRequestDataStringBytes () throws Exception {
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		connection = Mockito.spy(connection);
+		Mockito.doReturn(mockUrl).when(connection).createURL(url);
+
+		mockUrlConn = mock(HttpURLConnection.class);
+		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
+		when(mockUrlConn.getInputStream()).thenReturn(IOUtils.toInputStream("Hello World", "UTF-8"));
+		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
+		doReturn(200).when(mockUrlConn).getResponseCode();
+		byte[] nullBodyBytes = null;
+		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyBytes, HttpConnectionType.GET)));
 	}
 	
 	/**
 	 * Retrieves the data from the end server.  Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringNulls () throws Exception {
+	void testGetRequestDataStringNullsMap () throws Exception {
 		connection.setConnectionTimeout(1000);
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
@@ -167,14 +190,35 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
 		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
 		doReturn(200).when(mockUrlConn).getResponseCode();
-		assertEquals("Hello World", new String(connection.getRequestData(url, null, null)));
+		Map<String, Object> nullBodyMap = null;
+		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyMap, null)));
 	}
 	
 	/**
 	 * Retrieves the data from the end server.  Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringPut () throws Exception {
+	void testGetRequestDataStringNullsBytes () throws Exception {
+		connection.setConnectionTimeout(1000);
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		connection = Mockito.spy(connection);
+		Mockito.doReturn(mockUrl).when(connection).createURL(url);
+
+		mockUrlConn = mock(HttpURLConnection.class);
+		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
+		when(mockUrlConn.getInputStream()).thenReturn(IOUtils.toInputStream("Hello World", "UTF-8"));
+		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
+		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
+		doReturn(200).when(mockUrlConn).getResponseCode();
+		byte[] nullBodyBytes = null;
+		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyBytes, null)));
+	}
+	
+	/**
+	 * Retrieves the data from the end server.  Needs an http mock
+	 */
+	@Test
+	void testGetRequestDataStringPutMap () throws Exception {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
@@ -188,7 +232,30 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
 		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
 		doReturn(200).when(mockUrlConn).getResponseCode();
-		assertEquals("Hello World", new String(connection.getRequestData(url, null, HttpConnectionType.PUT)));
+		Map<String, Object> nullBodyMap = null;
+		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyMap, HttpConnectionType.PUT)));
+	}
+	
+	/**
+	 * Retrieves the data from the end server.  Needs an http mock
+	 */
+	@Test
+	void testGetRequestDataStringPutBytes () throws Exception {
+		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
+		connection.setRequestHeaders(headers);
+		connection.setConnectionTimeout(1000);
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		connection = Mockito.spy(connection);
+		Mockito.doReturn(mockUrl).when(connection).createURL(url);
+
+		mockUrlConn = mock(HttpURLConnection.class);
+		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
+		when(mockUrlConn.getInputStream()).thenReturn(IOUtils.toInputStream("Hello World", "UTF-8"));
+		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
+		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
+		doReturn(200).when(mockUrlConn).getResponseCode();
+		byte[] nullBodyBytes = null;
+		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyBytes, HttpConnectionType.PUT)));
 	}
 	
 	
@@ -196,7 +263,7 @@ class SMTHttpConnectionManagerTest {
 	 * Retrieves the data from the end server.  Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataURL () throws Exception {
+	void testGetRequestDataURLMap () throws Exception {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
@@ -208,14 +275,15 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
 		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
 		doReturn(200).when(mockUrlConn).getResponseCode();
-		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, null, HttpConnectionType.PUT)));
+		Map<String, Object> nullBodyMap = null;
+		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyMap, HttpConnectionType.PUT)));
 	}
 	
 	/**
 	 * Retrieves the data from the end server.  Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataURLNull () throws Exception {
+	void testGetRequestDataURLBytes () throws Exception {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
@@ -227,14 +295,55 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
 		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
 		doReturn(200).when(mockUrlConn).getResponseCode();
-		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, null, null)));
+		byte[] nullBodyBytes = null;
+		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyBytes, HttpConnectionType.PUT)));
 	}
 	
 	/**
 	 * Retrieves the data from the end server.  Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringPutNoHeader () throws Exception {
+	void testGetRequestDataURLNullMap () throws Exception {
+		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
+		connection.setRequestHeaders(headers);
+		connection.setConnectionTimeout(1000);
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+
+		mockUrlConn = mock(HttpURLConnection.class);
+		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
+		when(mockUrlConn.getInputStream()).thenReturn(IOUtils.toInputStream("Hello World", "UTF-8"));
+		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
+		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
+		doReturn(200).when(mockUrlConn).getResponseCode();
+		Map<String, Object> nullBodyMap = null;
+		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyMap, null)));
+	}
+	
+	/**
+	 * Retrieves the data from the end server.  Needs an http mock
+	 */
+	@Test
+	void testGetRequestDataURLNullBytes () throws Exception {
+		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
+		connection.setRequestHeaders(headers);
+		connection.setConnectionTimeout(1000);
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+
+		mockUrlConn = mock(HttpURLConnection.class);
+		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
+		when(mockUrlConn.getInputStream()).thenReturn(IOUtils.toInputStream("Hello World", "UTF-8"));
+		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
+		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
+		doReturn(200).when(mockUrlConn).getResponseCode();
+		byte[] nullBodyBytes = null;
+		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyBytes, null)));
+	}
+	
+	/**
+	 * Retrieves the data from the end server.  Needs an http mock
+	 */
+	@Test
+	void testGetRequestDataStringPutNoHeaderMap () throws Exception {
 		connection.setConnectionTimeout(1000);
 		connection.setUseCookieHandler(true);
 		connection = Mockito.spy(connection);
@@ -247,7 +356,29 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
 		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
 		doReturn(200).when(mockUrlConn).getResponseCode();
-		assertEquals("Hello World", new String(connection.getRequestData(url, null, HttpConnectionType.PUT)));
+		Map<String, Object> nullBodyMap = null;
+		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyMap, HttpConnectionType.PUT)));
+	}
+	
+	/**
+	 * Retrieves the data from the end server.  Needs an http mock
+	 */
+	@Test
+	void testGetRequestDataStringPutNoHeaderBytes () throws Exception {
+		connection.setConnectionTimeout(1000);
+		connection.setUseCookieHandler(true);
+		connection = Mockito.spy(connection);
+		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
+		Mockito.doReturn(mockUrl).when(connection).createURL(url);
+
+		mockUrlConn = mock(HttpURLConnection.class);
+		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
+		when(mockUrlConn.getInputStream()).thenReturn(IOUtils.toInputStream("Hello World", "UTF-8"));
+		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Error Message", "UTF-8"));
+		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
+		doReturn(200).when(mockUrlConn).getResponseCode();
+		byte[] nullBodyBytes = null;
+		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyBytes, HttpConnectionType.PUT)));
 	}
 
 	/**

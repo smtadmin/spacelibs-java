@@ -197,6 +197,42 @@ public class SMTHttpConnectionManager {
 		if (url == null) throw new IOException("Url is required");
 		return connect(url, convertPostData(parameters), type == null ? HttpConnectionType.POST : type);
 	}
+	
+    /**
+     * Retrieves data from an end point via the provided HTTP Request Type
+     * (GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE).  Returns data as a byte array since the 
+     * requested data may be binary
+     * @param url Url to call.
+     * @param data Data sent in the body of the message
+     * Do NOT include the ? in the Url or paramters
+     * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE
+     * @return byte data from the end point server
+     * @throws IOException
+     */
+    public byte[] getRequestData(URL url, byte[] data, HttpConnectionType type) 
+    throws IOException {
+        if (url == null) throw new IOException("Url is required");
+        return connect(url, data == null ? new byte[0] : data, type == null ? HttpConnectionType.POST : type);
+    }
+    
+    /**
+     * Retrieves data from an end point via the provided HTTP Request Type
+     * (GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE).  Returns data as a byte array since the 
+     * requested data may be binary
+     * @param url Url to call.
+     * @param data Data sent in the body of the message
+     * Do NOT include the ? in the Url or paramters
+     * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE
+     * @return byte data from the end point server
+     * @throws IOException
+     */
+    
+    public byte[] getRequestData(String url, byte[] data, HttpConnectionType type) 
+    throws IOException {
+        if (url == null) throw new IOException("Url is required");
+        return connect(createURL(url), data == null ? new byte[0] : data, type == null ? HttpConnectionType.POST : type);
+    }
+    
 
 	/**
 	 * Connects to a HTTP server using the supplied URL and gets the data

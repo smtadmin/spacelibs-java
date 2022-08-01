@@ -591,6 +591,15 @@ public class SMTHttpConnectionManager {
 	}
 	
 	/**
+	 * Adds a request header that will be passed on the request
+	 * @param key
+	 * @param value
+	 */
+	public void addRequestHeader(String key, String value) {
+		requestHeaders.put(key, value);
+	}
+	
+	/**
 	 * Adds a header map value for the HTTP connection
 	 * @param key Cookie unique identifier
 	 * @param value Cookie value

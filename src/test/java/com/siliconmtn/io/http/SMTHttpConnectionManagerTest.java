@@ -435,6 +435,35 @@ class SMTHttpConnectionManagerTest {
 		connection.setRequestHeaders(headers);
 		assertEquals(3, connection.getRequestHeaders().size());
 	}
+	
+	/**
+	 * 
+	 * @throws Exception
+	 */
+	@Test
+	void testAddRequestHeader() throws Exception {
+		Map<String, String> nullHeaders = null;
+		String testKey = "testKey";
+		String testValue = "testValue";
+		
+		connection.setRequestHeaders(nullHeaders);
+		int headerSize = connection.getRequestHeaders().size();
+		assertFalse(connection.getRequestHeaders().containsKey(testKey));
+		assertFalse(connection.getRequestHeaders().containsValue(testValue));
+		connection.addRequestHeader(testKey, testValue);
+		assertEquals(headerSize+1, connection.getRequestHeaders().size());
+		assertTrue(connection.getRequestHeaders().containsKey(testKey));
+		assertTrue(connection.getRequestHeaders().containsValue(testValue));
+		
+		connection.setRequestHeaders(headers);
+		headerSize = connection.getRequestHeaders().size();
+		assertFalse(connection.getRequestHeaders().containsKey(testKey));
+		assertFalse(connection.getRequestHeaders().containsValue(testValue));
+		connection.addRequestHeader(testKey, testValue);
+		assertEquals(headerSize+1, connection.getRequestHeaders().size());
+		assertTrue(connection.getRequestHeaders().containsKey(testKey));
+		assertTrue(connection.getRequestHeaders().containsValue(testValue));
+	}
 
 	/**
 	 * Test the response code from the request

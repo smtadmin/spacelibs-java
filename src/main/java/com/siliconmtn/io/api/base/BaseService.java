@@ -175,6 +175,6 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	 * @param entities the list of entities to delete
 	 */
 	public void deleteAll(List<T> entities) {
-		repository.deleteInBatch(entities);
+		repository.deleteAllInBatch(entities);
 	}
 }

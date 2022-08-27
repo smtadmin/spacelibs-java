@@ -2,11 +2,18 @@ package com.siliconmtn.io.aws;
 
 // JDK 11.x
 import java.io.IOException;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 // Apache Commons 3.x
 import org.apache.commons.io.IOUtils;
 
+// Space Libs 1.x
+import com.siliconmtn.io.BaseFile;
+
+import lombok.Getter;
 // Lombok 1.x
 import lombok.extern.log4j.Log4j2;
 
@@ -15,12 +22,14 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsResponse;
+import software.amazon.awssdk.services.s3.model.Owner;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -37,6 +46,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
  * @since Oct 14, 2021
  ****************************************************************************/
 @Log4j2
+@Getter
 public class AWSS3FileManager {
 
 	public static final Region DEFAULT_S3_REGION = Region.US_WEST_2;
@@ -74,7 +84,7 @@ public class AWSS3FileManager {
 	 * credentials used to instantiate this class
 	 * @return
 	 */
-	private S3Client buildClient() {
+	protected S3Client buildClient() {
 		// create aws credentials obj
 		AwsBasicCredentials basicCreds = AwsBasicCredentials.create(accessKeyId, secretAccessKey);
 
@@ -96,7 +106,7 @@ public class AWSS3FileManager {
 	 * @param prefix
 	 * @return
 	 */
-	public List<S3Object> listBucket(String bucketName, String prefix) {
+	public List<BaseFile> listBucket(String bucketName, String prefix) {
 		return listBucket(bucketName, prefix, DEFAULT_DELIMITER);
 	}
 	
@@ -109,7 +119,7 @@ public class AWSS3FileManager {
 	 * @param delimiter
 	 * @return
 	 */
-	public List<S3Object> listBucket(String bucketName, String prefix, String delimiter) {
+	public List<BaseFile> listBucket(String bucketName, String prefix, String delimiter) {
 		try (S3Client client = buildClient()) {
 			ListObjectsRequest req = ListObjectsRequest
 					.builder()
@@ -117,10 +127,38 @@ public class AWSS3FileManager {
 					.prefix(prefix + delimiter)
 					.delimiter(delimiter)
 					.build();
-
+			
+			List<BaseFile> data = new ArrayList<>();
 			ListObjectsResponse res = client.listObjects(req);
 			
-			return res.contents();
+			for(S3Object f : res.contents()) {
+				BaseFile bf = new BaseFile();
+				bf.assignFileInfo(f.key());
+				
+				// Get the ID
+				Optional<String> id = f.getValueForField("ETag", String.class);
+				if(id.isPresent()) bf.setId(id.get());
+				
+				// Get the last modified
+				Optional<Instant> lastMod = f.getValueForField("LastModified", Instant.class);
+				if(lastMod.isPresent()) bf.setUpdateDate(lastMod.get());
+				
+				// Get the file size
+				Optional<Long> size = f.getValueForField("Size", Long.class);
+				if(size.isPresent()) bf.setSize(size.get());
+				
+				// Get the owner info
+				Optional<Owner> owner = f.getValueForField("Owner", Owner.class);
+				if(owner.isPresent()) {
+					Owner o = owner.get();
+					bf.setOwner(o.displayName());
+					bf.setOwnerId(o.id());
+				}
+				
+				data.add(bf);
+			}
+
+			return data;
 		}
 	}
 	
@@ -134,17 +172,18 @@ public class AWSS3FileManager {
 	public void processBucketPutObject(byte[] fileData, String destBucketKey, String bucketName) 
 	throws IOException {
 		try (S3Client client = buildClient()) {
+			System.out.println("Client: " + client);
 			PutObjectRequest req = PutObjectRequest
 				.builder()
 				.bucket(bucketName)
 				.key(destBucketKey)
 				.build();
-		
-			PutObjectResponse res = client.putObject(req, RequestBody.fromBytes(fileData));
 			
-			if (res.sdkHttpResponse().statusCode() != 200) {
-				String status = res.sdkHttpResponse().statusText().toString();
-				int statusCode = res.sdkHttpResponse().statusCode();
+			PutObjectResponse res = client.putObject(req, RequestBody.fromBytes(fileData));
+			SdkHttpResponse sdkRes = res.sdkHttpResponse();
+			if (sdkRes.statusCode() != 200) {
+				String status = sdkRes.statusText().toString();
+				int statusCode = sdkRes.statusCode();
 				throw new IOException(statusCode + ": " + status);
 			}
 		}
@@ -162,7 +201,7 @@ public class AWSS3FileManager {
 		ResponseInputStream<GetObjectResponse> res = null;
 		byte[] resArray = null;
 		try (S3Client client = buildClient()) {
-		
+			
 			GetObjectRequest req = GetObjectRequest
 					.builder()
 					.bucket(bucketName)
@@ -187,7 +226,7 @@ public class AWSS3FileManager {
 	 * Close the supplied response
 	 * @param res
 	 */
-	private void closeResponse(ResponseInputStream<GetObjectResponse> res) {
+	protected void closeResponse(ResponseInputStream<GetObjectResponse> res) {
 		if (res == null) return;
 		try {
 			res.close();

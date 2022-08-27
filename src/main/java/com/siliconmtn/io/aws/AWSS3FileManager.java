@@ -25,6 +25,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
@@ -172,7 +173,6 @@ public class AWSS3FileManager {
 	public void processBucketPutObject(byte[] fileData, String destBucketKey, String bucketName) 
 	throws IOException {
 		try (S3Client client = buildClient()) {
-			System.out.println("Client: " + client);
 			PutObjectRequest req = PutObjectRequest
 				.builder()
 				.bucket(bucketName)
@@ -221,6 +221,21 @@ public class AWSS3FileManager {
 		return resArray;
 	}
 	
+	/**
+	 * Deletes a file in the s3 bucket
+	 * @param bucket S3 Bucket to delete the file from
+	 * @param key File key or name to delete
+	 */
+	public void removeS3File(String bucket, String key) {
+		try (S3Client client = buildClient()) {
+			DeleteObjectRequest request = DeleteObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .build();
+ 
+			client.deleteObject(request);
+		}
+	}
 	
 	/**
 	 * Close the supplied response

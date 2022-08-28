@@ -31,6 +31,7 @@ import software.amazon.awssdk.http.AbortableInputStream;
 import software.amazon.awssdk.http.SdkHttpResponse;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsRequest;
@@ -233,5 +234,15 @@ class AWSS3FileManagerTest {
 		ResponseInputStream<GetObjectResponse> res = new ResponseInputStream<>(gor, ais);
 		AWSS3FileManager mgr = new AWSS3FileManager("1234", "5678");
 		assertDoesNotThrow(() -> mgr.closeResponse(res));
+	}
+
+	@Test
+	void testRemoveS3File() {
+		AWSS3FileManager mgr = new AWSS3FileManager("1234", "5678");
+		AWSS3FileManager mgr1 = spy(mgr);
+		doReturn(client).when(mgr1).buildClient();
+		when(client.deleteObject(any(DeleteObjectRequest.class))).thenReturn(null);
+		
+		assertDoesNotThrow(() -> mgr1.removeS3File("bucket","key"));
 	}
 }

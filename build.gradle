@@ -10,12 +10,12 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java'
     id 'jacoco'
-    id 'org.springframework.boot' version '2.6.5'
+    id 'org.springframework.boot' version '2.7.0'
 	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 	id 'io.freefair.lombok' version '6.1.0-m1'
 	id 'signing'
 	id 'maven-publish'
-	id "org.owasp.dependencycheck" version "6.2.2"
+	id "org.owasp.dependencycheck" version "6.4.1.1"
 }
 
 group = 'com.siliconmtn'
@@ -64,6 +64,11 @@ dependencies {
 	testImplementation('org.springframework.boot:spring-boot-starter-test'){
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
+	//OpenAPI3 (Swagger)
+	implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
+	
+	// https://mvnrepository.com/artifact/org.apache.pulsar/pulsar-client
+	implementation 'org.apache.pulsar:pulsar-client:2.10.1'
 }
 
 // Prevent Spring Boot from looking for a main()

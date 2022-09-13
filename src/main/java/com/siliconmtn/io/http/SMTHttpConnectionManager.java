@@ -22,6 +22,7 @@ import javax.net.ssl.SSLSocketFactory;
 // Log4j 2.x
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import com.siliconmtn.data.text.StringUtil;
 
@@ -43,6 +44,7 @@ import com.siliconmtn.data.text.StringUtil;
  * @since Jan 15, 2021
  * @updates:
  ****************************************************************************/
+@Component
 public class SMTHttpConnectionManager {
 	
 	
@@ -303,7 +305,7 @@ public class SMTHttpConnectionManager {
 	 * @return URL object representing the string url
 	 * @throws IOException  When data can't be retrieved, this exception is thrown
 	 */
-	URL createURL(String actionUrl) throws IOException {
+	public URL createURL(String actionUrl) throws IOException {
 		if (StringUtil.isEmpty(actionUrl)) throw new IOException("Invalid URL");
 		if (! actionUrl.startsWith("http")) {
 			actionUrl = ((sslSocketFactory == null) ? HTTP_CONN_PREFIX : HTTPS_CONN_PREFIX) + actionUrl;

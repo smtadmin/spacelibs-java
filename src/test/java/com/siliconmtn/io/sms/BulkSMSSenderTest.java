@@ -3,9 +3,6 @@ package com.siliconmtn.io.sms;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.io.IOException;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,15 +23,6 @@ class BulkSMSSenderTest {
 
 	@InjectMocks
 	BulkSMSSender sender;
-
-	@BeforeEach
-	public void setup() throws IOException{
-//		config = new BulkSMSConfig("smtsms", "smtrul3s", "http://usa.bulksms.com:5567/eapi/submission/send_sms/2/2.0");
-//		sender = new BulkSMSSender();
-//		mgr = mock(SMTHttpConnectionManager.class);
-//		when(mgr.convertPostData(anyMap())).thenReturn("data".getBytes());
-//		when(mgr.getRequestData(eq(config.smsurl), anyMap(), eq(HttpConnectionType.POST))).thenReturn("0|IN_PROGRESS|2163000027\n".getBytes());
-	}
 	
 	@Test
 	void testNullSMS() {

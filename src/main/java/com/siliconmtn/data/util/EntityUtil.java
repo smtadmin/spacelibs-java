@@ -7,14 +7,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // JPA
 import javax.persistence.EntityManager;
 import javax.persistence.Id;
 
-// Spring 5.3.x
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -50,7 +49,6 @@ public class EntityUtil {
 	 * Creating bean for JPA Entity Manager by autowiring
 	 * @param entityManager the JPA entity manager
 	 */
-	@Autowired
 	public EntityUtil(EntityManager entityManager) {
 		this.entityManager = entityManager;
 	}
@@ -89,13 +87,14 @@ public class EntityUtil {
 		if (dto == null || entity == null) return null;
 		
 		try {
-			for (var dtoField : dto.getClass().getDeclaredFields()) {
+			List<Field> fields = new ArrayList<>();
+			getAllFields(dto.getClass(), fields);
+			for (Field dtoField : fields) {
 				// Check for constants and continue
-				if (Modifier.isFinal(dtoField.getModifiers())) continue;
-				
+				if (Modifier.isFinal(dtoField.getModifiers()) || dtoField.getDeclaredAnnotation(EntityIgnore.class) != null) continue;
 				var value = getValueFromInstance(dtoField.getName(), dto);
 				var entityField = entity.getClass().getDeclaredField(dtoField.getName());
-				
+
 				if (entityField.getType() != dtoField.getType() && value != null) {
 					value = entityManager.getReference(entityField.getType(), value);
 					if (value == null) 
@@ -106,7 +105,6 @@ public class EntityUtil {
 				
 				setValueIntoInstance(dtoField.getName(), entity, value);
 			}
-			
 		} catch (Exception e) {
 			log.error("unable to convert dto to entity", e);
 			return null;
@@ -114,7 +112,20 @@ public class EntityUtil {
 		
 		return entity;
 	}
-	
+
+	/**
+	 * Recursively load up all fields for a given class (Inclusive of super class fields)
+	 * @param dtoClass
+	 * @param fields
+	 */
+	private void getAllFields(Class<?> dtoClass, List<Field> fields) {
+		fields.addAll(Arrays.asList(dtoClass.getDeclaredFields()));
+
+	    if (dtoClass.getSuperclass() != null) {
+	        getAllFields(dtoClass.getSuperclass(), fields);
+	    }
+	}
+
 	/**
 	 * To map any given entity object into its respective dto object
 	 * @param <T> type of dto object being returned

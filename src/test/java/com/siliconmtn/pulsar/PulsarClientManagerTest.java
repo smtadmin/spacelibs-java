@@ -2,6 +2,7 @@ package com.siliconmtn.pulsar;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.MalformedURLException;
 
@@ -18,12 +19,11 @@ import org.springframework.test.context.ContextConfiguration;
 
 /**
  * 
- * <b>Title:</b> PulsarClientManagerTest.java
- * <b>Project:</b> Notifications MicroService
- * <b>Description:</b> Unit Tests providing coverage for the PulsarClientManager Class
+ * <b>Title:</b> PulsarClientManagerTest.java <b>Project:</b> Notifications
+ * MicroService <b>Description:</b> Unit Tests providing coverage for the
+ * PulsarClientManager Class
  *
- * <b>Copyright:</b> 2022
- * <b>Company:</b> Silicon Mountain Technologies
+ * <b>Copyright:</b> 2022 <b>Company:</b> Silicon Mountain Technologies
  * 
  * @author raptor
  * @version 1.0
@@ -32,7 +32,7 @@ import org.springframework.test.context.ContextConfiguration;
  *
  */
 @ActiveProfiles("test")
-@ContextConfiguration(classes = { PulsarConfig.class, PulsarClientManager.class})
+@ContextConfiguration(classes = { PulsarConfig.class, PulsarClientManager.class })
 class PulsarClientManagerTest {
 
 	@Mock
@@ -43,22 +43,34 @@ class PulsarClientManagerTest {
 
 	@InjectMocks
 	PulsarClientManager manager;
-	
 
 	@BeforeEach
 	void setup() {
-        MockitoAnnotations.openMocks(this);
+		MockitoAnnotations.openMocks(this);
 	}
-	
+
 	@Test
 	void buildPulsarClientConfigTest() throws MalformedURLException {
 		Mockito.when(config.getUrl()).thenReturn("pulsar://localhost:6650");
-		
+
 		ClientConfigurationData conf = manager.buildClientConfig();
 		assertEquals("pulsar://localhost:6650", conf.getServiceUrl());
 	}
+
+	@Test
+	void buildPulsarClientConfigTestWithClientJWT() throws MalformedURLException {
+		Mockito.when(config.getUrl()).thenReturn("pulsar://localhost:6650");
+		Mockito.when(config.getClientJWT()).thenReturn("HelloWorld");
+
+		ClientConfigurationData conf = manager.buildClientConfig();
+		assertNotNull(conf.getAuthentication());
+	}
+
 	@Test
 	void pulsarClientTest() {
-		assertDoesNotThrow(() -> bean.isClosed());
+		Mockito.when(config.getUrl()).thenReturn("pulsar://localhost:6650");
+		Mockito.when(config.getClientJWT()).thenReturn("HelloWorld");
+		PulsarClient client = assertDoesNotThrow(() -> manager.createPulsarClient());
+		assertNotNull(client);
 	}
 }

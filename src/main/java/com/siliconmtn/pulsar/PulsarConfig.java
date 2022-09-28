@@ -12,12 +12,10 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * <b>Title:</b> PulsarConfig.java
- * <b>Project:</b> Notifications MicroService
+ * <b>Title:</b> PulsarConfig.java <b>Project:</b> Notifications MicroService
  * <b>Description:</b> Manages configuration for the PulsarClient
  *
- * <b>Copyright:</b> 2022
- * <b>Company:</b> Silicon Mountain Technologies
+ * <b>Copyright:</b> 2022 <b>Company:</b> Silicon Mountain Technologies
  * 
  * @author raptor
  * @version 1.0
@@ -33,9 +31,12 @@ import lombok.ToString;
 @Getter
 @ToString
 public class PulsarConfig {
-	String key;
-	String url;
-	String securityMode;
-	OAuthConfig oauth2;
-    private Map<String, TopicConfig> topics;
+	private String key;
+	private String url;
+	private String securityMode;
+	private String clientJWT;
+	private String adminJWT;
+	private boolean tlsAllowInsecureConnection;
+	private OAuthConfig oauth2;
+	private Map<String, TopicConfig> topics;
 }

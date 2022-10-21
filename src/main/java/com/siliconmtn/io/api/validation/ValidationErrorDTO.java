@@ -3,6 +3,7 @@ package com.siliconmtn.io.api.validation;
 // JDK 11.x
 import java.io.Serializable;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 // Lombok 1.18.x
 import lombok.Data;
 import lombok.Builder;
@@ -39,21 +40,25 @@ public class ValidationErrorDTO implements Serializable {
 	/**
 	 * Primary key of the data element that failed validation
 	 */
+	@Schema(description = "The particular field that failed validation.")
 	private String elementId;
 	
 	/**
 	 * Value of the failed validation
 	 */
+	@Schema(description = "How did the field fail validation.")
 	private Object value;
 	
 	/**
 	 * Validation error message
 	 */
+	@Schema(description = "Specific error message of the validation attempt..")
 	private String errorMessage; 
 	
 	/**
 	 * The type of validation that failed
 	 */
+	@Schema(description = "Categorization of the failure.")
 	private ValidationError validationError;
 
 }

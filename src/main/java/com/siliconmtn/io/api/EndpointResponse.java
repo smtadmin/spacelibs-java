@@ -17,6 +17,7 @@ import com.siliconmtn.data.text.StringUtil;
 // PlanIt apps
 import com.siliconmtn.io.api.validation.ValidationErrorDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 // Lombok 1.18.x
 import lombok.Data;
 
@@ -39,13 +40,21 @@ public class EndpointResponse {
 
 	// Members
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    @Schema(description = "HTTP status code returned from the server.")
     protected HttpStatus status;
+    @Schema(description = "Localized timestamp of when the response was generated.")
     protected LocalDateTime timestamp;
+    @Schema(description = "Brief message intended to give context to the response.")
     protected String message;
+    @Schema(description = "Error Message of any problems on the server.  Empty on Success")
     protected String debugMessage;
+    @Schema(description = "The call succeeded on the server.")
     protected boolean isSuccess = false;
+    @Schema(description = "Number of results returned on the response.")
     protected int count;
+    @Schema(description = "Payload from the server.")
     protected Object data;
+    @Schema(description = "Validation errors encountered while processing the request.")
     protected List<ValidationErrorDTO> failedValidations = new ArrayList<>();
 
     /**

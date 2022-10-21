@@ -42,8 +42,8 @@ public class PulsarClientManager {
 		conf.setOperationTimeoutMs(1000);
 		conf.setTlsAllowInsecureConnection(config.isTlsAllowInsecureConnection());
 
-		if (!StringUtil.isEmpty(config.getClientJWT())) {
-			conf.setAuthentication(AuthenticationFactory.token(config.getClientJWT()));
+		if (!StringUtil.isEmpty(config.getAdminJWT())) {
+			conf.setAuthentication(AuthenticationFactory.token(config.getAdminJWT()));
 		}
 
 		return conf;

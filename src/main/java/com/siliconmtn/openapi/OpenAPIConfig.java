@@ -1,8 +1,12 @@
 package com.siliconmtn.openapi;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.Configuration;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,7 +27,7 @@ import lombok.ToString;
  *
  */
 @Configuration
-@ConfigurationProperties(prefix = "com.siliconmtn.oe.hmf.openapi") 
+@ConfigurationProperties(prefix = "com.siliconmtn.openapi")
 @ConfigurationPropertiesScan
 @NoArgsConstructor
 @Setter
@@ -34,4 +38,5 @@ public class OpenAPIConfig {
 	private String description;
 	private String version;
 	private String license;
+	private Map<String, String> servers = new HashMap<>();
 }

@@ -19,7 +19,7 @@ plugins {
 }
 
 group = 'com.siliconmtn'
-version = '1.2.7.1-SNAPSHOT'
+version = '1.2.7.2-SNAPSHOT'
 sourceCompatibility = '11'
 archivesBaseName = "spacelibs-java"
 
@@ -54,9 +54,9 @@ dependencies {
 	implementation 'com.auth0:java-jwt:3.14.0'
 	
 	// AWS Imports for the S3 Buckets
-	implementation 'software.amazon.awssdk:bom:2.17.221'
-	implementation 'software.amazon.awssdk:s3:2.17.221'
-	implementation 'software.amazon.awssdk:sns:2.17.221'
+	implementation 'software.amazon.awssdk:bom:2.19.8'
+	implementation 'software.amazon.awssdk:s3:2.19.8'
+	implementation 'software.amazon.awssdk:sns:2.19.8'
 	
     // Testing
     testImplementation 'org.springframework.security:spring-security-test'

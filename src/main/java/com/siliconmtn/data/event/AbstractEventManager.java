@@ -2,8 +2,6 @@ package com.siliconmtn.data.event;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.PriorityQueue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -11,6 +9,8 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+
+import lombok.Getter;
 
 /****************************************************************************
  * <b>Title:</b> AbstractEventManager.java <br>
@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
  * 
  ***************************************************************************
  */
+@Getter
 @Component
 public abstract class AbstractEventManager<T extends Comparable<T>> implements EventManagerIntfc<T>{
 
@@ -59,10 +60,12 @@ public abstract class AbstractEventManager<T extends Comparable<T>> implements E
 
 	//Root All Args Constructor for setting collection and timeout.
 	protected AbstractEventManager(@NotNull ApplicationEventPublisher applicationEventPublisher, Collection<T> data, long timeoutInMilliseconds) {
+		if(applicationEventPublisher == null) {
+			throw new IllegalArgumentException("ApplicationEventPublisher cannot be null.");
+		}
 		this.applicationEventPublisher = applicationEventPublisher;
-		if(data == null && queueComparator() != null) {
-			this.data = new PriorityQueue<>(queueComparator());
-		} else if(data == null) {
+
+		if(data == null) {
 			this.data = new ArrayList<>();	
 		} else {
 			this.data = data;
@@ -81,19 +84,13 @@ public abstract class AbstractEventManager<T extends Comparable<T>> implements E
 	 */
 	@Override
 	public void addData(T element) {
-		data.add(element);
-		setTimer();
-		if(validateData()) {
-			sendEvent(true, false);
+		if(element != null) {
+			data.add(element);
+			setTimer();
+			if(validateData()) {
+				sendEvent(true, false);
+			}
 		}
-	}
-
-	/**
-	 * Optional Comparator implementation for handling ordered/priority data. 
-	 */
-	@Override
-	public Comparator<T> queueComparator() {
-		return (T ele1, T ele2) -> ele1.compareTo(ele2);
 	}
 
 	/**
@@ -143,7 +140,7 @@ public abstract class AbstractEventManager<T extends Comparable<T>> implements E
 	/**
 	 * Internal function for managing lifecycle of the timer.
 	 */
-	private void setTimer() {
+	protected void setTimer() {
 		if(timer != null) {
 			timer.cancel();
 		}

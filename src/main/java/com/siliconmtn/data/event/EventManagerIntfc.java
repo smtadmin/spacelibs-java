@@ -1,7 +1,6 @@
 package com.siliconmtn.data.event;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.TimerTask;
 
 /**
@@ -47,12 +46,6 @@ public interface EventManagerIntfc<T extends Comparable<T>> {
 	 * @return
 	 */
 	public boolean validateData();
-
-	/**
-	 * Optional Comparator for ordering information in event of sequenced or priority handling.
-	 * @return
-	 */
-	public Comparator<T> queueComparator();
 
 	/**
 	 * Send event through the Eventing System.

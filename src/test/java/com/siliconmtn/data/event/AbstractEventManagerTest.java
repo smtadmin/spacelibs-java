@@ -22,6 +22,20 @@ import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+/****************************************************************************
+ * <b>Title:</b> AbstractEventManagerTest.java <br>
+ * <b>Project:</b> spacelibs-java <br>
+ * <b>Description:</b> Contains Tests for the AbstractEventManager Class<br>
+ * <b>Copyright:</b> Copyright (c) 2023 <br>
+ * <b>Company:</b> Silicon Mountain Technologies
+ * 
+ * @author Billy Larsen
+ * @version 1.x
+ * @since Feb 14, 2023
+ *        <b>updates:</b>
+ * 
+ ***************************************************************************
+ */
 @ExtendWith(SpringExtension.class)
 class AbstractEventManagerTest {
 

@@ -475,4 +475,29 @@ public class StringUtil {
 					.map(item -> (StringUtil.defaultString(symbol,"") + item + StringUtil.defaultString(symbol,"")))
 					.collect(Collectors.toList()));
 	}
+
+	/**
+	 * Null check and substring if startIndex >= 0 and endIndex < source length 
+	 * @param message - message to substring
+	 * @param startIndex - must be greater than or equals to 0, less than endIndex
+	 * @param endIndex - must be > 0 and < message.length
+	 * @return
+	 */
+	public static String safeSubstring(String message, int startIndex, int endIndex) {
+		String ret = StringUtil.defaultString(message);
+		if(endIndex > startIndex && startIndex >= 0 && ret.length() > endIndex) {
+			ret = ret.substring(startIndex, endIndex);
+		}
+		return ret;
+	}
+
+	/**
+	 * Null check and substring if source is longer than provided length.
+	 * @param message - message to substring
+	 * @param endIndex - Must be > 0 and < message.length
+	 * @return
+	 */
+	public static String safeSubstring(String message, int endIndex) {
+		return safeSubstring(message, 0, endIndex);
+	}
 }

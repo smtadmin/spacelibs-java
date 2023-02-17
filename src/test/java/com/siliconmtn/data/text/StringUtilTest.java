@@ -1,5 +1,6 @@
 package com.siliconmtn.data.text;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 // Junit 5
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -330,5 +331,37 @@ class StringUtilTest {
 		var array2 = new Integer[]{1,2,3};
 		result = StringUtil.join(array2, ",","'");
 		assertEquals("'1','2','3'", result);		
+	}
+
+	@Test
+	void safeSubstringNull() {
+		assertDoesNotThrow(() -> StringUtil.safeSubstring(null, 0));
+
+		assertDoesNotThrow(() -> StringUtil.safeSubstring(null, 0, 0));
+	}
+
+	@Test
+	void safeSubstringNegIndex() {
+		assertDoesNotThrow(() -> StringUtil.safeSubstring("test", -1));
+		
+		assertDoesNotThrow(() -> StringUtil.safeSubstring("test", -1, -1));
+	}
+
+	@Test
+	void safeSubstringInvalid() {
+		assertEquals("test", StringUtil.safeSubstring("test", -1, 5));
+		
+		assertEquals("test", StringUtil.safeSubstring("test", 5, 1));
+		
+		assertEquals("test", StringUtil.safeSubstring("test", 0, 10));
+		
+		assertEquals("test", StringUtil.safeSubstring("test", 10, 11));
+	}
+
+	@Test
+	void safeSubstringSuccess() {
+		assertEquals("te", StringUtil.safeSubstring("test", 2));
+
+		assertEquals("es", StringUtil.safeSubstring("test", 1, 3));
 	}
 }

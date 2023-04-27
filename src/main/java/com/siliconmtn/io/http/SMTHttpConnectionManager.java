@@ -116,10 +116,15 @@ public class SMTHttpConnectionManager {
 	public static final String REQUEST_PROPERTY_CONTENT_TYPE = "Content-Type";
 	
 	/**
-	 * Identifies the lengthof the message when posting data
+	 * Identifies the length of the message when posting data
 	 */
 	public static final String REQUEST_PROPERTY_CONTENT_LENGTH = "Content-Length";
 	
+	/**
+	 * Exception message text for use when URL is not supplied.
+	 */
+	public static final String MSG_URL_REQUIRED = "Url is required";
+
 	/**
 	 * sslSocketFactory The SSLSocketFactory that is set on the HTTPS connection
 	 * object just after it is instantiated and prior to any other properties being set
@@ -181,7 +186,7 @@ public class SMTHttpConnectionManager {
 	 */
 	public byte[] getRequestData(String url, Map<String, Object> parameters, HttpConnectionType type) 
 	throws IOException {
-		if (StringUtil.isEmpty(url)) throw new IOException("Url is required");
+		if (StringUtil.isEmpty(url)) throw new IOException(MSG_URL_REQUIRED);
 		return connect(createURL(url), convertPostData(parameters), type == null ? HttpConnectionType.POST : type);
 	}
 	
@@ -196,7 +201,7 @@ public class SMTHttpConnectionManager {
 	 */
 	public byte[] getRequestData(URL url, Map<String, Object> parameters, HttpConnectionType type) 
 	throws IOException {
-		if (url == null) throw new IOException("Url is required");
+		if (url == null) throw new IOException(MSG_URL_REQUIRED);
 		return connect(url, convertPostData(parameters), type == null ? HttpConnectionType.POST : type);
 	}
 	
@@ -213,7 +218,7 @@ public class SMTHttpConnectionManager {
      */
     public byte[] getRequestData(URL url, byte[] data, HttpConnectionType type) 
     throws IOException {
-        if (url == null) throw new IOException("Url is required");
+        if (url == null) throw new IOException(MSG_URL_REQUIRED);
         return connect(url, data == null ? new byte[0] : data, type == null ? HttpConnectionType.POST : type);
     }
     
@@ -231,7 +236,7 @@ public class SMTHttpConnectionManager {
     
     public byte[] getRequestData(String url, byte[] data, HttpConnectionType type) 
     throws IOException {
-        if (url == null) throw new IOException("Url is required");
+        if (url == null) throw new IOException(MSG_URL_REQUIRED);
         return connect(createURL(url), data == null ? new byte[0] : data, type == null ? HttpConnectionType.POST : type);
     }
     
@@ -280,6 +285,8 @@ public class SMTHttpConnectionManager {
 	 */
 	private InputStream connectStream(URL actionUrl, byte[] postDataBytes, int redirectAttempt, HttpConnectionType type) 
 	throws IOException {
+		log.debug("Connecting to: %s", actionUrl);
+
 		// build connection
 		HttpURLConnection conn = createConnection(actionUrl);
 
@@ -289,11 +296,14 @@ public class SMTHttpConnectionManager {
 		//see if we need to follow a redirect
 		if (followRedirects && (HttpURLConnection.HTTP_MOVED_PERM == responseCode || HttpURLConnection.HTTP_MOVED_TEMP == responseCode) && redirectAttempt < redirectLimit) {
 			String redirUrl = conn.getHeaderField("Location");
+			log.debug("Following redirect to: %s", redirUrl);
 			if (!StringUtil.isEmpty(redirUrl)) {
 				conn.disconnect();
 				return connectStream(createURL(redirUrl), postDataBytes, ++redirectAttempt, type);
 			}
 		}
+
+		log.debug("Response code: %s", responseCode);
 
 		// return the response stream from the server - if the request failed return the error stream
 		return (200 <= responseCode && 300 > responseCode) ? conn.getInputStream() : conn.getErrorStream();

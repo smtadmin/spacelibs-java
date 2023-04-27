@@ -285,7 +285,7 @@ public class SMTHttpConnectionManager {
 	 */
 	private InputStream connectStream(URL actionUrl, byte[] postDataBytes, int redirectAttempt, HttpConnectionType type) 
 	throws IOException {
-		log.debug("Connecting to: %s", actionUrl);
+		log.debug("Connecting to: {}", actionUrl);
 
 		// build connection
 		HttpURLConnection conn = createConnection(actionUrl);
@@ -296,14 +296,14 @@ public class SMTHttpConnectionManager {
 		//see if we need to follow a redirect
 		if (followRedirects && (HttpURLConnection.HTTP_MOVED_PERM == responseCode || HttpURLConnection.HTTP_MOVED_TEMP == responseCode) && redirectAttempt < redirectLimit) {
 			String redirUrl = conn.getHeaderField("Location");
-			log.debug("Following redirect to: %s", redirUrl);
+			log.debug("Following redirect to: {}", redirUrl);
 			if (!StringUtil.isEmpty(redirUrl)) {
 				conn.disconnect();
 				return connectStream(createURL(redirUrl), postDataBytes, ++redirectAttempt, type);
 			}
 		}
 
-		log.debug("Response code: %s", responseCode);
+		log.debug("Response code: {}", responseCode);
 
 		// return the response stream from the server - if the request failed return the error stream
 		return (200 <= responseCode && 300 > responseCode) ? conn.getInputStream() : conn.getErrorStream();

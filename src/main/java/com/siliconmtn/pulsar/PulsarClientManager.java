@@ -1,5 +1,6 @@
 package com.siliconmtn.pulsar;
 
+import org.apache.pulsar.client.api.Authentication;
 import org.apache.pulsar.client.api.AuthenticationFactory;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
@@ -42,7 +43,10 @@ public class PulsarClientManager {
 		conf.setOperationTimeoutMs(1000);
 		conf.setTlsAllowInsecureConnection(config.isTlsAllowInsecureConnection());
 
-		if (!StringUtil.isEmpty(config.getAdminJWT())) {
+		if(!StringUtil.isEmpty(config.getClientNpeId()) && !StringUtil.isEmpty(config.getClientNPESecret()) && !StringUtil.isEmpty(config.getKeyCloakUrl())) {
+			Authentication auth = AuthenticationFactory.token(new PulsarRemoteAuthenticator(config));
+				conf.setAuthentication(auth);
+		} else if (!StringUtil.isEmpty(config.getAdminJWT())) {
 			conf.setAuthentication(AuthenticationFactory.token(config.getAdminJWT()));
 		}
 

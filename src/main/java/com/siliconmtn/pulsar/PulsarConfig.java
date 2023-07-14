@@ -36,7 +36,7 @@ public class PulsarConfig {
 	private String securityMode;
 	private String clientJWT;
 	private String adminJWT;
+	private String cronSchedule;
 	private boolean tlsAllowInsecureConnection;
-	private OAuthConfig oauth2;
 	private Map<String, TopicConfig> topics;
 }

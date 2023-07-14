@@ -7,9 +7,8 @@ import org.apache.pulsar.client.impl.PulsarClientImpl;
 import org.apache.pulsar.client.impl.conf.ClientConfigurationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Service;
-
-import com.siliconmtn.data.text.StringUtil;
+import org.springframework.context.annotation.Import;
+import org.springframework.stereotype.Component;
 
 /**
  * <b>Title:</b> PulsarClientManager.java <b>Project:</b> Notifications
@@ -24,11 +23,15 @@ import com.siliconmtn.data.text.StringUtil;
  * @updates
  *
  */
-@Service
+@Component
+@Import({PulsarAuthenticator.class})
 public class PulsarClientManager {
 
 	@Autowired
 	public PulsarConfig config;
+
+	@Autowired
+    private PulsarAuthenticator auth;
 
 	protected ClientConfigurationData buildClientConfig() {
 		// Prepare ClientConfigurationData
@@ -41,10 +44,7 @@ public class PulsarClientManager {
 		conf.setRequestTimeoutMs(1000);
 		conf.setOperationTimeoutMs(1000);
 		conf.setTlsAllowInsecureConnection(config.isTlsAllowInsecureConnection());
-
-		if (!StringUtil.isEmpty(config.getAdminJWT())) {
-			conf.setAuthentication(AuthenticationFactory.token(config.getAdminJWT()));
-		}
+		conf.setAuthentication(AuthenticationFactory.token(auth));
 
 		return conf;
 	}

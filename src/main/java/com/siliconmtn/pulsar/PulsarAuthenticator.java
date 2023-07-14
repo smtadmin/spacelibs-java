@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siliconmtn.data.text.StringUtil;
 import com.siliconmtn.io.http.SMTHttpConnectionManager;
 import com.siliconmtn.io.http.SMTHttpConnectionManager.HttpConnectionType;
-import com.siliconmtn.io.http.TrustCerts;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -73,7 +72,6 @@ public class PulsarAuthenticator implements Supplier<String> {
 	 */
 	protected void prepareManager(SMTHttpConnectionManager manager) {
 		manager.addRequestHeader(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "application/x-www-form-urlencoded");
-		manager.setSslSocketFactory(new TrustCerts().getTrustCerts().getSocketFactory());
 	}
 
 	/**

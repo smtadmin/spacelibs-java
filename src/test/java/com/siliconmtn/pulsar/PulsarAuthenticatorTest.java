@@ -5,7 +5,6 @@ package com.siliconmtn.pulsar;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -17,7 +16,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.pulsar.shade.com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -25,10 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistration.ProviderDetails;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 
 import com.siliconmtn.io.http.SMTHttpConnectionManager;
 import com.siliconmtn.io.http.SMTHttpConnectionManager.HttpConnectionType;
@@ -43,9 +37,6 @@ class PulsarAuthenticatorTest {
 	@Mock
 	PulsarConfig config;
 
-	@Mock
-	ClientRegistrationRepository repo;
-
 	@InjectMocks
 	PulsarAuthenticator auth;
 
@@ -53,13 +44,22 @@ class PulsarAuthenticatorTest {
 	void prepareManager() throws MalformedURLException {
 		SMTHttpConnectionManager manager = new SMTHttpConnectionManager();
 		auth.prepareManager(manager);
-		assertNotNull(manager.getSslSocketFactory());
 		assertTrue(manager.getRequestHeaders().containsKey(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE));
-		assertEquals(manager.getRequestHeaders().get(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE), "application/x-www-form-urlencoded");
+		assertEquals("application/x-www-form-urlencoded", manager.getRequestHeaders().get(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE));
+	}
+
+	@Test
+	void updateTokenNoAuth() {
+		when(config.hasNPEAuth()).thenReturn(false);
+		when(config.hasJWTAuth()).thenReturn(false);
+		assertDoesNotThrow(() -> auth.updateToken());
+		assertEquals("", auth.get());
 	}
 
 	@Test
 	void updateTokenFromConfig() {
+		when(config.hasNPEAuth()).thenReturn(false);
+		when(config.hasJWTAuth()).thenReturn(true);
 		String clientToken = "client";
 		String adminToken = "admin";
 		when(config.getClientJWT()).thenReturn(clientToken);
@@ -70,17 +70,17 @@ class PulsarAuthenticatorTest {
 		assertEquals(adminToken, auth.get());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	void retrieveNPEJWTToken() throws IOException {
 		assertDoesNotThrow(() -> auth.retrieveNPEJWTToken(null));
 		assertNull(auth.get());
-
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.findAndRegisterModules();
 		String scope = "email";
 		String id = "clientId";
 		String secret = "clientSecret";
-		AuthorizationGrantType grantType = AuthorizationGrantType.CLIENT_CREDENTIALS;
+		String grantType = "CLIENT_CREDENTIALS";
 		String tokenUri = "tokenUri";
 		String accessToken = "token";
 		Map<String, String> retData = new HashMap<>();
@@ -88,32 +88,64 @@ class PulsarAuthenticatorTest {
 
 		byte [] data = mapper.writeValueAsBytes(retData);
 		SMTHttpConnectionManager manager = mock(SMTHttpConnectionManager.class);
-		ProviderDetails det = mock(ProviderDetails.class);
-		ClientRegistration reg = mock(ClientRegistration.class);
 		auth.manager = manager;
 
-		when(reg.getScopes()).thenReturn(Set.of(scope));
-		when(reg.getClientId()).thenReturn(id);
-		when(reg.getClientSecret()).thenReturn(secret);
-		when(reg.getAuthorizationGrantType()).thenReturn(grantType);
-		when(reg.getProviderDetails()).thenReturn(det);
-		when(det.getTokenUri()).thenReturn(tokenUri);
+		when(config.getScope()).thenReturn(scope);
+		when(config.getClientId()).thenReturn(id);
+		when(config.getClientSecret()).thenReturn(secret);
+		when(config.getAuthorizationGrantType()).thenReturn(grantType);
+		when(config.getTokenUri()).thenReturn(tokenUri);
 
 		when(manager.getRequestData(eq(tokenUri), any(Map.class), eq(HttpConnectionType.POST))).thenReturn(data);
 		
-		assertDoesNotThrow(() -> auth.retrieveNPEJWTToken(reg));
+		assertDoesNotThrow(() -> auth.retrieveNPEJWTToken(config));
 		
 		assertEquals(accessToken, auth.get());
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
-	void updateTokenFromOauth() throws IOException {
+	void retrieveNPEJWTTokenCatchError() throws IOException {
+		assertDoesNotThrow(() -> auth.retrieveNPEJWTToken(null));
+		assertNull(auth.get());
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.findAndRegisterModules();
 		String scope = "email";
 		String id = "clientId";
 		String secret = "clientSecret";
-		AuthorizationGrantType grantType = AuthorizationGrantType.CLIENT_CREDENTIALS;
+		String grantType = "CLIENT_CREDENTIALS";
+		String tokenUri = "tokenUri";
+		String accessToken = "token";
+		Map<String, String> retData = new HashMap<>();
+		retData.put(PulsarAuthenticator.ACCESS_TOKEN, accessToken);
+
+		byte [] data = null;
+		SMTHttpConnectionManager manager = mock(SMTHttpConnectionManager.class);
+		auth.manager = manager;
+
+		when(config.getScope()).thenReturn(scope);
+		when(config.getClientId()).thenReturn(id);
+		when(config.getClientSecret()).thenReturn(secret);
+		when(config.getAuthorizationGrantType()).thenReturn(grantType);
+		when(config.getTokenUri()).thenReturn(tokenUri);
+
+		when(manager.getRequestData(eq(tokenUri), any(Map.class), eq(HttpConnectionType.POST))).thenReturn(data);
+
+		assertDoesNotThrow(() -> auth.retrieveNPEJWTToken(config));
+
+		assertEquals(null, auth.get());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void updateTokenFromOauth() throws IOException {
+		when(config.hasNPEAuth()).thenReturn(true);
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.findAndRegisterModules();
+		String scope = "email";
+		String id = "clientId";
+		String secret = "clientSecret";
+		String grantType = "CLIENT_CREDENTIALS";
 		String tokenUri = "tokenUri";
 		String accessToken = "token";
 		Map<String, String> retData = new HashMap<>();
@@ -121,16 +153,12 @@ class PulsarAuthenticatorTest {
 
 		byte [] data = mapper.writeValueAsBytes(retData);
 		SMTHttpConnectionManager manager = mock(SMTHttpConnectionManager.class);
-		ProviderDetails det = mock(ProviderDetails.class);
-		ClientRegistration reg = mock(ClientRegistration.class);
 		auth.manager = manager;
-		when(repo.findByRegistrationId(PulsarAuthenticator.OAUTH_IDENTIFIER)).thenReturn(reg);
-		when(reg.getScopes()).thenReturn(Set.of(scope));
-		when(reg.getClientId()).thenReturn(id);
-		when(reg.getClientSecret()).thenReturn(secret);
-		when(reg.getAuthorizationGrantType()).thenReturn(grantType);
-		when(reg.getProviderDetails()).thenReturn(det);
-		when(det.getTokenUri()).thenReturn(tokenUri);
+		when(config.getScope()).thenReturn(scope);
+		when(config.getClientId()).thenReturn(id);
+		when(config.getClientSecret()).thenReturn(secret);
+		when(config.getAuthorizationGrantType()).thenReturn(grantType);
+		when(config.getTokenUri()).thenReturn(tokenUri);
 
 		when(manager.getRequestData(eq(tokenUri), any(Map.class), eq(HttpConnectionType.POST))).thenReturn(data);
 

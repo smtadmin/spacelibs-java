@@ -3,6 +3,7 @@ package com.siliconmtn.pulsar;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
 
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,7 +51,8 @@ class PulsarClientManagerTest {
 
 	@Test
 	void buildPulsarClientConfigTest() throws MalformedURLException {
-		Mockito.when(config.getUrl()).thenReturn("pulsar://localhost:6650");
+		when(config.getUrl()).thenReturn("pulsar://localhost:6650");
+		when(config.hasAuth()).thenReturn(false);
 
 		ClientConfigurationData conf = manager.buildClientConfig();
 		assertEquals("pulsar://localhost:6650", conf.getServiceUrl());
@@ -59,17 +60,17 @@ class PulsarClientManagerTest {
 
 	@Test
 	void buildPulsarClientConfigTestWithClientJWT() throws MalformedURLException {
-		Mockito.when(config.getUrl()).thenReturn("pulsar://localhost:6650");
-		Mockito.when(config.getClientJWT()).thenReturn("HelloWorld");
-
+		when(config.getUrl()).thenReturn("pulsar://localhost:6650");
+		when(config.getClientJWT()).thenReturn("HelloWorld");
+		when(config.hasAuth()).thenReturn(true);
 		ClientConfigurationData conf = manager.buildClientConfig();
 		assertNotNull(conf.getAuthentication());
 	}
 
 	@Test
 	void pulsarClientTest() {
-		Mockito.when(config.getUrl()).thenReturn("pulsar://localhost:6650");
-		Mockito.when(config.getClientJWT()).thenReturn("HelloWorld");
+		when(config.getUrl()).thenReturn("pulsar://localhost:6650");
+		when(config.getClientJWT()).thenReturn("HelloWorld");
 		PulsarClient client = assertDoesNotThrow(() -> manager.createPulsarClient());
 		assertNotNull(client);
 	}

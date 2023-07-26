@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,16 +46,14 @@ public class PulsarAuthenticator implements Supplier<String> {
 
 	//Autowired Member Variables
 	protected PulsarConfig config;
-	protected ClientRegistrationRepository repo;
 
 	//Instance Variables
 	private String token;
 	protected ObjectMapper mapper;
 	protected SMTHttpConnectionManager manager;
 
-	public PulsarAuthenticator(PulsarConfig config, ClientRegistrationRepository repo) {
+	public PulsarAuthenticator(PulsarConfig config) {
 		this.config = config;
-		this.repo = repo;
 		this.manager = new SMTHttpConnectionManager();
 		prepareManager(this.manager);
 		this.mapper = new ObjectMapper();
@@ -79,7 +75,7 @@ public class PulsarAuthenticator implements Supplier<String> {
 	 */
 	@Override
 	public String get() {
-		log.info("Pulsar JWT Token is being requested");
+		log.debug("Pulsar JWT Token is being requested");
 		return token;
 	}
 
@@ -93,14 +89,16 @@ public class PulsarAuthenticator implements Supplier<String> {
 	 */
 	@Scheduled(cron = "${pulsar.cronSchedule:-}")
 	public void updateToken() {
-		log.info("Populating Pulsar JWT Token");
-		ClientRegistration reg = repo.findByRegistrationId(OAUTH_IDENTIFIER);
-		if(reg != null && !StringUtil.isEmpty(reg.getClientId()) && !StringUtil.isEmpty(reg.getClientSecret()) && !StringUtil.isEmpty(reg.getProviderDetails().getTokenUri())) {
-			retrieveNPEJWTToken(reg);
-		} else if (!StringUtil.isEmpty(config.getAdminJWT()) || !StringUtil.isEmpty(config.getClientJWT())) {
+		log.debug("Populating Pulsar JWT Token");
+		if(config.hasNPEAuth()) {
+			retrieveNPEJWTToken(config);
+		} else if (config.hasJWTAuth()) {
 			token = StringUtil.defaultString(config.getAdminJWT(), config.getClientJWT());
+		} else {
+			//Authenticator requires at least an empty string to avoid an NPE.
+			token = "";
 		}
-		log.info("Populated Pulsar JWT Token");
+		log.debug("Populated Pulsar JWT Token");
 	}
 
 	/**
@@ -115,20 +113,21 @@ public class PulsarAuthenticator implements Supplier<String> {
 	 * --data-urlencode 'grant_type=client_credentials'
 	 * @param reg
 	 */
-	protected void retrieveNPEJWTToken(ClientRegistration reg) {
-		if(reg == null) {
-			token = null;
+	protected void retrieveNPEJWTToken(PulsarConfig config) {
+		token = null;
+
+		if(config == null) {
 			return;
 		}
 		Map<String, Object> postBody = new HashMap<>();
-		postBody.put(CLIENT_ID, reg.getClientId());
-		postBody.put(CLIENT_SECRET, reg.getClientSecret());
-		postBody.put(SCOPE, reg.getScopes().iterator().next());
-		postBody.put(GRANT_TYPE, reg.getAuthorizationGrantType().getValue());
+		postBody.put(CLIENT_ID, config.getClientId());
+		postBody.put(CLIENT_SECRET, config.getClientSecret());
+		postBody.put(SCOPE, config.getScope());
+		postBody.put(GRANT_TYPE, config.getAuthorizationGrantType());
 
 		try {
-			byte [] data = manager.getRequestData(reg.getProviderDetails().getTokenUri(), postBody, HttpConnectionType.POST);
-			log.info("Received Pulsar JWT Token");
+			byte [] data = manager.getRequestData(config.getTokenUri(), postBody, HttpConnectionType.POST);
+			log.debug("Received Pulsar JWT Token");
 			JsonNode g = mapper.readTree(data);
 			token = g.get(ACCESS_TOKEN).asText();
 		} catch(Exception e) {

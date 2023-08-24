@@ -5,8 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 // JEE 7.x
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.WriteListener;
 
 /****************************************************************************
  * <b>Title:</b> ServletOutputStreamMock.java

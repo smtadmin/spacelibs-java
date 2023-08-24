@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 // JEE 7.x
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 // Spring 5.5.x
 import org.aspectj.lang.annotation.Aspect;

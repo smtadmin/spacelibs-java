@@ -12,10 +12,10 @@ import java.util.HashSet;
 import java.util.List;
 
 // JEE 7
-import javax.persistence.EntityNotFoundException;
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Path;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.ConversionNotSupportedException;

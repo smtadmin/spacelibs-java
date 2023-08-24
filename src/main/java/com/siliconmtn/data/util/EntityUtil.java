@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 
 // JPA
-import javax.persistence.EntityManager;
-import javax.persistence.Id;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Id;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;

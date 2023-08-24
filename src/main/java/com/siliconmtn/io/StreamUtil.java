@@ -5,7 +5,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 
 // JEEE 8.x
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 // SpaceLibs 1.x
 import com.siliconmtn.data.report.AbstractReport;

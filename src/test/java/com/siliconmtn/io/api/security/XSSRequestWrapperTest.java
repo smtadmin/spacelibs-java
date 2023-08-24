@@ -1,8 +1,8 @@
 package com.siliconmtn.io.api.security;
 
 // JEE 7
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
 
 //Junit 5
 import static org.junit.jupiter.api.Assertions.*;

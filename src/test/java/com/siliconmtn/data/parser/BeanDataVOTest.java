@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 // J2EE
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 // Mockito 3.x
 import org.mockito.Mockito;

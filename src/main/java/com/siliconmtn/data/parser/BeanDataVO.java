@@ -4,7 +4,7 @@ package com.siliconmtn.data.parser;
 import java.io.Serializable;
 
 // J2E
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 // Spacelibs 1.x
 import com.siliconmtn.data.text.StringUtil;

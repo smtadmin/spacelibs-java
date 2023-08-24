@@ -1,7 +1,7 @@
 package com.siliconmtn.data.parser;
 
 // J2EE
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /****************************************************************************
  * <b>Title:</b> AutoPopulateIntfc.java

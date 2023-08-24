@@ -2,7 +2,7 @@ package com.siliconmtn.weather;
 
 // JDK 11.x
 import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 // Spacelibs 1.x
 import com.siliconmtn.data.format.DateFormat;

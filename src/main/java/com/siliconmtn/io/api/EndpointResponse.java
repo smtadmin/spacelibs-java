@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 // Faster XML 2.1.x
@@ -95,9 +96,11 @@ public class EndpointResponse {
      * Assigns the HTTP status and the the time
      * @param status HttpStatus to return
      */
-    public EndpointResponse(HttpStatus status) {
+    public EndpointResponse(HttpStatusCode status) {
         this();
-        this.status = status;
+        if(status != null) {
+        	this.status = HttpStatus.resolve(status.value());
+        }
     }
     
     /**
@@ -105,9 +108,9 @@ public class EndpointResponse {
      * @param status HttpStatus to return
      * @param ex Exception that was thrown
      */
-    public EndpointResponse(HttpStatus status, Throwable ex) {
+    public EndpointResponse(HttpStatusCode status, Throwable ex) {
         this();
-        this.status = status;
+        this.status = HttpStatus.resolve(status.value());
         this.message = "Unexpected error";
         this.debugMessage = ex.getLocalizedMessage();
     }
@@ -118,9 +121,9 @@ public class EndpointResponse {
      * @param message Error message to display
      * @param ex Exception that was thrown
      */
-    public EndpointResponse(HttpStatus status, String message, Throwable ex) {
+    public EndpointResponse(HttpStatusCode status, String message, Throwable ex) {
         this();
-        this.status = status;
+        this.status = HttpStatus.resolve(status.value());
         this.message = message;
         this.debugMessage = ex.getLocalizedMessage();
     }

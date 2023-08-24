@@ -224,6 +224,14 @@ class AWSS3FileManagerTest {
 		doReturn(client).when(mgr1).buildClient();
 		when(client.getObject(any(GetObjectRequest.class))).thenReturn(null);
 		assertEquals(0, mgr1.getBucketObject("name", "file").length);
+
+		byte [] ba = "test".getBytes();
+		InputStream is = new ByteArrayInputStream(ba);
+		AbortableInputStream ais = AbortableInputStream.create(is, () -> { });
+		GetObjectResponse gor = GetObjectResponse.builder().build();
+		ResponseInputStream<GetObjectResponse> res = new ResponseInputStream<>(gor, ais);
+		when(client.getObject(any(GetObjectRequest.class))).thenReturn(res);
+		assertEquals(ba.length, mgr1.getBucketObject("name", "file").length);
 	}
 
 	@Test

@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 // J2EE 8.x
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 
 // Spacelibs 1.x
 import com.siliconmtn.data.report.ExcelReport;

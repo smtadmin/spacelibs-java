@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 // Libs 1.x
 import com.siliconmtn.data.format.DateFormat;

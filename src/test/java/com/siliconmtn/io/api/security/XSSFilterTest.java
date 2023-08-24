@@ -8,9 +8,9 @@ import java.io.BufferedReader;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 // Junit 5
 import org.junit.jupiter.api.Test;

@@ -11,12 +11,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-// JEE 7
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Path;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -29,7 +23,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.validation.BindException;
 // Spring 5.5.x
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -47,6 +40,12 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.siliconmtn.io.api.security.SecurityAuthorizationException;
+
+// JEE 7
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Path;
 
 class RestExceptionHandlerTest {
 	
@@ -198,7 +197,7 @@ class RestExceptionHandlerTest {
 	@Test
 	void testHandleHttpRequestMethodNotSupported() throws Exception {
 		RestExceptionHandler  rest = new RestExceptionHandler();
-		ResponseEntity<Object> resp = rest.handleHttpRequestMethodNotSupported(new HttpRequestMethodNotSupportedException("emailAddress", "String"), null, HttpStatus.BAD_REQUEST, null);
+		ResponseEntity<Object> resp = rest.handleHttpRequestMethodNotSupported(new HttpRequestMethodNotSupportedException("emailAddress", List.of("test")), null, HttpStatus.BAD_REQUEST, null);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		assertEquals("Method is Not Supported", ((EndpointResponse)resp.getBody()).getMessage());
 	}
@@ -271,18 +270,6 @@ class RestExceptionHandlerTest {
 		ResponseEntity<Object> resp = rest.handleMissingServletRequestPart(new MissingServletRequestPartException("emailAddress"), null, HttpStatus.BAD_REQUEST, null);
 		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
 		assertEquals("multipart/form-data error", ((EndpointResponse)resp.getBody()).getMessage());
-	}
-
-	/**
-	 * Test method for {@link com.siliconmtn.io.api.RestExceptionHandler#handleBindException(org.springframework.validation.BindException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)}.
-	 */
-	@Test
-	void testHandleBindException() throws Exception {
-		RestExceptionHandler  rest = new RestExceptionHandler();
-		ResponseEntity<Object> resp = rest.handleBindException(new BindException("this", "that"), null, HttpStatus.BAD_REQUEST, null);
-		assertEquals(HttpStatus.BAD_REQUEST, resp.getStatusCode());
-		assertEquals("Unable to Support a Binding Result", ((EndpointResponse)resp.getBody()).getMessage());
-		
 	}
 
 	/**

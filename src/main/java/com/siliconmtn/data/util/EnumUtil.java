@@ -2,7 +2,6 @@ package com.siliconmtn.data.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /********************************************************************
@@ -115,7 +114,7 @@ public class EnumUtil {
 		if (enumArray == null) return new ArrayList<>();
 		return Stream.of(enumArray)
 				.map(Enum::name)
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 }

@@ -73,16 +73,16 @@ public class BooleanUtil {
 		if (obj == null) return false;
 
 		// If the object is a boolean, return it
-		if (obj instanceof Boolean)	return ((Boolean) obj);
+		if (obj instanceof Boolean b)	return b;
 
 		//check for boxed ints
-		if (obj instanceof Integer)	return toBoolean(((Integer) obj).intValue());
+		if (obj instanceof Integer i)	return toBoolean(i.intValue());
 
 		//check for boxed long
-		if (obj instanceof Long) return toBoolean(((Long) obj).longValue());
+		if (obj instanceof Long l) return toBoolean(l.longValue());
 				
 		//check for boxed chars
-		if (obj instanceof Character) return toBoolean(((Character) obj).charValue());
+		if (obj instanceof Character c) return toBoolean(c.charValue());
 				
 		// Make sure the passed data is a String
 		if (!(obj instanceof String)) return false;
@@ -98,11 +98,7 @@ public class BooleanUtil {
 	 */
 	private static boolean checkStringVals(String val) {
 		switch(val.toUpperCase()) {
-			case "Y" :
-			case "YES" :
-			case "TRUE" :
-			case "ON" :
-			case "1" :
+			case "Y", "YES", "TRUE", "ON","1" :
 				return true;
 			default:
 				return false;

@@ -63,7 +63,7 @@ public final class HashCodeUtil {
 	 * @return hash for a char as an int
 	 */
 	public static int hash(char aChar) {
-		return firstTerm() + (int) aChar;
+		return firstTerm() + aChar;
 	}
 
 	/**
@@ -131,7 +131,7 @@ public final class HashCodeUtil {
 		char[] item = val.toCharArray();
 		int total = 0;
 		for (char c : item) {
-			total += (int) c;
+			total += c;
 		}
 		
 		return total;

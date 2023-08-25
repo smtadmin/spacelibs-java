@@ -92,8 +92,8 @@ public class GenericVO implements Serializable, Comparable<GenericVO> {
 	public int compareTo(GenericVO val) {
 		if (val == null || val.getKey() == null) return 0;
 		
-		if (key instanceof java.lang.String) {
-			return (((String)key).compareToIgnoreCase((String)val.getKey()));
+		if (key instanceof String s) {
+			return (s.compareToIgnoreCase((String)val.getKey()));
 		} else {
 			return 0;
 		}
@@ -106,10 +106,10 @@ public class GenericVO implements Serializable, Comparable<GenericVO> {
 	@Override
 	public boolean equals(Object o) {
 		GenericVO val = null;
-		if (o instanceof GenericVO) val = (GenericVO)o;
+		if (o instanceof GenericVO g) val = g;
 
-		if (val != null && key instanceof java.lang.String) {
-			return (((String)key).equalsIgnoreCase((String)val.getKey()));
+		if (val != null && key instanceof String s) {
+			return (s.equalsIgnoreCase((String)val.getKey()));
 		}
 		
 		return false;

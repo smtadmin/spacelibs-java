@@ -5,10 +5,6 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.util.ArrayList;
 
-// Spring JPA
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ConstraintViolationException;
-
 // Spring 5.x
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
@@ -21,7 +17,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -43,6 +38,9 @@ import com.siliconmtn.io.api.security.SecurityAuthorizationException;
 import com.siliconmtn.io.api.validation.ValidationErrorDTO;
 import com.siliconmtn.io.api.validation.ValidationErrorDTO.ValidationError;
 
+// Spring JPA
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 // Log4J 2.x
 import lombok.extern.log4j.Log4j2;
 
@@ -177,22 +175,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		log.error(ex);
 		return buildResponseEntity(new EndpointResponse(status, "multipart/form-data error", ex));	
     }
-	
-	/**
-	 * Customize the response for BindException.
-	 * <p>This method delegates to {@link #buildResponseEntity}.
-	 * @param ex the exception
-	 * @param headers the headers to be written to the response
-	 * @param status the selected response status
-	 * @param request the current request
-	 * @return a {@code ResponseEntity} instance
-	 */
-    @Override
-    protected ResponseEntity<Object> handleBindException(
-    		BindException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-		log.error(ex);
-		return buildResponseEntity(new EndpointResponse(status, "Unable to Support a Binding Result", ex));		
-	}
 	
 	/**
 	 * Customize the response for AsyncRequestTimeoutException.

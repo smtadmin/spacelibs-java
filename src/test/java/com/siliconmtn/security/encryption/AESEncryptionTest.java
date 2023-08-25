@@ -79,32 +79,8 @@ class AESEncryptionTest {
 	void testIsEncryptedEmpty() throws Exception {
 		EncryptionIntfc ei = new AESEncryption(passPhrase, salt);
 		assertFalse(ei.isEncrypted(""));
-	}
-
-	/**
-	 * Test method for {@link com.siliconmtn.security.encryption.AESEncryption#isEncrypted(java.lang.String)}.
-	 */
-	@Test
-	void testIsEncryptedTrue() throws Exception {
-		EncryptionIntfc ei = new AESEncryption(passPhrase, salt);
 		assertTrue(ei.isEncrypted("3a793ea17226fc819e61b8ac2965db37817d31193205ad35fe4cafa180c73535"));
-	}
-	
-	/**
-	 * Test method for {@link com.siliconmtn.security.encryption.AESEncryption#isEncrypted(java.lang.String)}.
-	 */
-	@Test
-	void testIsEncryptedFalse() throws Exception {
-		EncryptionIntfc ei = new AESEncryption(passPhrase, salt);
 		assertFalse(ei.isEncrypted("HelloWorld"));
-	}
-	
-	/**
-	 * Test method for {@link com.siliconmtn.security.encryption.AESEncryption#isEncrypted(java.lang.String)}.
-	 */
-	@Test
-	void testIsEncryptedFlow() throws Exception {
-		EncryptionIntfc ei = new AESEncryption(passPhrase, salt);
 		assertFalse(ei.isEncrypted("flow"));
 	}
 }

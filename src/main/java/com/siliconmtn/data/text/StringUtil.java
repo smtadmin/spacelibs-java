@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -473,7 +472,7 @@ public class StringUtil {
 				list
 					.stream()
 					.map(item -> (StringUtil.defaultString(symbol,"") + item + StringUtil.defaultString(symbol,"")))
-					.collect(Collectors.toList()));
+					.toList());
 	}
 
 	/**

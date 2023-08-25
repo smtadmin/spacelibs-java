@@ -369,11 +369,11 @@ public class ExcelReport extends AbstractReport {
 		} else if (value instanceof Boolean) {
 			c.setCellValue(BooleanUtil.toBoolean(value));
 			cvt = CellValueType.BOOLEAN;
-		} else if (value instanceof Timestamp) {
-			c.setCellValue((Timestamp)value);
+		} else if (value instanceof Timestamp t) {
+			c.setCellValue(t);
 			cvt = CellValueType.TIMESTAMP;
-		} else if (value instanceof Date) {
-			c.setCellValue((Date)value);
+		} else if (value instanceof Date d) {
+			c.setCellValue(d);
 			cvt = CellValueType.DATE;
 		} else {
 			if (Pattern.matches("^(\\d{4}-\\d{2}-\\d{2}).*", value + "")) {

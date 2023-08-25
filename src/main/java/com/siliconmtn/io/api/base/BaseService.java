@@ -150,7 +150,7 @@ public class BaseService<T extends BaseEntity, V extends BaseDTO> {
 	public List<T> saveAll(List<?> entities) {
 		if (entities == null || entities.isEmpty()) return new ArrayList<>();
 		if (entities.get(0) instanceof BaseDTO)
-			return repository.saveAll(toEntityList((List<BaseDTO>)entities));
+			return repository.saveAll(toEntityList(entities));
 		return repository.saveAll((List<T>)entities);
 	}
 

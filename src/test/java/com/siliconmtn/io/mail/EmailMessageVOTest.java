@@ -74,28 +74,28 @@ class EmailMessageVOTest {
 	void addRecipientTest() {
 		EmailMessageVO msg = new EmailMessageVO();
 		msg.addRecipient("test@test.com");
-		assertEquals(msg.getRecipients(RecipientType.TO)[0], "test@test.com");
+		assertEquals("test@test.com", msg.getRecipients(RecipientType.TO)[0]);
 	}
 
 	@Test
 	void addRecipientTestEmpty() {
 		EmailMessageVO msg = new EmailMessageVO();
 		assertDoesNotThrow(() -> msg.addRecipient("", RecipientType.BCC));
-		assertEquals(msg.getRecipients(RecipientType.TO).length, 0);
+		assertEquals(0, msg.getRecipients(RecipientType.TO).length);
 	}
 
 	@Test
 	void addRecipientTestNoType() {
 		EmailMessageVO msg = new EmailMessageVO();
 		assertDoesNotThrow(() -> msg.addRecipient("", null));
-		assertEquals(msg.getRecipients(RecipientType.TO).length, 0);
+		assertEquals(0, msg.getRecipients(RecipientType.TO).length);
 	}
 	
 	@Test
 	void addRecipientTestValid() {
 		EmailMessageVO msg = new EmailMessageVO();
 		assertDoesNotThrow(() -> msg.addRecipient("test@test.com", RecipientType.BCC));
-		assertEquals(msg.getRecipients(RecipientType.BCC).length, 1);
-		assertEquals(msg.getRecipients(RecipientType.BCC)[0], "test@test.com");
+		assertEquals(1, msg.getRecipients(RecipientType.BCC).length);
+		assertEquals("test@test.com", msg.getRecipients(RecipientType.BCC)[0]);
 	}
 }

@@ -212,8 +212,9 @@ public class AWSS3FileManager {
 
 			resArray = IOUtils.toByteArray(res);
 			
-		} catch (IOException e) {
+		} catch (IOException | NullPointerException e) {
 			log.error("Failed to acquire file " + file + " from bucket " + bucketName, e);
+			resArray = new byte[0];
 		} finally {
 			closeResponse(res);
 		}

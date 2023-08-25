@@ -12,15 +12,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-// Jee 7.x
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-
 // Apache commons 3.x
 import org.apache.commons.io.IOUtils;
-
 // Jsoup 1.13.x
 import org.jsoup.Jsoup;
 import org.jsoup.parser.Parser;
@@ -29,6 +22,11 @@ import org.owasp.encoder.Encode;
 
 // Spacelibs 1.x
 import com.siliconmtn.data.text.StringUtil;
+
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
 /****************************************************************************
  * <b>Title</b>: XSSRequestWrapper.java

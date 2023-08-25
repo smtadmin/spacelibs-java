@@ -4,7 +4,7 @@ package com.siliconmtn.data.parser;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 // Space Libs 1.x
 import com.siliconmtn.data.format.DateFormat.DatePattern;

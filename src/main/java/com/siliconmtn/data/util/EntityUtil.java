@@ -96,7 +96,7 @@ public class EntityUtil {
 				var entityField = entity.getClass().getDeclaredField(dtoField.getName());
 
 				if (entityField.getType() != dtoField.getType() && value != null) {
-					log.info(entityField.getName());
+					log.debug(entityField.getName());
 					value = entityManager.getReference(entityField.getType(), value);
 					if (value == null) 
 						throw new EndpointRequestException(

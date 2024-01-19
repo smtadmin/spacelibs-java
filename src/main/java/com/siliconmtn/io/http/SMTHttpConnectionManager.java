@@ -14,40 +14,48 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-// Log4j 2.x
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.pulsar.shade.org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.siliconmtn.data.text.StringUtil;
+import com.siliconmtn.io.api.EndpointResponse;
+
+import lombok.extern.log4j.Log4j2;
 
 /****************************************************************************
  * <b>Title</b>: SMTHttpConnectionManager.java
  * <b>Project</b>: SpaceLibs-Java
- * <b>Description: </b> Wrapper class around URLs and connections.  Manages the 
- * sessions via cookies.  This allows  multiple requests to be made to the same 
- * server using any cookies that were present 
- * during the initial connection as well as subsequent sessions.  Allow
- * for the setting of an SSLSocketFactory in support of certificate-based auth
- * connections.  Redirects, timeouts, headers (both request and response) are managed.
- * Because we return byte[], any type of data can be retrieved
+ * <b>Description: </b> Wrapper class around URLs and connections. Manages the
+ * sessions via cookies. This allows multiple requests to be made to the same
+ * server using any cookies that were present during the initial connection as
+ * well as subsequent sessions. Allow for the setting of an SSLSocketFactory in
+ * support of certificate-based auth connections. Redirects, timeouts, headers
+ * (both request and response) are managed. Because we return byte[], any type
+ * of data can be retrieved
  * <b>Copyright:</b> Copyright (c) 2021
  * <b>Company:</b> Silicon Mountain Technologies
  * 
  * @author James Camire
  * @version 3.0
  * @since Jan 15, 2021
- * @updates:
+ * @updates: Added capability to build a URL constructed requiring parameter
+ * replacement as well as parse/convert an EndpointResponse JSON Payload.
  ****************************************************************************/
 @Component
+@Log4j2
 public class SMTHttpConnectionManager {
-	
-	
+
 	/**
 	 * Identifies the type of HTTP Connection
 	 */
@@ -59,12 +67,12 @@ public class SMTHttpConnectionManager {
 	 * Default connection prefix if not supplied
 	 */
 	public static final String HTTP_CONN_PREFIX = "http://";
-	
+
 	/**
 	 * Default connection prefix if not supplied
 	 */
 	public static final String HTTPS_CONN_PREFIX = "https://";
-	
+
 	/**
 	 * Socket timeout in ms
 	 */
@@ -91,7 +99,7 @@ public class SMTHttpConnectionManager {
 	public static final String COOKIE_HEADER_NAME = "Set-Cookie";
 
 	/**
-	 * String representation in the header 
+	 * String representation in the header
 	 */
 	public static final String COOKIE_NAME = "Cookie";
 
@@ -109,17 +117,17 @@ public class SMTHttpConnectionManager {
 	 * Identifies the request method for the connection as a GET method
 	 */
 	public static final String HTTP_PUT_METHOD = "PUT";
-	
+
 	/**
 	 * Identifies the content type for the POST method.
 	 */
 	public static final String REQUEST_PROPERTY_CONTENT_TYPE = "Content-Type";
-	
+
 	/**
 	 * Identifies the length of the message when posting data
 	 */
 	public static final String REQUEST_PROPERTY_CONTENT_LENGTH = "Content-Length";
-	
+
 	/**
 	 * Exception message text for use when URL is not supplied.
 	 */
@@ -127,14 +135,13 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * sslSocketFactory The SSLSocketFactory that is set on the HTTPS connection
-	 * object just after it is instantiated and prior to any other properties being set
-	 * for said object.  If a non-https url is passed to the connect methods, the
+	 * object just after it is instantiated and prior to any other properties being
+	 * set for said object. If a non-https url is passed to the connect methods, the
 	 * SSLSocketFactory object will be ignored.
 	 */
 	private SSLSocketFactory sslSocketFactory;
-	
+
 	// Members
-	static final Logger log = LogManager.getLogger(SMTHttpConnectionManager.class);
 	private int connectionTimeout;
 	private boolean followRedirects = true;
 	private Map<String, String> requestHeaders;
@@ -143,7 +150,7 @@ public class SMTHttpConnectionManager {
 	private Map<String, String> headerMap;
 	private int redirectLimit = 10;
 	private boolean useCookieHandler = false;
-	
+
 	/**
 	 * Initializes the manager
 	 */
@@ -152,99 +159,108 @@ public class SMTHttpConnectionManager {
 		cookies = new LinkedHashMap<>();
 		headerMap = new LinkedHashMap<>();
 	}
-	
+
 	/**
 	 * Specifies if the cookie handler should be utilized
+	 * 
 	 * @param useCookieHandler Boolean to indicate whther or not to use the provided
-	 * cookie manager
+	 *                         cookie manager
 	 */
 	public SMTHttpConnectionManager(boolean useCookieHandler) {
 		this();
 		this.useCookieHandler = useCookieHandler;
 	}
-	
+
 	/**
-	 * Accepts an SSLSocketFactory.  The SSLSocketFactory is set on an HTTPS 
-	 * connection object (HttpsURLConnection) when the connection object is 
-	 * created, provided that the requested url's protocol is https.  Otherwise the 
+	 * Accepts an SSLSocketFactory. The SSLSocketFactory is set on an HTTPS
+	 * connection object (HttpsURLConnection) when the connection object is created,
+	 * provided that the requested url's protocol is https. Otherwise the
 	 * SSLSocketFactory object is not used.
+	 * 
 	 * @param sslSocketFactory Socket factory to utilize for SSL connections
 	 */
 	public SMTHttpConnectionManager(SSLSocketFactory sslSocketFactory) {
 		this();
 		setSslSocketFactory(sslSocketFactory);
 	}
-	
+
 	/**
 	 * Retrieves data from an HTTP server and returns the data
-	 * @param url fully qualified URL (http://www.somedomain.com)
+	 * 
+	 * @param url        fully qualified URL (http://www.somedomain.com)
 	 * @param parameters HTTP POST data as a Map of key, value pairs
 	 * @return binary data containing information retrieved from the site
-	 * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
-	 * Defaults to POST if type is null
+	 * @param type Request Type. One of GET, POST, HEAD, OPTIONS, PUT, DELETE,
+	 *             TRACE. Defaults to POST if type is null
 	 * @throws IOException When data can't be retrieved, this exception is thrown
 	 */
-	public byte[] getRequestData(String url, Map<String, Object> parameters, HttpConnectionType type) 
-	throws IOException {
-		if (StringUtil.isEmpty(url)) throw new IOException(MSG_URL_REQUIRED);
+	public byte[] getRequestData(String url, Map<String, Object> parameters, HttpConnectionType type)
+			throws IOException {
+		if (StringUtil.isEmpty(url))
+			throw new IOException(MSG_URL_REQUIRED);
 		return connect(createURL(url), convertPostData(parameters), type == null ? HttpConnectionType.POST : type);
 	}
-	
+
 	/**
 	 * Retrieves data from an HTTP server and returns the data
-	 * @param url fully qualified URL (http://www.somedomain.com)
+	 * 
+	 * @param url        fully qualified URL (http://www.somedomain.com)
 	 * @param parameters HTTP POST data as a Map of key, value pairs
 	 * @return binary data containing information retrieved from the site
-	 * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
-	 * Defaults to POST if type is null
+	 * @param type Request Type. One of GET, POST, HEAD, OPTIONS, PUT, DELETE,
+	 *             TRACE. Defaults to POST if type is null
 	 * @throws IOException When data can't be retrieved, this exception is thrown
 	 */
-	public byte[] getRequestData(URL url, Map<String, Object> parameters, HttpConnectionType type) 
-	throws IOException {
-		if (url == null) throw new IOException(MSG_URL_REQUIRED);
+	public byte[] getRequestData(URL url, Map<String, Object> parameters, HttpConnectionType type) throws IOException {
+		if (url == null)
+			throw new IOException(MSG_URL_REQUIRED);
 		return connect(url, convertPostData(parameters), type == null ? HttpConnectionType.POST : type);
 	}
-	
-    /**
-     * Retrieves data from an end point via the provided HTTP Request Type
-     * (GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE).  Returns data as a byte array since the 
-     * requested data may be binary
-     * @param url Url to call.
-     * @param data Data sent in the body of the message
-     * Do NOT include the ? in the Url or paramters
-     * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE
-     * @return byte data from the end point server
-     * @throws IOException
-     */
-    public byte[] getRequestData(URL url, byte[] data, HttpConnectionType type) 
-    throws IOException {
-        if (url == null) throw new IOException(MSG_URL_REQUIRED);
-        return connect(url, data == null ? new byte[0] : data, type == null ? HttpConnectionType.POST : type);
-    }
-    
-    /**
-     * Retrieves data from an end point via the provided HTTP Request Type
-     * (GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE).  Returns data as a byte array since the 
-     * requested data may be binary
-     * @param url Url to call.
-     * @param data Data sent in the body of the message
-     * Do NOT include the ? in the Url or paramters
-     * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE
-     * @return byte data from the end point server
-     * @throws IOException
-     */
-    
-    public byte[] getRequestData(String url, byte[] data, HttpConnectionType type) 
-    throws IOException {
-        if (url == null) throw new IOException(MSG_URL_REQUIRED);
-        return connect(createURL(url), data == null ? new byte[0] : data, type == null ? HttpConnectionType.POST : type);
-    }
-    
+
+	/**
+	 * Retrieves data from an end point via the provided HTTP Request Type (GET,
+	 * POST, HEAD, OPTIONS, PUT, DELETE, TRACE). Returns data as a byte array since
+	 * the requested data may be binary
+	 * 
+	 * @param url  Url to call.
+	 * @param data Data sent in the body of the message Do NOT include the ? in the
+	 *             Url or paramters
+	 * @param type Request Type. One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE
+	 * @return byte data from the end point server
+	 * @throws IOException
+	 */
+	public byte[] getRequestData(URL url, byte[] data, HttpConnectionType type) throws IOException {
+		if (url == null)
+			throw new IOException(MSG_URL_REQUIRED);
+		return connect(url, data == null ? new byte[0] : data, type == null ? HttpConnectionType.POST : type);
+	}
+
+	/**
+	 * Retrieves data from an end point via the provided HTTP Request Type (GET,
+	 * POST, HEAD, OPTIONS, PUT, DELETE, TRACE). Returns data as a byte array since
+	 * the requested data may be binary
+	 * 
+	 * @param url  Url to call.
+	 * @param data Data sent in the body of the message Do NOT include the ? in the
+	 *             Url or paramters
+	 * @param type Request Type. One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE
+	 * @return byte data from the end point server
+	 * @throws IOException
+	 */
+
+	public byte[] getRequestData(String url, byte[] data, HttpConnectionType type) throws IOException {
+		if (url == null)
+			throw new IOException(MSG_URL_REQUIRED);
+		return connect(createURL(url), data == null ? new byte[0] : data,
+				type == null ? HttpConnectionType.POST : type);
+	}
 
 	/**
 	 * Connects to a HTTP server using the supplied URL and gets the data
+	 * 
 	 * @param actionUrl
-	 * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
+	 * @param type      Request Type. One of GET, POST, HEAD, OPTIONS, PUT, DELETE,
+	 *                  TRACE.
 	 * @return data for the request
 	 * @throws IOException When data can't be retrieved, this exception is thrown
 	 */
@@ -258,33 +274,39 @@ public class SMTHttpConnectionManager {
 			}
 
 		}
-		
+
 		return baos.toByteArray();
 	}
-	
+
 	/**
-	 * Connects to the end device and returns a stream so the data can be 
-	 * processed sequentially.
-	 * @param url URL for the connection
+	 * Connects to the end device and returns a stream so the data can be processed
+	 * sequentially.
+	 * 
+	 * @param url    URL for the connection
 	 * @param params Post data to pass as a Map key, value pairs
-	 * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
+	 * @param type   Request Type. One of GET, POST, HEAD, OPTIONS, PUT, DELETE,
+	 *               TRACE.
 	 * @return Connection stream to the data
 	 * @throws IOException When data can't be retrieved, this exception is thrown
 	 */
-	public InputStream getConnectionStream(URL url, Map<String, Object> params, HttpConnectionType type) throws IOException {
+	public InputStream getConnectionStream(URL url, Map<String, Object> params, HttpConnectionType type)
+			throws IOException {
 		return connectStream(url, convertPostData(params), 0, type);
 	}
-	
+
 	/**
-	 * Connects to the end device and returns a stream so the data can be processed sequentially
+	 * Connects to the end device and returns a stream so the data can be processed
+	 * sequentially
+	 * 
 	 * @param actionUrl URL for the connection
-	 * @param postData Post data to pass
-	 * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
+	 * @param postData  Post data to pass
+	 * @param type      Request Type. One of GET, POST, HEAD, OPTIONS, PUT, DELETE,
+	 *                  TRACE.
 	 * @return Stream of the connection
 	 * @throws IOException When data can't be retrieved, this exception is thrown
 	 */
-	private InputStream connectStream(URL actionUrl, byte[] postDataBytes, int redirectAttempt, HttpConnectionType type) 
-	throws IOException {
+	private InputStream connectStream(URL actionUrl, byte[] postDataBytes, int redirectAttempt, HttpConnectionType type)
+			throws IOException {
 		log.debug("Connecting to: {}", actionUrl);
 
 		// build connection
@@ -293,8 +315,9 @@ public class SMTHttpConnectionManager {
 		// execute the connection
 		executeConnection(conn, postDataBytes, type);
 
-		//see if we need to follow a redirect
-		if (followRedirects && (HttpURLConnection.HTTP_MOVED_PERM == responseCode || HttpURLConnection.HTTP_MOVED_TEMP == responseCode) && redirectAttempt < redirectLimit) {
+		// see if we need to follow a redirect
+		if (followRedirects && (HttpURLConnection.HTTP_MOVED_PERM == responseCode
+				|| HttpURLConnection.HTTP_MOVED_TEMP == responseCode) && redirectAttempt < redirectLimit) {
 			String redirUrl = conn.getHeaderField("Location");
 			log.debug("Following redirect to: {}", redirUrl);
 			if (!StringUtil.isEmpty(redirUrl)) {
@@ -305,33 +328,37 @@ public class SMTHttpConnectionManager {
 
 		log.debug("Response code: {}", responseCode);
 
-		// return the response stream from the server - if the request failed return the error stream
+		// return the response stream from the server - if the request failed return the
+		// error stream
 		return (200 <= responseCode && 300 > responseCode) ? conn.getInputStream() : conn.getErrorStream();
 	}
-	
+
 	/**
-	 * Validates and creates a URL using actionUrl.  Default prototcal is http://
+	 * Validates and creates a URL using actionUrl. Default prototcal is http://
+	 * 
 	 * @param actionUrl Creates a URL object form the string url
 	 * @return URL object representing the string url
-	 * @throws IOException  When data can't be retrieved, this exception is thrown
+	 * @throws IOException When data can't be retrieved, this exception is thrown
 	 */
 	public URL createURL(String actionUrl) throws IOException {
-		if (StringUtil.isEmpty(actionUrl)) throw new IOException("Invalid URL");
-		if (! actionUrl.startsWith("http")) {
+		if (StringUtil.isEmpty(actionUrl))
+			throw new IOException("Invalid URL");
+		if (!actionUrl.startsWith("http")) {
 			actionUrl = ((sslSocketFactory == null) ? HTTP_CONN_PREFIX : HTTPS_CONN_PREFIX) + actionUrl;
 		}
-		
+
 		return new URL(actionUrl);
 	}
-	
+
 	/**
 	 * Returns a connection type based on the URL protocol
+	 * 
 	 * @param url Pointer to the end server
 	 * @return Http URL Connection to the end server
-	 * @throws IOException  When data can't be retrieved, this exception is thrown
+	 * @throws IOException When data can't be retrieved, this exception is thrown
 	 */
 	private HttpURLConnection createConnection(URL url) throws IOException {
-		// Set the cookie handler. Since this is and accessed 
+		// Set the cookie handler. Since this is and accessed
 		// via static method lack of use still requires action to be taken
 		if (useCookieHandler) {
 			CookieHandler.setDefault(new CookieManager());
@@ -341,22 +368,25 @@ public class SMTHttpConnectionManager {
 		// build connection
 		if ("https".equalsIgnoreCase(url.getProtocol())) {
 			HttpsURLConnection sConn = (HttpsURLConnection) url.openConnection();
-			if (sslSocketFactory != null) sConn.setSSLSocketFactory(sslSocketFactory);
+			if (sslSocketFactory != null)
+				sConn.setSSLSocketFactory(sslSocketFactory);
 			return sConn;
 		} else {
 			return (HttpURLConnection) url.openConnection();
 		}
 	}
 
-
 	/**
 	 * Initializes and executes the connection
-	 * @param conn COnnection to the end server
+	 * 
+	 * @param conn     COnnection to the end server
 	 * @param postData data to send to the server
-	 * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
-	 * @throws IOException  When data can't be retrieved, this exception is thrown
+	 * @param type     Request Type. One of GET, POST, HEAD, OPTIONS, PUT, DELETE,
+	 *                 TRACE.
+	 * @throws IOException When data can't be retrieved, this exception is thrown
 	 */
-	private void executeConnection(HttpURLConnection conn, byte[] postDataBytes, HttpConnectionType type) throws IOException {
+	private void executeConnection(HttpURLConnection conn, byte[] postDataBytes, HttpConnectionType type)
+			throws IOException {
 		// Setup the connection parameters
 		initConnection(conn, postDataBytes, type);
 
@@ -364,24 +394,26 @@ public class SMTHttpConnectionManager {
 		conn.connect();
 		responseCode = conn.getResponseCode();
 
-		//Parse header information
+		// Parse header information
 		storeCookies(conn);
 	}
-	
+
 	/**
 	 * Initializes the Connection parameters
-	 * @param conn Connecton to the server to be initialized
+	 * 
+	 * @param conn     Connecton to the server to be initialized
 	 * @param postData Data to post to the end server
-	 * @param type Request Type.  One of GET, POST, HEAD, OPTIONS, PUT, DELETE, TRACE.
-	 * @throws IOException  When data can't be retrieved, this exception is thrown
+	 * @param type     Request Type. One of GET, POST, HEAD, OPTIONS, PUT, DELETE,
+	 *                 TRACE.
+	 * @throws IOException When data can't be retrieved, this exception is thrown
 	 */
-	private void initConnection(HttpURLConnection conn, byte[] postDataBytes, HttpConnectionType type) 
-	throws IOException {
+	private void initConnection(HttpURLConnection conn, byte[] postDataBytes, HttpConnectionType type)
+			throws IOException {
 		// set additional common connection properties
 		conn.setDoOutput(true);
 		conn.setReadTimeout(connectionTimeout > 0 ? connectionTimeout : DEFAULT_SOCKET_TIMEOUT);
 		conn.setConnectTimeout(connectionTimeout > 0 ? connectionTimeout : DEFAULT_SOCKET_TIMEOUT);
-		conn.setUseCaches (false);
+		conn.setUseCaches(false);
 		conn.setAllowUserInteraction(false);
 		HttpURLConnection.setFollowRedirects(followRedirects);
 		conn.setInstanceFollowRedirects(followRedirects);
@@ -397,41 +429,43 @@ public class SMTHttpConnectionManager {
 		conn.setRequestMethod(type.toString());
 
 		if (HttpConnectionType.POST.equals(type) || HttpConnectionType.PUT.equals(type)) {
-			if (! requestHeaders.containsKey(REQUEST_PROPERTY_CONTENT_TYPE))
-				conn.setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE,"application/x-www-form-urlencoded");
-			
+			if (!requestHeaders.containsKey(REQUEST_PROPERTY_CONTENT_TYPE))
+				conn.setRequestProperty(REQUEST_PROPERTY_CONTENT_TYPE, "application/x-www-form-urlencoded");
+
 			conn.setRequestProperty(REQUEST_PROPERTY_CONTENT_LENGTH, Integer.toString(postDataBytes.length));
 			try (DataOutputStream out = new DataOutputStream(conn.getOutputStream())) {
 				out.write(postDataBytes);
 			}
 		}
 	}
-	
+
 	/**
-	 * Parses the returned Set-Cookie parameter in the header into name value
-	 * pairs and stores them in a hash map to be used during future connections.
+	 * Parses the returned Set-Cookie parameter in the header into name value pairs
+	 * and stores them in a hash map to be used during future connections.
+	 * 
 	 * @param conn Connection to the server to retrieve / assign cookies
 	 */
 	void storeCookies(HttpURLConnection conn) {
-		//Loop all of the HTTP header info
+		// Loop all of the HTTP header info
 		int c = 0;
 		while (conn.getHeaderField(c) != null) {
 			// Store each header param in the headerMap collection
 			String key = conn.getHeaderFieldKey(c);
 			String value = StringUtil.defaultString(conn.getHeaderField(c));
 			headerMap.put(key, value);
-			
+
 			// Find the Set-Cookie parameters
 			if (COOKIE_HEADER_NAME.equalsIgnoreCase(key)) {
 				// Parse out the data
 				int length = value.indexOf(COOKIE_DELIMITER);
-				if (length < 0) length = value.length();
+				if (length < 0)
+					length = value.length();
 				value = value.substring(0, length);
 
 				// Parse out the name/value pairs
 				int sepVal = value.indexOf(COOKIE_VALUE_DELIMITER);
 				if (sepVal > -1) {
-					String valueKey = value.substring(0,sepVal);
+					String valueKey = value.substring(0, sepVal);
 					String valueVal = value.substring(sepVal + 1, value.length());
 					addCookie(valueKey, valueVal);
 				}
@@ -443,52 +477,58 @@ public class SMTHttpConnectionManager {
 		// Add the Response Code
 		headerMap.put(RESPONSE_CODE, Integer.toString(responseCode));
 	}
-	
+
 	/**
 	 * Converts the map data into a url encoded string and converts to a byte[]
+	 * 
 	 * @param postData Converts map of data elements into a delimited string
 	 * @return URL encoded data parameters
 	 */
 	public byte[] convertPostData(Map<String, Object> postData) {
-		if (postData == null || postData.isEmpty()) return new byte[0];
+		if (postData == null || postData.isEmpty())
+			return new byte[0];
 		StringBuilder sb = new StringBuilder(512);
-		
-		//convert the postData Map to URL-encoded UTF-8 key=value pairs
+
+		// convert the postData Map to URL-encoded UTF-8 key=value pairs
 		for (Entry<String, Object> entry : postData.entrySet()) {
-			if(sb.length() > 0) sb.append('&');
-			
-			if(entry.getValue() instanceof Object[] || entry.getValue() instanceof Collection) 
+			if (sb.length() > 0)
+				sb.append('&');
+
+			if (entry.getValue() instanceof Object[] || entry.getValue() instanceof Collection)
 				listParams(sb, entry);
 			else {
 				String value = StringUtil.defaultString(entry.getValue() + "", "");
 				sb.append(entry.getKey()).append("=").append(URLEncoder.encode(value, StandardCharsets.UTF_8));
 			}
 		}
-		
+
 		return sb.toString().getBytes(StandardCharsets.UTF_8);
 	}
 
 	/**
 	 * Helper method ensures that multiple values for a given key get added
 	 * correctly.
-	 * @param sb assigns key values into the string builder
+	 * 
+	 * @param sb    assigns key values into the string builder
 	 * @param entry items to assign
 	 */
 	private void listParams(StringBuilder sb, Entry<String, Object> entry) {
 		Object raw = entry.getValue();
 		String key = entry.getKey();
-		Object[] values = (raw instanceof Collection) ? ((Collection<?>)raw).toArray() : (Object[]) raw;
+		Object[] values = (raw instanceof Collection) ? ((Collection<?>) raw).toArray() : (Object[]) raw;
 
 		int i = 0;
-		for(Object o : values) {
-			if(i > 0) sb.append("&");
+		for (Object o : values) {
+			if (i > 0)
+				sb.append("&");
 			sb.append(key).append('=').append(URLEncoder.encode(o.toString(), StandardCharsets.UTF_8));
 			i++;
 		}
 	}
-	
+
 	/**
 	 * Sets the factory for the SSL connection
+	 * 
 	 * @param sslSocketFactory the sslSocketFactory to set
 	 */
 	public void setSslSocketFactory(SSLSocketFactory sslSocketFactory) {
@@ -497,6 +537,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Returns the socket factory
+	 * 
 	 * @return sslSocketFactory assigned
 	 */
 	public SSLSocketFactory getSslSocketFactory() {
@@ -505,6 +546,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Gets the connection timeout
+	 * 
 	 * @return the connectionTimeout
 	 */
 	public int getConnectionTimeout() {
@@ -513,6 +555,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Determines if this class will follow redirects
+	 * 
 	 * @return the followRedirects
 	 */
 	public boolean isFollowRedirects() {
@@ -521,6 +564,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Gets the request headers
+	 * 
 	 * @return the requestHeaders
 	 */
 	public Map<String, String> getRequestHeaders() {
@@ -529,6 +573,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Gets the onnection response code
+	 * 
 	 * @return the responseCode
 	 */
 	public int getResponseCode() {
@@ -537,6 +582,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Gets the cookies
+	 * 
 	 * @return the cookies
 	 */
 	public Map<String, String> getCookies() {
@@ -545,6 +591,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Gets the header maps
+	 * 
 	 * @return the headerMap
 	 */
 	public Map<String, String> getHeaderMap() {
@@ -553,6 +600,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Number of redirects to foloow
+	 * 
 	 * @return the redirectLimit
 	 */
 	public int getRedirectLimit() {
@@ -561,6 +609,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Determines if cookie handler is in use
+	 * 
 	 * @return the useCookieHandler
 	 */
 	public boolean isUseCookieHandler() {
@@ -569,6 +618,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Sets the connection timeout
+	 * 
 	 * @param connectionTimeout the connectionTimeout to set
 	 */
 	public void setConnectionTimeout(int connectionTimeout) {
@@ -577,6 +627,7 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Sets whether redirects should be followed
+	 * 
 	 * @param followRedirects the followRedirects to set
 	 */
 	public void setFollowRedirects(boolean followRedirects) {
@@ -585,35 +636,42 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Sets request headers for the connection
+	 * 
 	 * @param requestHeaders the requestHeaders to set
 	 */
 	public void setRequestHeaders(Map<String, String> requestHeaders) {
-		if (requestHeaders == null) this.requestHeaders.clear();
-		else this.requestHeaders = requestHeaders;
+		if (requestHeaders == null)
+			this.requestHeaders.clear();
+		else
+			this.requestHeaders = requestHeaders;
 	}
-	
+
 	/**
 	 * Adds any request headers assigned to the request connection
+	 * 
 	 * @param conn Connection to the end server
 	 */
 	protected void setRequestHeaders(HttpURLConnection conn) {
-		if (requestHeaders.isEmpty()) return;
-		for (Map.Entry<String, String> entry: requestHeaders.entrySet())
+		if (requestHeaders.isEmpty())
+			return;
+		for (Map.Entry<String, String> entry : requestHeaders.entrySet())
 			conn.setRequestProperty(entry.getKey(), entry.getValue());
 	}
-	
+
 	/**
 	 * Adds a request header that will be passed on the request
+	 * 
 	 * @param key
 	 * @param value
 	 */
 	public void addRequestHeader(String key, String value) {
 		requestHeaders.put(key, value);
 	}
-	
+
 	/**
 	 * Adds a header map value for the HTTP connection
-	 * @param key Cookie unique identifier
+	 * 
+	 * @param key   Cookie unique identifier
 	 * @param value Cookie value
 	 */
 	public void addCookie(String key, String value) {
@@ -622,25 +680,30 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Map containing multiple cookies to add
+	 * 
 	 * @param cookies the cookies to set
 	 */
 	public void setCookies(Map<String, String> cookies) {
-		if (cookies == null) this.cookies.clear(); 
-		else this.cookies = cookies;
+		if (cookies == null)
+			this.cookies.clear();
+		else
+			this.cookies = cookies;
 	}
-	
+
 	/**
-	 * Adds any cookies from the collection of stored cookies and formats
-	 * the data into: Cookie: name=value; name=value;
-	 * Do not use this to initially add cookies to the cookie map on this object, rather
-	 * use the addCookie(key,value) method.
+	 * Adds any cookies from the collection of stored cookies and formats the data
+	 * into: Cookie: name=value; name=value; Do not use this to initially add
+	 * cookies to the cookie map on this object, rather use the addCookie(key,value)
+	 * method.
+	 * 
 	 * @param conn Connection to the end server
 	 */
 	void assignCookies(HttpURLConnection conn) {
-		if (cookies.isEmpty() || conn == null) return;
+		if (cookies.isEmpty() || conn == null)
+			return;
 		StringBuilder sb = new StringBuilder(250);
 
-		for (Map.Entry<String, String> entry: cookies.entrySet())
+		for (Map.Entry<String, String> entry : cookies.entrySet())
 			sb.append(entry.getKey()).append(COOKIE_VALUE_DELIMITER).append(entry.getValue()).append(COOKIE_DELIMITER);
 
 		conn.addRequestProperty(COOKIE_NAME, sb.toString());
@@ -648,15 +711,19 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Adds parameters to the header map
+	 * 
 	 * @param headerMap the headerMap to set
 	 */
 	public void setHeaderMap(Map<String, String> headerMap) {
-		if (headerMap == null) this.headerMap.clear(); 
-		else this.headerMap = headerMap;
+		if (headerMap == null)
+			this.headerMap.clear();
+		else
+			this.headerMap = headerMap;
 	}
 
 	/**
 	 * Number of redirects to follow before quitting
+	 * 
 	 * @param redirectLimit the redirectLimit to set
 	 */
 	public void setRedirectLimit(int redirectLimit) {
@@ -665,9 +732,103 @@ public class SMTHttpConnectionManager {
 
 	/**
 	 * Sets whether the cookie handler should be used
+	 * 
 	 * @param useCookieHandler the useCookieHandler to set
 	 */
 	public void setUseCookieHandler(boolean useCookieHandler) {
 		this.useCookieHandler = useCookieHandler;
+	}
+
+	/**
+	 * Build a URI without the need for Path Parameter Replacement
+	 * @param endpoint
+	 * @param urlPath
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public String buildUri(String endpoint, String urlPath) throws IllegalArgumentException {
+		return this.buildUriWithParams(endpoint, urlPath, null);
+	}
+
+	/**
+	 * Build the Uri that requires Path Parameter Replacement
+	 * 
+	 * @param endpoint
+	 * @param urlPath
+	 * @param urlParams
+	 * @return Url String with all placeholders replaced with urlParams
+	 * @throws OEException
+	 */
+	public String buildUriWithParams(String endpoint, String urlPath, List<Object> urlParams)
+			throws IllegalArgumentException {
+		if (StringUtils.isEmpty(endpoint)) {
+			throw new IllegalArgumentException("Unable to build URI with missing endpoint");
+		} else if (StringUtils.isEmpty(urlPath)) {
+			throw new IllegalArgumentException("Unable to build URI with missing urlPath");
+		}
+
+		UriComponents uri = UriComponentsBuilder.fromUriString(endpoint).path(urlPath).build();
+		if (urlParams != null) {
+			uri = uri.expand(urlParams.toArray());
+		}
+		return uri.toString();
+	}
+
+	/**
+	 * Convert the response from the Network call into a RoadmapProcessingDTO, throw
+	 * an exception otherwise.
+	 * 
+	 * @param data
+	 * @param returnType
+	 * @param mapper
+	 * @return The payload of the EndpointResponse converted to the returnType
+	 *         passed.
+	 * @throws OEException
+	 * @throws IOException
+	 */
+	public <T> T convertEndpointResponse(byte[] data, Class<T> returnType, ObjectMapper mapper)
+			throws IllegalArgumentException, IOException {
+		if (data == null || data.length == 0) {
+			throw new IllegalArgumentException("Cannot process empty data");
+		} else if (returnType == null) {
+			throw new IllegalArgumentException("No valid returnType was passed.  Unable to convert response data.");
+		} else if (mapper == null) {
+			throw new IllegalArgumentException("Missing mapper to perform conversion of data");
+		}
+		EndpointResponse res = mapper.readValue(data, EndpointResponse.class);
+		if (res.isSuccess()) {
+			return mapper.convertValue(res.getData(), returnType);
+		} else {
+			throw new IOException("There was a problem processing the desired data: " + res.getFailedValidations());
+		}
+	}
+
+	/**
+	 * Convert the response from the Network call into a RoadmapProcessingDTO, throw
+	 * an exception otherwise.
+	 * 
+	 * @param data
+	 * @param returnType
+	 * @param mapper
+	 * @return The payload of the EndpointResponse converted to the returnType
+	 *         passed.
+	 * @throws OEException
+	 * @throws IOException
+	 */
+	public <T> List<T> convertEndpointResponseList(byte[] data, TypeReference<List<T>> returnType, ObjectMapper mapper)
+			throws IllegalArgumentException, IOException {
+		if (data == null || data.length == 0) {
+			throw new IllegalArgumentException("Cannot process empty data");
+		} else if (returnType == null) {
+			throw new IllegalArgumentException("No valid returnType was passed.  Unable to convert response data.");
+		} else if (mapper == null) {
+			throw new IllegalArgumentException("Missing mapper to perform conversion of data");
+		}
+		EndpointResponse res = mapper.readValue(data, EndpointResponse.class);
+		if (res.isSuccess()) {
+			return mapper.convertValue(res.getData(), returnType);
+		} else {
+			throw new IOException("There was a problem processing the desired data: " + res.getFailedValidations());
+		}
 	}
 }

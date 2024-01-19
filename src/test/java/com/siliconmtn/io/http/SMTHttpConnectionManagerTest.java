@@ -1,5 +1,17 @@
 package com.siliconmtn.io.http;
 
+// JUnit5
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+/// Mockito
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 // JDK 11.x
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,26 +22,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-// JUnit5
-import static org.junit.jupiter.api.Assertions.*;
+// Apache IOUtils 1.3.2
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.siliconmtn.data.bean.GenericVO;
+import com.siliconmtn.data.exception.InvalidDataException;
+import com.siliconmtn.io.api.EndpointResponse;
 // Libs
 import com.siliconmtn.io.http.SMTHttpConnectionManager.HttpConnectionType;
-
-/// Mockito
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
-
-// Apache IOUtils 1.3.2
-import org.apache.commons.io.IOUtils;
 
 /****************************************************************************
  * <b>Title</b>: SMTHttpConnectionManagerTest.java
@@ -44,7 +57,7 @@ import org.apache.commons.io.IOUtils;
  * @updates:
  ****************************************************************************/
 class SMTHttpConnectionManagerTest {
-	
+
 	/**
 	 * Request parameters for the test
 	 */
@@ -59,46 +72,46 @@ class SMTHttpConnectionManagerTest {
 	@BeforeAll
 	static void setUpBeforeClass() throws Exception {
 		params = new HashMap<>();
-		
+
 		List<String> values = new ArrayList<>();
 		values.add("one");
 		values.add("two");
 		values.add("three");
-		
+
 		params.put("counter", values);
-		params.put("arrCtr", new String[] {"alpha", "brave", "charlie"});
-		params.put("name","James");
-		params.put("age","30");
+		params.put("arrCtr", new String[] { "alpha", "brave", "charlie" });
+		params.put("name", "James");
+		params.put("age", "30");
 	}
-	
+
 	@BeforeEach
 	void setUpBeforeEach() throws Exception {
-	
+
 		// Instantiate the conn mgr
 		connection = new SMTHttpConnectionManager();
-		
+
 		// Assign the headers
 		headers = new HashMap<>();
 		headers.put("Host", "www.siliconmtn.com");
 		headers.put("Referer", "www.google.com");
 		headers.put("User-Agent", "Mozilla/5.0 (platform; rv:geckoversion) Gecko/geckotrail");
-		
+
 		// Assign the cookies
 		cookies = new HashMap<>();
 		cookies.put("JSESSION_ID", "12345678");
 		cookies.put("AWSALB", "AWS_COOKIE");
 		cookies.put("AWSALBCORS", "AWS_COR_COOKIE");
 	}
-	
+
 	/**
 	 * Initializes and turns cookie management on and off
 	 */
 	@Test
 	void testSMTHttpConnectionManagerBoolean() {
-		
+
 		SMTHttpConnectionManager newConn = new SMTHttpConnectionManager(true);
 		assertTrue(newConn.isUseCookieHandler());
-		
+
 		newConn = new SMTHttpConnectionManager(false);
 		assertFalse(newConn.isUseCookieHandler());
 	}
@@ -112,21 +125,23 @@ class SMTHttpConnectionManagerTest {
 	}
 
 	/**
-	 * Retrieves the data form the end server.  Needs an http mock
+	 * Retrieves the data form the end server. Needs an http mock
 	 */
 	@Test
 	void testGetRequestData() throws Exception {
-		
+
 		// Valid the exception when null is passed
 		String nullUrl = null;
 		URL nullURL = null;
 		Map<String, Object> nullBodyMap = null;
 		assertThrows(IOException.class, () -> connection.getRequestData(nullUrl, nullBodyMap, HttpConnectionType.GET));
-	    assertThrows(IOException.class, () -> connection.getRequestData(nullURL, nullBodyMap, HttpConnectionType.GET));
-	    byte[] nullBodyBytes = null;
-	    assertThrows(IOException.class, () -> connection.getRequestData(nullURL, nullBodyBytes, HttpConnectionType.GET));
-	    //assertThrows(IOException.class, () -> connection.getRequestData(nullUrl, nullBodyBytes, HttpConnectionType.GET));
-	    
+		assertThrows(IOException.class, () -> connection.getRequestData(nullURL, nullBodyMap, HttpConnectionType.GET));
+		byte[] nullBodyBytes = null;
+		assertThrows(IOException.class,
+				() -> connection.getRequestData(nullURL, nullBodyBytes, HttpConnectionType.GET));
+		// assertThrows(IOException.class, () -> connection.getRequestData(nullUrl,
+		// nullBodyBytes, HttpConnectionType.GET));
+
 		// Tests with a URL Class
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		mockUrlConn = mock(HttpURLConnection.class);
@@ -135,14 +150,15 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getInputStream()).thenReturn(mis);
 		when(mockUrlConn.getErrorStream()).thenReturn(mis);
 		doReturn(200).when(mockUrlConn).getResponseCode();
-	    assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyMap, HttpConnectionType.GET)));
+		assertEquals("Hello World",
+				new String(connection.getRequestData(mockUrl, nullBodyMap, HttpConnectionType.GET)));
 	}
 
-	/**Cookie
-	 * Retrieves the data from the end server.  Needs an http mock
+	/**
+	 * Cookie Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringMap () throws Exception {
+	void testGetRequestDataStringMap() throws Exception {
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
 		Mockito.doReturn(mockUrl).when(connection).createURL(url);
@@ -155,12 +171,12 @@ class SMTHttpConnectionManagerTest {
 		Map<String, Object> nullBodyMap = null;
 		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyMap, HttpConnectionType.GET)));
 	}
-	
-	/**Cookie
-	 * Retrieves the data from the end server.  Needs an http mock
+
+	/**
+	 * Cookie Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringBytes () throws Exception {
+	void testGetRequestDataStringBytes() throws Exception {
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
 		Mockito.doReturn(mockUrl).when(connection).createURL(url);
@@ -173,12 +189,12 @@ class SMTHttpConnectionManagerTest {
 		byte[] nullBodyBytes = null;
 		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyBytes, HttpConnectionType.GET)));
 	}
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringNullsMap () throws Exception {
+	void testGetRequestDataStringNullsMap() throws Exception {
 		connection.setConnectionTimeout(1000);
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
@@ -193,12 +209,12 @@ class SMTHttpConnectionManagerTest {
 		Map<String, Object> nullBodyMap = null;
 		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyMap, null)));
 	}
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringNullsBytes () throws Exception {
+	void testGetRequestDataStringNullsBytes() throws Exception {
 		connection.setConnectionTimeout(1000);
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		connection = Mockito.spy(connection);
@@ -213,12 +229,12 @@ class SMTHttpConnectionManagerTest {
 		byte[] nullBodyBytes = null;
 		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyBytes, null)));
 	}
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringPutMap () throws Exception {
+	void testGetRequestDataStringPutMap() throws Exception {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
@@ -235,12 +251,12 @@ class SMTHttpConnectionManagerTest {
 		Map<String, Object> nullBodyMap = null;
 		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyMap, HttpConnectionType.PUT)));
 	}
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringPutBytes () throws Exception {
+	void testGetRequestDataStringPutBytes() throws Exception {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
@@ -257,13 +273,12 @@ class SMTHttpConnectionManagerTest {
 		byte[] nullBodyBytes = null;
 		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyBytes, HttpConnectionType.PUT)));
 	}
-	
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataURLMap () throws Exception {
+	void testGetRequestDataURLMap() throws Exception {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
@@ -276,14 +291,15 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
 		doReturn(200).when(mockUrlConn).getResponseCode();
 		Map<String, Object> nullBodyMap = null;
-		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyMap, HttpConnectionType.PUT)));
+		assertEquals("Hello World",
+				new String(connection.getRequestData(mockUrl, nullBodyMap, HttpConnectionType.PUT)));
 	}
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataURLBytes () throws Exception {
+	void testGetRequestDataURLBytes() throws Exception {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
@@ -296,14 +312,15 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getOutputStream()).thenReturn(new ByteArrayOutputStream());
 		doReturn(200).when(mockUrlConn).getResponseCode();
 		byte[] nullBodyBytes = null;
-		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyBytes, HttpConnectionType.PUT)));
+		assertEquals("Hello World",
+				new String(connection.getRequestData(mockUrl, nullBodyBytes, HttpConnectionType.PUT)));
 	}
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataURLNullMap () throws Exception {
+	void testGetRequestDataURLNullMap() throws Exception {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
@@ -318,12 +335,12 @@ class SMTHttpConnectionManagerTest {
 		Map<String, Object> nullBodyMap = null;
 		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyMap, null)));
 	}
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataURLNullBytes () throws Exception {
+	void testGetRequestDataURLNullBytes() throws Exception {
 		headers.put(SMTHttpConnectionManager.REQUEST_PROPERTY_CONTENT_TYPE, "text/html");
 		connection.setRequestHeaders(headers);
 		connection.setConnectionTimeout(1000);
@@ -338,12 +355,12 @@ class SMTHttpConnectionManagerTest {
 		byte[] nullBodyBytes = null;
 		assertEquals("Hello World", new String(connection.getRequestData(mockUrl, nullBodyBytes, null)));
 	}
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringPutNoHeaderMap () throws Exception {
+	void testGetRequestDataStringPutNoHeaderMap() throws Exception {
 		connection.setConnectionTimeout(1000);
 		connection.setUseCookieHandler(true);
 		connection = Mockito.spy(connection);
@@ -359,12 +376,12 @@ class SMTHttpConnectionManagerTest {
 		Map<String, Object> nullBodyMap = null;
 		assertEquals("Hello World", new String(connection.getRequestData(url, nullBodyMap, HttpConnectionType.PUT)));
 	}
-	
+
 	/**
-	 * Retrieves the data from the end server.  Needs an http mock
+	 * Retrieves the data from the end server. Needs an http mock
 	 */
 	@Test
-	void testGetRequestDataStringPutNoHeaderBytes () throws Exception {
+	void testGetRequestDataStringPutNoHeaderBytes() throws Exception {
 		connection.setConnectionTimeout(1000);
 		connection.setUseCookieHandler(true);
 		connection = Mockito.spy(connection);
@@ -394,6 +411,7 @@ class SMTHttpConnectionManagerTest {
 
 	/**
 	 * Tests the ssl socket information timeout metadata
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -404,6 +422,7 @@ class SMTHttpConnectionManagerTest {
 
 	/**
 	 * Tests the connection timeout metadata
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -414,6 +433,7 @@ class SMTHttpConnectionManagerTest {
 
 	/**
 	 * Tests the connection meta data around following redirects
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -424,6 +444,7 @@ class SMTHttpConnectionManagerTest {
 
 	/**
 	 * Tests the connection request headers
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -431,11 +452,11 @@ class SMTHttpConnectionManagerTest {
 		Map<String, String> nullHeaders = null;
 		connection.setRequestHeaders(nullHeaders);
 		assertEquals(0, connection.getRequestHeaders().size());
-		
+
 		connection.setRequestHeaders(headers);
 		assertEquals(3, connection.getRequestHeaders().size());
 	}
-	
+
 	/**
 	 * 
 	 * @throws Exception
@@ -445,28 +466,29 @@ class SMTHttpConnectionManagerTest {
 		Map<String, String> nullHeaders = null;
 		String testKey = "testKey";
 		String testValue = "testValue";
-		
+
 		connection.setRequestHeaders(nullHeaders);
 		int headerSize = connection.getRequestHeaders().size();
 		assertFalse(connection.getRequestHeaders().containsKey(testKey));
 		assertFalse(connection.getRequestHeaders().containsValue(testValue));
 		connection.addRequestHeader(testKey, testValue);
-		assertEquals(headerSize+1, connection.getRequestHeaders().size());
+		assertEquals(headerSize + 1, connection.getRequestHeaders().size());
 		assertTrue(connection.getRequestHeaders().containsKey(testKey));
 		assertTrue(connection.getRequestHeaders().containsValue(testValue));
-		
+
 		connection.setRequestHeaders(headers);
 		headerSize = connection.getRequestHeaders().size();
 		assertFalse(connection.getRequestHeaders().containsKey(testKey));
 		assertFalse(connection.getRequestHeaders().containsValue(testValue));
 		connection.addRequestHeader(testKey, testValue);
-		assertEquals(headerSize+1, connection.getRequestHeaders().size());
+		assertEquals(headerSize + 1, connection.getRequestHeaders().size());
 		assertTrue(connection.getRequestHeaders().containsKey(testKey));
 		assertTrue(connection.getRequestHeaders().containsValue(testValue));
 	}
 
 	/**
 	 * Test the response code from the request
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -482,40 +504,42 @@ class SMTHttpConnectionManagerTest {
 	void testGetCookies() throws Exception {
 		connection.setCookies(cookies);
 		assertEquals(3, connection.getCookies().size());
-		
+
 		// Loop the original cookies and make sure they are all returned
-		for(String s: cookies.values()) {
+		for (String s : cookies.values()) {
 			assertTrue(connection.getCookies().values().contains(s));
 		}
-		
+
 		cookies = null;
 		connection.setCookies(cookies);
 		assertEquals(0, connection.getCookies().size());
-		
+
 		HttpURLConnection cConn = null;
 		connection.assignCookies(cConn);
 	}
 
 	/**
 	 * Gets the values in the headerMap
+	 * 
 	 * @throws Exception
 	 */
 	@Test
 	void testGetHeaderMap() throws Exception {
 		connection.setHeaderMap(cookies);
 		assertEquals(3, connection.getHeaderMap().size());
-		
+
 		// Loop the original cookies and make sure they are all returned
-		for(String s: cookies.values()) {
+		for (String s : cookies.values()) {
 			assertTrue(connection.getHeaderMap().values().contains(s));
 		}
-		
+
 		connection.setHeaderMap(null);
 		assertEquals(0, connection.getHeaderMap().size());
 	}
 
 	/**
 	 * Assigns and gets the maximum number of redirects to follow on a request
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -526,6 +550,7 @@ class SMTHttpConnectionManagerTest {
 
 	/**
 	 * tests getting and setting the cookie handler
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -535,9 +560,9 @@ class SMTHttpConnectionManagerTest {
 	}
 
 	/**
-	 * Tests the get connection stream method.  This method performs redirects as 
-	 * needed when response code is 30X.  
-	 * actions and other 
+	 * Tests the get connection stream method. This method performs redirects as
+	 * needed when response code is 30X. actions and other
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -548,7 +573,7 @@ class SMTHttpConnectionManagerTest {
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		mockUrlConn = mock(HttpURLConnection.class);
 		when(mockUrlConn.getHeaderField("Location")).thenReturn("http://www.google.com");
-		
+
 		InputStream mis = IOUtils.toInputStream("Hello World", "UTF-8");
 		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
 		when(mockUrlConn.getInputStream()).thenReturn(mis);
@@ -556,16 +581,15 @@ class SMTHttpConnectionManagerTest {
 		doReturn(HttpURLConnection.HTTP_MOVED_PERM).when(mockUrlConn).getResponseCode();
 		assertTrue(connection.getConnectionStream(mockUrl, null, HttpConnectionType.GET) instanceof InputStream);
 
-		
 		doReturn(HttpURLConnection.HTTP_MOVED_PERM).when(mockUrlConn).getResponseCode();
 		when(mockUrlConn.getHeaderField("Location")).thenReturn(null);
 		assertTrue(connection.getConnectionStream(mockUrl, null, HttpConnectionType.GET) instanceof InputStream);
 	}
-	
+
 	/**
-	 * Tests the get connection stream method.  This method performs redirects as 
-	 * needed when response code is 30X.  
-	 * actions and other 
+	 * Tests the get connection stream method. This method performs redirects as
+	 * needed when response code is 30X. actions and other
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -576,7 +600,7 @@ class SMTHttpConnectionManagerTest {
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		mockUrlConn = mock(HttpURLConnection.class);
 		when(mockUrlConn.getHeaderField("Location")).thenReturn(null);
-		
+
 		InputStream mis = IOUtils.toInputStream("Hello World", "UTF-8");
 		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
 		when(mockUrlConn.getInputStream()).thenReturn(mis);
@@ -584,11 +608,11 @@ class SMTHttpConnectionManagerTest {
 		doReturn(HttpURLConnection.HTTP_MOVED_TEMP).when(mockUrlConn).getResponseCode();
 		assertTrue(connection.getConnectionStream(mockUrl, null, HttpConnectionType.GET) instanceof InputStream);
 	}
-	
+
 	/**
-	 * Tests the get connection stream method.  This method performs redirects as 
-	 * needed when response code is 30X.  
-	 * actions and other 
+	 * Tests the get connection stream method. This method performs redirects as
+	 * needed when response code is 30X. actions and other
+	 * 
 	 * @throws Exception
 	 */
 	@Test
@@ -599,14 +623,14 @@ class SMTHttpConnectionManagerTest {
 		URL mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("http://www.siliconmtn.com"));
 		mockUrlConn = mock(HttpURLConnection.class);
 		when(mockUrlConn.getHeaderField("Location")).thenReturn(null);
-		
+
 		InputStream mis = IOUtils.toInputStream("Hello World", "UTF-8");
 		when(mockUrl.openConnection()).thenReturn(mockUrlConn);
 		when(mockUrlConn.getInputStream()).thenReturn(mis);
 		when(mockUrlConn.getErrorStream()).thenReturn(mis);
 		doReturn(404).when(mockUrlConn).getResponseCode();
 		assertTrue(connection.getConnectionStream(mockUrl, null, HttpConnectionType.GET) instanceof InputStream);
-		
+
 		doReturn(100).when(mockUrlConn).getResponseCode();
 		assertTrue(connection.getConnectionStream(mockUrl, null, HttpConnectionType.GET) instanceof InputStream);
 	}
@@ -621,9 +645,9 @@ class SMTHttpConnectionManagerTest {
 		when(mockUrlConn.getInputStream()).thenReturn(IOUtils.toInputStream("Hello World", "UTF-8"));
 		when(mockUrlConn.getErrorStream()).thenReturn(IOUtils.toInputStream("Hello World", "UTF-8"));
 		assertTrue(connection.getConnectionStream(mockUrl, null, HttpConnectionType.GET) instanceof InputStream);
-		
+
 		// Test with an SSL Factory
-		connection.setSslSocketFactory((SSLSocketFactory)SSLSocketFactory.getDefault());
+		connection.setSslSocketFactory((SSLSocketFactory) SSLSocketFactory.getDefault());
 		mockUrl = mock(URL.class, Mockito.withSettings().useConstructor("https://www.siliconmtn.com"));
 		when(mockUrl.getProtocol()).thenReturn("https");
 		mockUrlConn = mock(HttpsURLConnection.class);
@@ -634,29 +658,31 @@ class SMTHttpConnectionManagerTest {
 	}
 
 	/**
-	 * Tests the create URL Method.  Validates url is created and exception is 
-	 * thrown when null data is presented
+	 * Tests the create URL Method. Validates url is created and exception is thrown
+	 * when null data is presented
+	 * 
 	 * @throws Exception
 	 */
 	@Test
 	void testCreateURL() throws Exception {
 		assertThrows(IOException.class, () -> connection.createURL(null));
-	    assertEquals(-1, connection.createURL(sUrl).getPort());
-	    assertEquals("www.siliconmtn.com", connection.createURL(sUrl).getHost());
-	    assertEquals("www.siliconmtn.com", connection.createURL("www.siliconmtn.com").getHost());
+		assertEquals(-1, connection.createURL(sUrl).getPort());
+		assertEquals("www.siliconmtn.com", connection.createURL(sUrl).getHost());
+		assertEquals("www.siliconmtn.com", connection.createURL("www.siliconmtn.com").getHost());
 
-	    connection.setSslSocketFactory((SSLSocketFactory)SSLSocketFactory.getDefault());
-	    assertEquals("www.siliconmtn.com", connection.createURL("www.siliconmtn.com").getHost());
+		connection.setSslSocketFactory((SSLSocketFactory) SSLSocketFactory.getDefault());
+		assertEquals("www.siliconmtn.com", connection.createURL("www.siliconmtn.com").getHost());
 	}
-	
+
 	/**
 	 * tests the storage of cookies capabilities
+	 * 
 	 * @throws Exception
 	 */
 	@Test
 	void testStoreCookies() throws Exception {
 		URL myUrl = new URL(sUrl);
-		mockUrlConn = (HttpURLConnection)myUrl.openConnection();
+		mockUrlConn = (HttpURLConnection) myUrl.openConnection();
 		mockUrlConn = Mockito.spy(mockUrlConn);
 		Mockito.doReturn("JSESSION_ID=12345678").when(mockUrlConn).getHeaderField(0);
 		Mockito.doReturn("AWSALB=AWS_COOKIE").when(mockUrlConn).getHeaderField(1);
@@ -674,20 +700,21 @@ class SMTHttpConnectionManagerTest {
 	}
 
 	/**
-	 * Tests the assignment of cookies to the url connection class.  Utilizes a 
+	 * Tests the assignment of cookies to the url connection class. Utilizes a
 	 * Mockito Mock class to perform this action
+	 * 
 	 * @throws Exception
 	 */
 	@Test
 	void testAssignCookiesHttpURLConnection() throws Exception {
 		URL myUrl = new URL(url);
-		mockUrlConn = (HttpURLConnection)myUrl.openConnection();
+		mockUrlConn = (HttpURLConnection) myUrl.openConnection();
 		connection.assignCookies(mockUrlConn);
 		assertNull(mockUrlConn.getRequestProperty("Cookie"));
-		
+
 		connection.setCookies(cookies);
 		connection.assignCookies(null);
-		
+
 		connection.assignCookies(mockUrlConn);
 		assertTrue(mockUrlConn.getRequestProperty("Cookie").contains("JSESSION_ID"));
 		assertTrue(mockUrlConn.getRequestProperty("Cookie").contains("AWSALB"));
@@ -695,19 +722,107 @@ class SMTHttpConnectionManagerTest {
 	}
 
 	/**
-	 * Tests the assignment of request headers to the url connection class.  Utilizes a 
-	 * Mockito Mock class to perform this action
+	 * Tests the assignment of request headers to the url connection class. Utilizes
+	 * a Mockito Mock class to perform this action
+	 * 
 	 * @throws Exception
 	 */
 	@Test
 	void testSetRequestHeadersHttpURLConnection() throws Exception {
 		connection.setRequestHeaders(headers);
 		URL myUrl = new URL(sUrl);
-		mockUrlConn = (HttpURLConnection)myUrl.openConnection();
+		mockUrlConn = (HttpURLConnection) myUrl.openConnection();
 		connection.setRequestHeaders(mockUrlConn);
-		
+
 		assertTrue(mockUrlConn.getRequestProperties().toString().contains("Referer"));
 		assertTrue(mockUrlConn.getRequestProperties().toString().contains("User-Agent"));
 		assertFalse(mockUrlConn.getRequestProperties().toString().contains("Host"));
+	}
+
+	@Test
+	void buildUri() {
+		String endpoint = "https://test.com";
+		String url = "/test/{sessionId}";
+
+		assertThrows(IllegalArgumentException.class, () -> connection.buildUri(null, null));
+		assertThrows(IllegalArgumentException.class, () -> connection.buildUri("", null));
+		assertThrows(IllegalArgumentException.class, () -> connection.buildUri(endpoint, null));
+		assertThrows(IllegalArgumentException.class, () -> connection.buildUri(endpoint, ""));
+
+		String uri = assertDoesNotThrow(() -> connection.buildUri(endpoint, url));
+		assertEquals(endpoint + url, uri);
+	}
+
+	@Test
+	void buildUriWithParams() {
+		UUID sessionId = UUID.randomUUID();
+		String endpoint = "https://test.com";
+		String url = "/test/{sessionId}";
+
+		assertThrows(IllegalArgumentException.class, () -> connection.buildUriWithParams(null, null, null));
+		assertThrows(IllegalArgumentException.class, () -> connection.buildUriWithParams("", null, null));
+		assertThrows(IllegalArgumentException.class, () -> connection.buildUriWithParams(endpoint, null, null));
+		assertThrows(IllegalArgumentException.class, () -> connection.buildUriWithParams(endpoint, "", null));
+
+		String uri = assertDoesNotThrow(() -> connection.buildUriWithParams(endpoint, url, List.of(sessionId)));
+		assertEquals((endpoint + url).replace("{sessionId}", sessionId.toString()), uri);
+	}
+
+	@Test
+	void convertEndpointResponse() throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.findAndRegisterModules();
+
+		assertThrows(IllegalArgumentException.class, () -> connection.convertEndpointResponse(null, null, null));
+		assertThrows(IllegalArgumentException.class, () -> connection.convertEndpointResponse(new byte[0], null, null));
+		assertThrows(IllegalArgumentException.class,
+				() -> connection.convertEndpointResponse("test".getBytes(), null, null));
+
+		assertThrows(IllegalArgumentException.class,
+				() -> connection.convertEndpointResponse("test".getBytes(), String.class, null));
+		byte[] data1 = assertDoesNotThrow(() -> mapper.writeValueAsBytes(
+				new EndpointResponse(HttpStatus.BAD_GATEWAY, new InvalidDataException("There was a problem"))));
+		assertThrows(IOException.class, () -> connection.convertEndpointResponse(data1, String.class, mapper));
+
+		byte[] data2 = assertDoesNotThrow(() -> mapper.writeValueAsBytes(new EndpointResponse("test")));
+		assertThrows(Exception.class, () -> connection.convertEndpointResponse(data2, GenericVO.class, mapper));
+
+		byte[] data3 = assertDoesNotThrow(() -> mapper.writeValueAsBytes(new EndpointResponse(new GenericVO())));
+		assertDoesNotThrow(() -> connection.convertEndpointResponse(data3, GenericVO.class, mapper));
+	}
+
+	@Test
+	void convertEndpointResponseList() throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.findAndRegisterModules();
+
+		assertThrows(IllegalArgumentException.class, () -> connection.convertEndpointResponseList(null, null, null));
+		assertThrows(IllegalArgumentException.class,
+				() -> connection.convertEndpointResponseList(new byte[0], null, null));
+		assertThrows(IllegalArgumentException.class,
+				() -> connection.convertEndpointResponseList("test".getBytes(), null, null));
+
+		assertThrows(IllegalArgumentException.class,
+				() -> connection.convertEndpointResponseList("test".getBytes(), new TypeReference<List<GenericVO>>() {
+				}, null));
+		byte[] data1 = assertDoesNotThrow(() -> mapper.writeValueAsBytes(
+				new EndpointResponse(HttpStatus.BAD_GATEWAY, new InvalidDataException("There was a problem"))));
+		assertThrows(IOException.class,
+				() -> connection.convertEndpointResponseList(data1, new TypeReference<List<GenericVO>>() {
+				}, mapper));
+
+		byte[] data2 = assertDoesNotThrow(() -> mapper.writeValueAsBytes(new EndpointResponse("test")));
+		assertThrows(Exception.class,
+				() -> connection.convertEndpointResponseList(data2, new TypeReference<List<GenericVO>>() {
+				}, mapper));
+
+		List<GenericVO> srcData = new ArrayList<>();
+		srcData.add(new GenericVO("something", "todo"));
+		srcData.add(new GenericVO("hello", "world"));
+		byte[] data3 = assertDoesNotThrow(() -> mapper.writeValueAsBytes(new EndpointResponse(srcData)));
+		List<GenericVO> data = assertDoesNotThrow(
+				() -> connection.convertEndpointResponseList(data3, new TypeReference<List<GenericVO>>() {
+				}, mapper));
+		assertEquals(srcData.size(), data.size());
 	}
 }

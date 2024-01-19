@@ -10,12 +10,13 @@ plugins {
     // Apply the java-library plugin to add support for Java Library
     id 'java'
     id 'jacoco'
-    id 'org.springframework.boot' version '3.1.3'
+    id 'org.springframework.boot' version '3.1.5'
 	id 'io.spring.dependency-management' version '1.1.3'
-	id 'io.freefair.lombok' version '8.2.2'
+	id 'io.freefair.lombok' version '8.4'
 	id 'signing'
 	id 'maven-publish'
-	id "org.owasp.dependencycheck" version "8.4.0"
+	id "org.owasp.dependencycheck" version "8.4.2"
+	id "org.sonarqube" version "4.4.1.3373"
 }
 
 group = 'com.siliconmtn'
@@ -25,11 +26,20 @@ group = 'com.siliconmtn'
  * For 'release' publishing, use: version = n.n.n
  *
  */
-//version = '2.0.1-SNAPSHOT'
-version = '2.0.1'
+//version = '2.0.2-SNAPSHOT'
+version = '2.0.2'
 
-sourceCompatibility = '17'
 archivesBaseName = "spacelibs-java"
+
+
+configurations {
+	testImplementation{
+		extendsFrom compileOnly
+	}
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
 
 repositories {
     // Use Maven Central for resolving dependencies.
@@ -39,46 +49,48 @@ repositories {
 
 dependencies {
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'commons-beanutils:commons-beanutils:1.9.4'
-    implementation 'commons-io:commons-io:2.13.0'
-    implementation 'com.googlecode.libphonenumber:libphonenumber:8.13.19'
+    compileOnly 'commons-beanutils:commons-beanutils:1.9.4'
+    compileOnly 'commons-io:commons-io:2.13.0'
+    compileOnly 'com.googlecode.libphonenumber:libphonenumber:8.13.19'
 
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
-	implementation 'org.apache.poi:poi:5.2.3'
+	compileOnly 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+	compileOnly 'org.apache.poi:poi:5.2.3'
 
 	// Spring Boot (Starters -> https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using-boot-starter)
-	implementation 'org.springframework.boot:spring-boot-starter'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-aop'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	compileOnly 'org.springframework.boot:spring-boot-starter'
+	compileOnly 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.springframework.boot:spring-boot-starter-data-jpa'
+	compileOnly 'org.springframework.boot:spring-boot-starter-aop'
+	compileOnly 'org.springframework.boot:spring-boot-starter-validation'
 
-	implementation 'org.springframework.security:spring-security-crypto:6.1.3'
-	implementation 'org.hibernate:hibernate-validator:8.0.1.Final'
+	compileOnly 'org.springframework.security:spring-security-crypto:6.1.3'
+	compileOnly 'org.hibernate:hibernate-validator:8.0.1.Final'
 
 	// XSS content validation/filtering
-	implementation 'org.owasp.encoder:encoder:1.2.3'
-	implementation 'org.jsoup:jsoup:1.16.1'
-	implementation 'com.auth0:java-jwt:4.4.0'
+	compileOnly 'org.owasp.encoder:encoder:1.2.3'
+	compileOnly 'org.jsoup:jsoup:1.16.1'
+	compileOnly 'com.auth0:java-jwt:4.4.0'
 
 	// AWS Imports for the S3 Buckets
-	implementation 'software.amazon.awssdk:bom:2.19.8'
-	implementation 'software.amazon.awssdk:s3:2.19.8'
-	implementation 'software.amazon.awssdk:sns:2.19.8'
+	compileOnly 'software.amazon.awssdk:bom:2.19.8'
+	compileOnly 'software.amazon.awssdk:s3:2.19.8'
+	compileOnly 'software.amazon.awssdk:sns:2.19.8'
 
     // Testing
-    testImplementation 'org.springframework.security:spring-security-test'
+   	testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.mockito:mockito-core:5.2.0'
 	testImplementation 'org.mockito:mockito-inline:5.2.0'
 	testImplementation('org.springframework.boot:spring-boot-starter-test'){
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	//OpenAPI3 (Swagger)
-	implementation 'org.springdoc:springdoc-openapi-ui:1.7.0'
+	compileOnly 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 
 	// https://mvnrepository.com/artifact/org.apache.pulsar/pulsar-client
-	implementation 'org.apache.pulsar:pulsar-client:3.1.0'
+	compileOnly 'org.apache.pulsar:pulsar-client:3.1.0'
 
+	testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+	testRuntimeOnly('org.junit.platform:junit-platform-launcher:1.9.2')
 }
 
 // Prevent Spring Boot from looking for a main()
@@ -111,6 +123,7 @@ javadoc {
 }
 
 java {
+	sourceCompatibility = JavaVersion.VERSION_17
     withJavadocJar()
     withSourcesJar()
 }

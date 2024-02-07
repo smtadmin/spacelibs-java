@@ -26,8 +26,8 @@ group = 'com.siliconmtn'
  * For 'release' publishing, use: version = n.n.n
  *
  */
-//version = '2.0.2-SNAPSHOT'
-version = '2.0.2'
+//version = '2.0.3-SNAPSHOT'
+version = '2.0.3'
 
 archivesBaseName = "spacelibs-java"
 

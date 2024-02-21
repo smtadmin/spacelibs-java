@@ -69,7 +69,7 @@ public class EmailSendUtil {
 		// Use default from address if nothing is provided
 		if (StringUtil.isEmpty(vo.getFromEmail())) 
 			vo.setFromEmail(DEFAULT_FROM_EMAIL);
-		
+		log.info(vo);
 		// Create our mime message and the helper that populates it
 	    MimeMessage message = mailSender.createMimeMessage();
 	    MimeMessageHelper helper = new MimeMessageHelper(message, true);

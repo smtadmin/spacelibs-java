@@ -3,6 +3,7 @@ package com.siliconmtn.io.mail;
 // JDK 11.x
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,8 +38,7 @@ public class EmailMessageVO {
 	public enum RecipientType {
 		TO, CC, BCC;
 	}
-
-	public static final String DEFAULT_FROM_EMAIL = "email@siliconmtn.com";
+	
 	// Members
 	@Getter(AccessLevel.NONE)
 	@Setter(AccessLevel.NONE)
@@ -48,16 +48,15 @@ public class EmailMessageVO {
 	private String replyTo;
 	private String subject;
 	private StringBuilder message;
-	private List<byte[]> attachments;
-
+	private Map<String, byte[]> attachments;
+	
 	/**
 	 * Initializes the recipient types
 	 */
 	public EmailMessageVO() {
-
 		// Initialize and create an empty list for each type
 		allRecipients = new EnumMap<>(RecipientType.class);
-		attachments = new ArrayList<>();
+		attachments = new HashMap<>();
 
 		for (RecipientType rt : RecipientType.values()) {
 			allRecipients.put(rt, new ArrayList<>());
@@ -67,22 +66,43 @@ public class EmailMessageVO {
 	/**
 	 * Helper method to determine if the message has attachments
 	 * 
-	 * @return True if attachments are present. False otherwise
+	 * @return True if attachments 
+	        helper.setReplyTo(vo.getReplyTo());are present. False otherwise
 	 */
 	public boolean hasAttachments() {
 		return !attachments.isEmpty();
 	}
+	
+	/**
+	 * Get the replyTo when provided, get fromEmail when not
+	 * @return
+	 */
+	public String getReplyTo() {
+		return StringUtil.isEmpty(replyTo)? fromEmail : replyTo;
+	}
 
 	/**
-	 * Gets the from email
-	 * 
-	 * @return fromEmail id present, otherwise default from email
+	 * Add a single to recipient
+	 * @param recipient
 	 */
-	public String getFromEmail() {
-		if (StringUtil.isEmpty(fromEmail))
-			return DEFAULT_FROM_EMAIL;
-		else
-			return fromEmail;
+	public void addToRecipient(String recipient) {
+		addRecipient(recipient, RecipientType.TO);
+	}
+	
+	/**
+	 * Add a single CC recipient
+	 * @param recipient
+	 */
+	public void addCCRecipient(String recipient) {
+		addRecipient(recipient, RecipientType.CC);
+	}
+	
+	/**
+	 * Add a single BCC recipient
+	 * @param recipient
+	 */
+	public void addBCCRecipient(String recipient) {
+		addRecipient(recipient, RecipientType.BCC);
 	}
 
 	/**
@@ -115,9 +135,7 @@ public class EmailMessageVO {
 	 * @param recipient Email address or phone number of the recipient
 	 */
 	public void addRecipient(String recipient) {
-		if(!StringUtil.isEmpty(recipient)) {
-			allRecipients.get(RecipientType.TO).add(recipient);
-		}
+		allRecipients.get(RecipientType.TO).add(recipient);
 	}
 
 	/**
@@ -129,13 +147,37 @@ public class EmailMessageVO {
 	public String[] getRecipients(RecipientType type) {
 		return allRecipients.get(type).toArray(new String[0]);
 	}
+	
+	/**
+	 * Get all To addresses
+	 * @return
+	 */
+	public String[] getTo() {
+		return getRecipients(RecipientType.TO);
+	}
+	
+	/**
+	 * Get all CC addresses
+	 * @return
+	 */
+	public String[] getCC() {
+		return getRecipients(RecipientType.CC);
+	}
+	
+	/**
+	 * Get all BCC addresses
+	 * @return
+	 */
+	public String[] getBCC() {
+		return getRecipients(RecipientType.BCC);
+	}
 
 	/**
 	 * Adds an attachment to be sent
 	 * 
 	 * @param attachment
 	 */
-	public void addAttachment(byte[] attachment) {
-		attachments.add(attachment);
+	public void addAttachment(String fileNm, byte[] attachment) {
+		attachments.put(fileNm, attachment);
 	}
 }

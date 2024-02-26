@@ -23,14 +23,8 @@ class EmailMessageVOTest {
 	@Test
 	void hasAttachmentsTrueTest() {
 		EmailMessageVO msg = new EmailMessageVO();
-		msg.addAttachment(new byte[5]);
+		msg.addAttachment("file", new byte[5]);
 		assertTrue(msg.hasAttachments());
-	}
-
-	@Test
-	void getFromEmailDefaultTest() {
-		EmailMessageVO msg = new EmailMessageVO();
-		assertEquals(EmailMessageVO.DEFAULT_FROM_EMAIL, msg.getFromEmail());
 	}
 
 	@Test
@@ -38,6 +32,20 @@ class EmailMessageVOTest {
 		EmailMessageVO msg = new EmailMessageVO();
 		msg.setFromEmail("test@test.com");
 		assertEquals("test@test.com", msg.getFromEmail());
+	}
+
+	@Test
+	void getFromNoReplyTest() {
+		EmailMessageVO msg = new EmailMessageVO();
+		msg.setFromEmail("test@test.com");
+		assertEquals("test@test.com", msg.getReplyTo());
+	}
+
+	@Test
+	void getReplyTest() {
+		EmailMessageVO msg = new EmailMessageVO();
+		msg.setReplyTo("test@test.com");
+		assertEquals("test@test.com", msg.getReplyTo());
 	}
 
 	@Test
@@ -98,4 +106,16 @@ class EmailMessageVOTest {
 		assertEquals(1, msg.getRecipients(RecipientType.BCC).length);
 		assertEquals("test@test.com", msg.getRecipients(RecipientType.BCC)[0]);
 	}
+
+	@Test
+	void addRecipientsTest() {
+		EmailMessageVO msg = new EmailMessageVO();
+		assertDoesNotThrow(() -> msg.addToRecipient("test@test.com"));
+		assertDoesNotThrow(() -> msg.addCCRecipient("test@test.com"));
+		assertDoesNotThrow(() -> msg.addBCCRecipient("test@test.com"));
+		assertEquals(1, msg.getTo().length);
+		assertEquals(1, msg.getCC().length);
+		assertEquals(1, msg.getBCC().length);
+	}
+	
 }

@@ -68,6 +68,7 @@ class PulsarClientManagerTest {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	void pulsarClientTest() {
 		when(config.getUrl()).thenReturn("pulsar://localhost:6650");
 		when(config.getClientJWT()).thenReturn("HelloWorld");

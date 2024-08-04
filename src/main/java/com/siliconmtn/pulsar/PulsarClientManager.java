@@ -5,8 +5,8 @@ import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.PulsarClientException;
 import org.apache.pulsar.client.impl.PulsarClientImpl;
 import org.apache.pulsar.client.impl.conf.ClientConfigurationData;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
@@ -24,14 +24,23 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
+@Configuration
 @Import({PulsarAuthenticator.class})
 public class PulsarClientManager {
 
-	@Autowired
+	// Autowired Elements
 	public PulsarConfig config;
-
-	@Autowired
     private PulsarAuthenticator auth;
+	
+	/**
+	 * 
+	 * @param config
+	 * @param auth
+	 */
+	public PulsarClientManager(PulsarConfig config, PulsarAuthenticator auth) {
+		this.config = config;
+		this.auth = auth;
+	}
 
 	protected ClientConfigurationData buildClientConfig() {
 		// Prepare ClientConfigurationData

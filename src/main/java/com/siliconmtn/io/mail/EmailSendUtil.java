@@ -65,7 +65,7 @@ public class EmailSendUtil {
 	 * @param vo
 	 * @throws MessagingException
 	 */
-	public void sendEmail(EmailMessageVO vo) throws MessagingException {
+	public String sendEmail(EmailMessageVO vo) throws MessagingException {
 		// Use default from address if nothing is provided
 		if (StringUtil.isEmpty(vo.getFromEmail())) 
 			vo.setFromEmail(DEFAULT_FROM_EMAIL);
@@ -93,6 +93,9 @@ public class EmailSendUtil {
 	        
 	        // Send the message with the autowired mail sender
 	        mailSender.send(message);
+	        
+	        // Retrieve the ID of the message and return it
+	        return message.getMessageID();
 		} catch (MessagingException e) {
 			// Log why the error failed and throw it again
 		    log.error("Failed to send email", e);

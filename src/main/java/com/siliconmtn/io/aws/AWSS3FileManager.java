@@ -78,7 +78,7 @@ public class AWSS3FileManager {
 		this.accessKeyId = accessKeyId;
 		this.secretAccessKey = secretAccessKey;
 	}
-	
+
 	
 	/**
 	 * Builds the AWS SecretsManagerClient object from the 
@@ -114,19 +114,28 @@ public class AWSS3FileManager {
 	
 	
 	/**
-	 * Returns a list of all items in the provided bucket using the provided delimiter
+	 * Returns a list of all object keys in the provided bucket using the provided prefix. The
+	 * prefix and delimiter are concatenated prior to sending the request to S3.
 	 * @param bucketName
 	 * @param prefix
 	 * @param delimiter
 	 * @return
 	 */
 	public List<BaseFile> listBucket(String bucketName, String prefix, String delimiter) {
+		// If key prefix doesn't end with the delimiter, add it to the delimiter before querying S3.
+		if (! prefix.endsWith(delimiter)) prefix = prefix + delimiter;
+		
+		/* 2024-08-22 DBargerhuff
+		 * Note: In the past we built the ListObjectsRequest object using the .delimiter(delimiter)
+		 * method (.builder().bucket(bucketName).prefix(prefix + delimiter).delimiter(delimiter)).
+		 * However, this only returns object keys that are in the 'root' of the prefix. It doesn't 
+		 * return object keys 'below' that (e.g. 'recursively'). I changed the syntax to correct that.
+		 */
 		try (S3Client client = buildClient()) {
 			ListObjectsRequest req = ListObjectsRequest
 					.builder()
 					.bucket(bucketName)
-					.prefix(prefix + delimiter)
-					.delimiter(delimiter)
+					.prefix(prefix)
 					.build();
 			
 			List<BaseFile> data = new ArrayList<>();

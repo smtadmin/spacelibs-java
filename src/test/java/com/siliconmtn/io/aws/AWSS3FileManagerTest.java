@@ -115,6 +115,9 @@ class AWSS3FileManagerTest {
 		when(client.listObjects(any((ListObjectsRequest.class)))).thenReturn(loRes);
 
 		assertNotNull(mgr1.listBucket("smt-juv2-xfer", "usms_jira_json"));
+		
+		// test when prefix already has a delimiter appended to it ('/' in this case).
+		assertNotNull(mgr1.listBucket("smt-juv2-xfer", "usms_jira_json" + AWSS3FileManager.DEFAULT_DELIMITER));
 	}
 
 	@Test

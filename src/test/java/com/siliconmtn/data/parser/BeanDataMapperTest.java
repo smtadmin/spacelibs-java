@@ -83,11 +83,9 @@ class BeanDataMapperTest {
 	 */
 	@Test
 	void testParseBeanObjectMapOfStringStringString() {
-		
-		ConvertUtilsBean obj = Mockito.mock(ConvertUtilsBean.class);
+		ConvertUtilsBean obj = Mockito.spy(new ConvertUtilsBean());
 		when(obj.convert(ArgumentMatchers.anyString(), ArgumentMatchers.any()))
-		.thenThrow(new ConversionException(""));
-		Mockito.spy(obj);
+				.thenThrow(new ConversionException(""));
 		List<Object> data = BeanDataMapper.createList(String.class, new Object[] {"one", "two"});
 		assertEquals(2, data.size());
 	}
